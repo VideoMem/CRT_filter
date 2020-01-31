@@ -10,12 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CRTModel.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Testcard_G_PM5544_KSL.png" beforeDir="false" afterPath="$PROJECT_DIR$/Testcard_G_PM5544_KSL.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testCardRGB.bmp" beforeDir="false" afterPath="$PROJECT_DIR$/testCardRGB.bmp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,7 +58,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1580418713219</updated>
-      <workItem from="1580418714382" duration="38226000" />
+      <workItem from="1580418714382" duration="47921000" />
     </task>
     <servers />
   </component>
