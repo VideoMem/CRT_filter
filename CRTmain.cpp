@@ -90,30 +90,93 @@ void testInvert( SDL_Surface *surface ) {
         }
 }
 
-void testNoise( SDL_Surface *surface ) {
+void testDesaturate( SDL_Surface *surface, SDL_Surface *dest ) {
+    SDL_FillRect(dest, NULL, 0x000000);
     for(int x=0; x< SCREEN_WIDTH; ++x)
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
-            int noise = rand() & 0x50;
-            int pixel = get_pixel32(surface, x, y) & 0xFF;
-            int bias  = pixel > noise? pixel - noise: noise - pixel; //gain
-            int snow  = (bias << 16) + (bias << 8) + bias;
-            int pxno  = snow | 0xFF000000;
-            put_pixel32(surface, x, y,
-                        pxno);
+            int pixel = get_pixel32(surface, x, y);
+            int R = (pixel & 0xFF0000) >> 16;
+            int G = (pixel & 0xFF00) >> 8;
+            int B = pixel & 0xFF;
+            int luma = round((R + G + B) /3);
+            int npx = ((luma << 16) + (luma << 8) + luma) | 0xFF000000;
+            put_pixel32(dest, x, y,
+                        npx);
+        }
+}
+
+void testNoise( SDL_Surface *surface, SDL_Surface *dest  ) {
+    SDL_FillRect(dest, NULL, 0x000000);
+    for(int x=0; x< SCREEN_WIDTH; ++x)
+        for(int y=0; y< SCREEN_HEIGHT; ++y) {
+            int noise = rand() & 0x30;
+            int snow  = (noise << 16) + (noise << 8) + noise;
+            int pixel = get_pixel32(surface, x, y) & 0x00FFFFFF;
+            int biasR = (pixel & 0xFF0000) > (snow & 0xFF0000)? (pixel & 0xFF0000) - (snow & 0xFF0000): (snow & 0xFF0000) - (pixel & 0xFF0000);
+            int biasG = (pixel & 0xFF00) > (snow & 0xFF00)? (pixel & 0xFF00) - (snow & 0xFF00): (snow & 0xFF00) - (pixel & 0xFF00);
+            int biasB = (pixel & 0xFF) > (snow & 0xFF)? (pixel & 0xFF) - (snow & 0xFF): (snow & 0xFF) - (pixel & 0xFF);
+
+            int pxno  = (biasR + biasG + biasB) | 0xFF000000;
+            put_pixel32(dest, x, y,
+                        pxno );
         }
 }
 
 void testHRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
-    for(int x=0; x< SCREEN_WIDTH; ++x)
-        for(int y=0; y< SCREEN_HEIGHT; ++y) {
+    SDL_FillRect(dest, NULL, 0x000000);
+    for(int y=0; y< SCREEN_HEIGHT; ++y) {
+        int noiseSlip = round((rand() & 0xFF) / 0x50);
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
             int pixel = get_pixel32(surface, x, y);
-            float screenpos = ((float)y + warp )/ SCREEN_HEIGHT;
-            int slip = round((sin((M_PI* 4) * screenpos)) * 10);
+            float screenpos = ((float) y + warp) / SCREEN_HEIGHT;
+            int slip = round((sin((M_PI * 4) * screenpos)) * 6) + noiseSlip;
             int newx = x + slip;
-            if (newx > 0 && newx < SCREEN_WIDTH) put_pixel32(dest, newx, y, pixel);
-            if (newx > SCREEN_WIDTH) put_pixel32(dest, newx, y, 0);
-
+            if (newx > 0) put_pixel32(dest, newx, y, pixel);
         }
+    }
+}
+
+void testVRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
+    SDL_FillRect(dest, NULL, 0x000000);
+    int noiseSlip = round((rand() & 0xFF) / 0xF0);
+    for(int y=0; y< SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            int pixel = get_pixel32(surface, x, y);
+            float screenpos = ((float) y + warp) / SCREEN_HEIGHT;
+            int slip = round((cos((M_PI * 2) * screenpos)) * 10) + noiseSlip;
+            int newy = y + slip;
+            if (newy > 0 && newy < SCREEN_HEIGHT) put_pixel32(dest, x, newy, pixel);
+        }
+    }
+}
+
+void testBlend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) {
+    SDL_FillRect(dest, NULL, 0x000000);
+
+    for(int y=0; y< SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            int persist  = get_pixel32(last, x, y);
+            int pxno = (persist & 0x000FFFFFF) | 0xF0000000;
+            put_pixel32(last, x, y, pxno);
+        }
+    }
+    //SDL_SetSurfaceBlendMode(dest, SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
+    SDL_BlitSurface(last, NULL, dest, NULL);
+    SDL_BlitSurface(surface, NULL, dest, NULL);
+}
+
+void testGhost( SDL_Surface *surface, SDL_Surface *dest, int delay) {
+    SDL_FillRect(dest, NULL, 0x000000);
+
+    for(int y=0; y< SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < SCREEN_WIDTH; ++x) {
+            int pixel  = get_pixel32(surface, x, y);
+            int pixeld = get_pixel32(surface, x + delay, y);
+            put_pixel32(dest, x + delay, y, ((pixel & 0xFFFFFF) + (pixeld & 0xFFFFFF)) | 0xFF000000);
+        }
+    }
 }
 
 
@@ -206,7 +269,7 @@ int main( int argc, char* args[] )
 		    int warp = 0;
             loadMedia();
             createBuffer();
-            //testInvert(gHelloWorld);
+            SDL_BlitSurface(gHelloWorld, NULL, gBack, NULL);
             while(!quit) {
                 while( SDL_PollEvent( &e ) != 0 ) {
                     //User requests quit
@@ -214,16 +277,20 @@ int main( int argc, char* args[] )
                         quit = true;
                     }
                 }
-                //SDL_RenderClear( gWindow );
-                SDL_BlitSurface(gHelloWorld, NULL, gBuffer, NULL);
+                //if((rand() & 1)) testInvert(gHelloWorld);
 
-                testNoise(gBuffer);
-                SDL_BlitSurface(gBuffer, NULL, gBlank, NULL);
 
-                testHRipple(gBlank, gBuffer, warp);
+                SDL_FillRect(gScreenSurface, NULL, 0x000000);
+                SDL_BlitSurface(gHelloWorld, NULL, gBlank, NULL);
+                //if((rand() & 1)) testDesaturate(gBuffer, gBlank); else SDL_BlitSurface(gBuffer, NULL, gBlank, NULL);
+                testNoise(gBlank, gBuffer);
+                testHRipple(gBuffer, gBlank, warp);
+                testVRipple(gBlank, gBuffer, warp);
+                testBlend(gBuffer, gBack, gBlank);
 
                 //Apply the image
-                SDL_BlitSurface(gBuffer, NULL, gScreenSurface, NULL);
+                SDL_BlitSurface(gBlank, NULL, gScreenSurface, NULL);
+                SDL_BlitSurface(gScreenSurface, NULL, gBack, NULL);
 
                 //Update the surface
                 SDL_UpdateWindowSurface(gWindow);
