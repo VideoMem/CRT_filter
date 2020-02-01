@@ -39,16 +39,15 @@ void close() {
 }
 
 int main( int argc, char* args[] ) {
-    CRTModel* crt = new CRTModel();
+    static CRTModel* crt = new CRTModel();
 
     //Main loop flag
     bool quit = false;
 
     //Event handler
     SDL_Event e;
-    float ripple = 1.0;
+    float ripple = 0.1;
     float noise = 0.2;
-    int step = 0;
 	//Start up SDL and create window
 	if( !init() ) {
 		printf( "Failed to initialize!\n" );
@@ -72,6 +71,35 @@ int main( int argc, char* args[] ) {
                             break;
                         case SDLK_RIGHT:
                             if (noise < 1.5) noise += 0.1;
+                            break;
+                        case SDLK_z:
+                            crt->resetFrameStats();
+                            break;
+                        case SDLK_1:
+                            crt->noise(true);
+                            break;
+                        case SDLK_q:
+                            crt->noise(false);
+                            break;
+                        case SDLK_2:
+                            crt->setHRipple(true);
+                            break;
+                        case SDLK_w:
+                            crt->setHRipple(false);
+                            break;
+                        case SDLK_3:
+                            crt->setVRipple(true);
+                            break;
+                        case SDLK_e:
+                            crt->setVRipple(false);
+                            break;
+                        case SDLK_4:
+                            crt->setBlend(true);
+                            break;
+                        case SDLK_r:
+                            crt->setBlend(false);
+                            break;
+                        default:
                             break;
                     }
                 }
