@@ -23,6 +23,7 @@ bool init() {
 		} else {
 			//Get window surface
 			gScreenSurface = SDL_GetWindowSurface( gWindow );
+            SDL_SetSurfaceBlendMode( gScreenSurface, SDL_BLENDMODE_NONE );
 		}
 	}
 

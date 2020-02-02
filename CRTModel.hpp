@@ -57,6 +57,7 @@ class CRTModel {
     SDL_Surface* gBuffer = NULL;
     SDL_Surface* gBlank = NULL;
     SDL_Surface* gBack = NULL;
+    SDL_Surface* gFaux = NULL;
     time_t frameTimer;
     time_t execTimer;
     bool createBuffers();
@@ -88,8 +89,10 @@ bool CRTModel::createBuffers() {
                                    rmask, gmask, bmask, amask);
     gBack  = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
                                   rmask, gmask, bmask, amask);
+    gBack  = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
+                                  rmask, gmask, bmask, amask);
 
-    if (gBuffer == NULL || gBlank == NULL || gBack == NULL) {
+    if (gBuffer == NULL || gBlank == NULL || gBack == NULL || gFaux == NULL)  {
         SDL_Log("SDL_CreateRGBSurface() failed: %s", SDL_GetError());
         return false;
     }
@@ -167,13 +170,12 @@ void CRTModel::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
     if(addHRipple) {
         SDL_FillRect(dest, NULL, 0x000000);
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
-            //int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 int pixel = get_pixel32(surface, x, y);
                 float screenpos = ((float) y + warp) / SCREEN_HEIGHT;
-                int slip = round((sin((M_PI * 4) * screenpos)) * 6 * ripple); // + noiseSlip;
+                int slip = round((sin((M_PI * 4) * screenpos)) * 6 * ripple);
                 int newx = x + slip;
-                if (newx > 0) put_pixel32(dest, newx, y, pixel);
+                if (newx > 0 && newx < SCREEN_WIDTH) put_pixel32(dest, newx, y, pixel);
             }
         }
     } else
@@ -208,10 +210,12 @@ void CRTModel::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest
                 put_pixel32(last, x, y, pxno);
             }
         }
-        SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_BLEND);
+        SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_ADD);
         SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
         SDL_BlitSurface(last, NULL, dest, NULL);
         SDL_BlitSurface(surface, NULL, dest, NULL);
+        SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_NONE);
+        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     } else {
         SDL_BlitSurface(surface, NULL, dest, NULL);
     }
@@ -261,6 +265,10 @@ void CRTModel::init() {
     setBlend(true);
     SDL_BlitSurface(gFrame, NULL, gBack, NULL);
     resetFrameStats();
+    SDL_SetSurfaceBlendMode(gFrame, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBack, SDL_BLENDMODE_NONE);
 }
 
 void CRTModel::close() {
@@ -269,10 +277,12 @@ void CRTModel::close() {
     SDL_FreeSurface( gBlank );
     SDL_FreeSurface( gBack );
 	SDL_FreeSurface( gFrame );
+    SDL_FreeSurface( gFaux );
 	gFrame  = NULL;
     gBuffer = NULL;
     gBlank  = NULL;
     gBack   = NULL;
+    gFaux   = NULL;
 }
 
 void CRTModel::logStats() {

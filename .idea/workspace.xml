@@ -14,7 +14,6 @@
       <change beforePath="$PROJECT_DIR$/CRTModel.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTModel.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -76,7 +75,7 @@
       <updated>1580418713219</updated>
       <workItem from="1580418714382" duration="49315000" />
       <workItem from="1580510534257" duration="84000" />
-      <workItem from="1580510633733" duration="7882000" />
+      <workItem from="1580510633733" duration="11398000" />
     </task>
     <servers />
   </component>
