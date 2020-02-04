@@ -189,8 +189,8 @@ void CRTModel::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
             int pixel = get_pixel32(surface, x, y);
             int B = (pixel & bmask) >> 16;
             int G = (pixel & gmask) >> 8;
-            int R = pixel & rmask;
-            int luma = round((R + G + B) /3);
+            int R = pixel & rmask ;
+            int luma = round(0.2126 * R + 0.7152 * G + 0.0722 * B);
             int npx = ((luma << 16) + (luma << 8) + luma) | amask;
             put_pixel32(dest, x, y,
                         npx);
@@ -206,6 +206,10 @@ void CRTModel::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
                 int noise = round((rand() & 0x50) * gnoise);
                 Uint32 snow = (noise << 16) + (noise << 8) + noise;
                 Uint32 pixel = get_pixel32(surface, x, y) & cmask;
+                Uint32 B = (pixel & bmask) >> 16;
+                Uint32 G = (pixel & gmask) >> 8;
+                Uint32 R = pixel & rmask;
+
                 Uint32 biasB = (pixel & bmask) + (snow & bmask) > bmask ?
                                bmask:
                                (snow & bmask) + (pixel & bmask);
@@ -215,7 +219,7 @@ void CRTModel::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
                 Uint32 biasR = (pixel & rmask) + (snow & rmask) > rmask ?
                                rmask:
                                (snow & rmask) + (pixel & rmask);
-
+                //Uint32 luma =
                 Uint32 pxno = (biasR + biasG + biasB) | amask;
                 put_pixel32(dest, x + noiseSlip, y,
                             pxno);
