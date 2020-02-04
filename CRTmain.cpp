@@ -24,7 +24,8 @@ bool init() {
 			//Get window surface
 			gScreenSurface = SDL_GetWindowSurface( gWindow );
             SDL_SetSurfaceBlendMode( gScreenSurface, SDL_BLENDMODE_NONE );
-		}
+
+        }
 	}
 
 	return success;
@@ -47,24 +48,65 @@ int main( int argc, char* args[] ) {
 
     //Event handler
     SDL_Event e;
-    float ripple = 0.1;
-    float noise = 0.2;
+    float ripple = 0.03;
+    float noise = 0.4;
 	//Start up SDL and create window
 	if( !init() ) {
 		printf( "Failed to initialize!\n" );
 	} else {
         while(!quit) {
+
+            crt->update(gScreenSurface);
+            //Update the surface
+            SDL_UpdateWindowSurface(gWindow);
+
+            crt->setRipple(ripple);
+            crt->setNoise(noise);
+
             while( SDL_PollEvent( &e ) != 0 ) {
                 //User requests quit
                 if (e.type == SDL_QUIT) {
                     quit = true;
+                    crt->setRipple(0);
+                    crt->setBlend(true);
+                    crt->setHRipple(true);
+                    crt->setVRipple(true);
+                    crt->shutdown();
+                    crt->setNoise(20);
+                    while (crt->getSupply() > 0.11) {
+                        crt->setSupply(crt->getSupply() / 1.2);
+                        crt->update(gScreenSurface);
+                        SDL_UpdateWindowSurface(gWindow);
+                    }
+                    //crt->setHRipple(true);
+                    crt->noise(false);
+                    crt->setSupply(0.001);
+                    crt->setRipple(1);
+                    int fanout = 10;
+                    while(fanout > 0) {
+                        crt->shutdown();
+                        crt->update(gScreenSurface);
+                        SDL_UpdateWindowSurface(gWindow);
+                        --fanout;
+                    }
+                    crt->setNoise(0);
+                    fanout = 50;
+                    while(fanout > 0) {
+                        crt->blank(gScreenSurface);
+                        crt->fade(gScreenSurface);
+                        SDL_UpdateWindowSurface(gWindow);
+                        --fanout;
+                    }
+                    break;
                 } else if( e.type == SDL_KEYDOWN ) {
                     switch (e.key.keysym.sym) {
                         case SDLK_UP:
-                            if (ripple < 10.0) ripple += 0.1;
+                            ripple += 0.01;
+                            if (ripple > 1) ripple = 1;
                             break;
                         case SDLK_DOWN:
-                            if (ripple > 0) ripple -= 0.1;
+                            ripple -= 0.01;
+                            if (ripple < 0) ripple = 0;
                             break;
                         case SDLK_LEFT:
                             noise -= 0.1;
@@ -100,18 +142,18 @@ int main( int argc, char* args[] ) {
                         case SDLK_r:
                             crt->setBlend(false);
                             break;
+                        case SDLK_PAGEUP:
+                            crt->channelUp();
+                            break;
+                        case SDLK_PAGEDOWN:
+                            crt->channelDw();
+                            break;
                         default:
                             break;
                     }
                 }
             }
 
-            crt->update(gScreenSurface);
-            //Update the surface
-            SDL_UpdateWindowSurface(gWindow);
-
-            crt->setRipple(ripple);
-            crt->setNoise(noise);
 
         }
 	}
