@@ -1,6 +1,3 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
-
 //Using SDL and standard IO
 #include <SDL2/SDL.h>
 #include <stdio.h>
@@ -8,13 +5,14 @@ and may not be redistributed without written permission.*/
 #include <string>
 
 #define rand() xorshift128plus()
+#define PERSISTENCE_ALPHA 0xA1000000
+
 
 std::string channels[] = { "standby640.bmp", "testCardRGB.bmp", "marcosvtar.bmp", "alf.bmp" };
 
 static uint64_t s[2];
 static inline uint64_t
-xoroshiro128plus()
-{
+xoroshiro128plus() {
     uint64_t s0 = s[0];
     uint64_t s1 = s[1];
     uint64_t result = s0 + s1;
@@ -25,8 +23,7 @@ xoroshiro128plus()
 }
 
 static inline uint64_t
-xorshift64star()
-{
+xorshift64star() {
     uint64_t x = s[0];
     x ^= x >> 12;
     x ^= x << 25;
@@ -36,8 +33,7 @@ xorshift64star()
 }
 
 static inline uint64_t
-xorshift128plus()
-{
+xorshift128plus() {
     uint64_t x = s[0];
     uint64_t y = s[1];
     s[0] = y;
@@ -46,12 +42,11 @@ xorshift128plus()
     return s[1] + y;
 }
 
-
 //Screen dimension constants
-const int SCREEN_WIDTH = 720; //720;
+const int SCREEN_WIDTH  = 720; //720;
 const int SCREEN_HEIGHT = 540; //540;
-
-
+const int TARGET_WIDTH  = 640; //720;
+const int TARGET_HEIGHT = 480; //540;
 
 class CRTModel {
     public:
@@ -66,8 +61,15 @@ class CRTModel {
     void setHRipple(bool f) { addHRipple = f; }
     void setBlend(bool f) { addBlend = f; }
     void setSupply(float v) { supplyV = v; }
-    void blank(SDL_Surface* surface) { SDL_FillRect(surface, NULL, amask); }
-    void shutdown() { warp = 0; SDL_FillRect(gFrame, NULL, 0xFFFFFFFF);}
+    void setBrightness(float v) { brightness = v; }
+    void setContrast(float v) { contrast = v; }
+    void setFocus(float v) { focus = v; }
+    void setColor(float v) { color = v; }
+
+    void blank(SDL_Surface* surface);
+    void dot(SDL_Surface* surface);
+    void focusNoise(SDL_Surface* surface);
+    void shutdown();
     void fade( SDL_Surface* surface );
     float getSupply() { return supplyV; }
     int  randomSlip() { return (rand() & 3) == 0? -3: 1; }
@@ -85,6 +87,7 @@ class CRTModel {
     void VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void ghost( SDL_Surface *surface, SDL_Surface *dest, int delay );
     void blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest );
+    void strech( SDL_Surface *surface, float scale);
     void channelUp() { int size = sizeof(channels) / sizeof(channels[0]); ++channel; if(channel >= size) channel = 0; loadMedia(); }
     void channelDw() { int size = sizeof(channels) / sizeof(channels[0]);--channel; if(channel < 0 ) channel = size -1; loadMedia(); }
 
@@ -94,19 +97,26 @@ class CRTModel {
     protected:
     void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
     void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
+    inline void comp    (Uint32* pixel, Uint32* R, Uint32* G, Uint32* B);
+    inline void toPixel (Uint32* pixel, Uint32* R, Uint32* G, Uint32* B);
+    inline void toLuma  (float* luma , Uint32* R, Uint32* G, Uint32* B);
+    inline void toChroma(float* Db, float* Dr , Uint32* R, Uint32* G, Uint32* B);
+    inline void toRGB   (float* luma , float* Db, float* Dr, Uint32* R, Uint32* G, Uint32* B);
+    inline Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
+    inline float  fromChar(Uint32* c) { return (float) *c / 0xFF; }
 
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        const Uint32 rmask = 0xff000000;
-        const Uint32 gmask = 0x00ff0000;
-        const Uint32 bmask = 0x0000ff00;
-        const Uint32 amask = 0x000000ff;
-        const Uint32 cmask = 0xffffff00;
+        static const Uint32 rmask = 0xff000000;
+        static const Uint32 gmask = 0x00ff0000;
+        static const Uint32 bmask = 0x0000ff00;
+        static const Uint32 amask = 0x000000ff;
+        static const Uint32 cmask = 0xffffff00;
     #else
-        const Uint32 rmask = 0x000000ff;
-        const Uint32 gmask = 0x0000ff00;
-        const Uint32 bmask = 0x00ff0000;
-        const Uint32 amask = 0xff000000;
-        const Uint32 cmask = 0x00ffffff;
+        static const Uint32 rmask = 0x000000ff;
+        static const Uint32 gmask = 0x0000ff00;
+        static const Uint32 bmask = 0x00ff0000;
+        static const Uint32 amask = 0xff000000;
+        static const Uint32 cmask = 0x00ffffff;
     #endif
 
     SDL_Surface* gFrame = NULL;
@@ -131,7 +141,10 @@ class CRTModel {
     float supplyV;
     float lastR;
     int channel;
-
+    float brightness;
+    float contrast;
+    float color;
+    float focus;
 };
 
 CRTModel::CRTModel() {
@@ -159,6 +172,75 @@ bool CRTModel::createBuffers() {
     return true;
 }
 
+void CRTModel::blank(SDL_Surface *surface) {
+    SDL_FillRect(surface, NULL, amask);
+}
+
+void CRTModel::focusNoise(SDL_Surface *surface) {
+    SDL_Rect tsize;
+    SDL_Rect size;
+    SDL_Rect osize;
+    SDL_GetClipRect(surface, &osize);
+    SDL_GetClipRect(gBack, &tsize);
+    int spread = 4;
+    int psize = 2;
+    int slip = (rand() % spread) - (spread /2);
+    size.x = rand() & 1? slip + tsize.w /2: -slip + tsize.w /2 ;
+    size.y = rand() & 1? slip + tsize.h /2: -slip + tsize.h /2 ;
+    size.x -= psize /2;
+    size.y -= psize /2;
+    size.w = psize;
+    size.h = psize;
+    blank(gBlank);
+    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gBack , SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_BLEND);
+    SDL_BlitSurface(gBack, &tsize, gBlank, &tsize);
+    SDL_FillRect(gBlank, &size, cmask | PERSISTENCE_ALPHA /4 );
+    SDL_BlitScaled(gBlank, &tsize, surface, &osize);
+
+    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBack , SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_NONE);
+    SDL_BlitSurface(gBlank, &tsize, gBack, &tsize);
+}
+
+void CRTModel::dot(SDL_Surface *surface) {
+    blank(surface);
+    SDL_Rect size;
+    SDL_Rect osize;
+    SDL_GetClipRect(gBack, &osize);
+    size.x = osize.w /2;
+    size.y = osize.h /2;
+    size.w =2;
+    size.h =2;
+    SDL_FillRect(gBack, &size, cmask);
+}
+
+void CRTModel::strech(SDL_Surface *surface, float scale) {
+    SDL_Rect src, dst;
+    SDL_GetClipRect(gBack, &src);
+    SDL_GetClipRect(surface, &dst);
+    blank(gBuffer);
+    for(int line =0; line < src.h; ++line) {
+        blitLineScaled(gBack, gBuffer, line, scale);
+    }
+    SDL_BlitScaled(gBuffer, &src, surface, &dst);
+    SDL_BlitSurface(gBuffer, NULL, gBack, NULL);
+}
+
+void CRTModel::shutdown() {
+    if(supplyV < 0.5) {
+        setNoise(1);
+        desaturate(gFrame, gBuffer);
+        SDL_BlitSurface(gBuffer, NULL, gFrame, NULL);
+    }
+    if(supplyV < 0.2) {
+        setNoise(0);
+        SDL_FillRect(gFrame, NULL, 0xFFFFFFFF);
+    }
+}
+
 Uint32 CRTModel::get_pixel32( SDL_Surface *surface, int x, int y ) {
     //Convert the pixels to 32 bit
     Uint32 *pixels = (Uint32 *)surface->pixels;
@@ -178,20 +260,50 @@ void CRTModel::invert( SDL_Surface *surface ) {
     for(int x=0; x< SCREEN_WIDTH; ++x)
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
             put_pixel32(surface, x, y,
-                        (0x00FFFFFF - (get_pixel32(surface, x, y) & 0x00FFFFFF)) | 0xFF000000);
+                        (0x00FFFFFF - (get_pixel32(surface, x, y) & 0x00FFFFFF)) | amask );
         }
+}
+
+inline void CRTModel::comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
+    *B = (*pixel & bmask) >> 16;
+    *G = (*pixel & gmask) >> 8;
+    *R = *pixel & rmask ;
+}
+
+inline void CRTModel::toLuma(float *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
+    *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
+}
+
+
+inline void CRTModel::toPixel(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
+    *pixel = ((*B << 16) + (*G << 8) + *R) | amask;
+}
+
+inline void CRTModel::toChroma(float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+    *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
+    *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
+}
+
+inline void CRTModel::toRGB(float *luma, float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+    float fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
+    float fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
+    float fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
+    *R = toChar(&fR);
+    *G = toChar(&fG);
+    *B = toChar(&fB);
 }
 
 void CRTModel::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
     SDL_FillRect(dest, NULL, 0x000000);
+    Uint32 B, G, R, pixel, npx;
+    float luma;
     for(int x=0; x< SCREEN_WIDTH; ++x)
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
-            int pixel = get_pixel32(surface, x, y);
-            int B = (pixel & bmask) >> 16;
-            int G = (pixel & gmask) >> 8;
-            int R = pixel & rmask ;
-            int luma = round(0.2126 * R + 0.7152 * G + 0.0722 * B);
-            int npx = ((luma << 16) + (luma << 8) + luma) | amask;
+            pixel = get_pixel32(surface, x, y);
+            comp(&pixel, &R, &G, &B);
+            toLuma(&luma, &R, &G, &B);
+            Uint32 iluma = toChar(&luma);
+            toPixel(&npx, &iluma, &iluma, &iluma);
             put_pixel32(dest, x, y,
                         npx);
         }
@@ -200,31 +312,32 @@ void CRTModel::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
 void CRTModel::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
     if(addNoise) {
         SDL_FillRect(dest, NULL, 0x000000);
+        Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
+        float luma, Db, Dr, noise;
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
-                int noise = round((rand() & 0x50) * gnoise);
-                Uint32 snow = (noise << 16) + (noise << 8) + noise;
-                Uint32 pixel = get_pixel32(surface, x, y) & cmask;
-                Uint32 B = (pixel & bmask) >> 16;
-                Uint32 G = (pixel & gmask) >> 8;
-                Uint32 R = pixel & rmask;
+                pixel = get_pixel32(surface, x, y) & cmask;
+                rnd = rand() & 0xFF;
+                noise = fromChar(&rnd) * gnoise;
+                chrnoise = toChar(&noise);
+                toPixel(&snow, &chrnoise, &chrnoise, &chrnoise);
+                comp(&pixel, &R, &G, &B);
+                toLuma(&luma, &R, &G, &B);
+                toChroma(&Db, &Dr, &R, &G, &B);
+                luma = luma ==0? fromChar(&rnd) / 20: luma;
+                luma *= (1 - noise) * contrast;
+                luma += (1 - brightness) * contrast;
+                Dr *= (1 - noise) * color * contrast;
+                Db *= (1 - noise) * color * contrast;
 
-                Uint32 biasB = (pixel & bmask) + (snow & bmask) > bmask ?
-                               bmask:
-                               (snow & bmask) + (pixel & bmask);
-                Uint32 biasG = (pixel & gmask) + (snow & gmask) > gmask ?
-                               gmask:
-                               (snow & gmask) + (pixel & gmask);
-                Uint32 biasR = (pixel & rmask) + (snow & rmask) > rmask ?
-                               rmask:
-                               (snow & rmask) + (pixel & rmask);
-                //Uint32 luma =
-                Uint32 pxno = (biasR + biasG + biasB) | amask;
+                toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
+                toPixel(&pxno, &BiasR, &BiasG, &BiasB);
                 put_pixel32(dest, x + noiseSlip, y,
                             pxno);
             }
         }
+        if(gnoise > 1) { desaturate(dest, gBlank); SDL_BlitSurface(gBlank, NULL, dest, NULL); }
     } else {
         SDL_BlitSurface(surface, NULL, dest, NULL);
     }
@@ -268,7 +381,6 @@ inline void CRTModel::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int lin
     SDL_BlitScaled(src, &srcrect, dst, &dstrect);
 }
 
-
 void CRTModel::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
     if(addHRipple) {
         SDL_FillRect(dest, NULL, 0x000000);
@@ -302,33 +414,43 @@ void CRTModel::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
 }
 
 void CRTModel::fade(SDL_Surface* surface) {
+
+    SDL_BlitSurface(gBack, NULL, gBuffer, NULL);
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
-            int persist = get_pixel32(gBack, x, y);
-            int pxno = (persist & 0x000FFFFFF) | 0xF1000000;
-            put_pixel32(gBack, x, y, pxno);
+            int persist = get_pixel32(gBuffer, x, y);
+            int pxno = (persist & 0x000FFFFFF) | PERSISTENCE_ALPHA;
+            put_pixel32(gBuffer, x, y, pxno);
         }
     }
-    SDL_SetSurfaceBlendMode(gBack, SDL_BLENDMODE_BLEND);
+
+    SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_BLEND);
     SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
-    SDL_BlitSurface(gBack, NULL, surface, NULL);
-    SDL_SetSurfaceBlendMode(gBack, SDL_BLENDMODE_NONE);
+    SDL_Rect clipRect, sRect;
+    SDL_GetClipRect(gBuffer, &sRect);
+    SDL_GetClipRect(surface, &clipRect);
+
+    SDL_BlitScaled (gBuffer, &sRect, surface, &clipRect);
+    SDL_BlitSurface(gBuffer, NULL, gBack, NULL);
+
+    SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_NONE);
     SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
-    SDL_BlitSurface(surface, NULL, gBack, NULL);
+
 }
 
 
 void CRTModel::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) {
     if (addBlend) {
-        SDL_FillRect(dest, NULL, 0x000000);
+        blank(dest);
 
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
                 int persist = get_pixel32(last, x, y);
-                int pxno = (persist & 0x000FFFFFF) | 0xF1000000;
+                int pxno = (persist & cmask) | PERSISTENCE_ALPHA;
                 put_pixel32(last, x, y, pxno);
             }
         }
+
         SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_BLEND);
         SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
         SDL_BlitSurface(last, NULL, dest, NULL);
@@ -393,6 +515,10 @@ void CRTModel::init() {
     loadMedia();
     setRipple(0.1);
     setNoise(0.2);
+    setColor(1);
+    setBrightness(1);
+    setContrast(1);
+    setFocus(1);
     setPerfStats(true);
     noise(true);
     setHRipple(true);
@@ -420,7 +546,6 @@ void CRTModel::close() {
     gBuffer = NULL;
     gBlank  = NULL;
     gBack   = NULL;
-
 }
 
 void CRTModel::logStats() {
@@ -436,7 +561,6 @@ void CRTModel::logStats() {
 void CRTModel::update(SDL_Surface * gScreenSurface)  {
     SDL_FillRect(gScreenSurface, NULL, 0x000000);
     SDL_BlitSurface(gFrame, NULL, gBlank, NULL);
-    if(gnoise > 1.3) { desaturate(gBlank, gBuffer); SDL_BlitSurface(gBuffer, NULL, gBlank, NULL); }
     noise(gBlank, gBuffer);
     HRipple(gBuffer, gBlank, warp);
     VRipple(gBlank , gBuffer, warp);
@@ -447,17 +571,16 @@ void CRTModel::update(SDL_Surface * gScreenSurface)  {
     SDL_Rect dstsize;
     SDL_GetClipRect(gBlank, &srcsize);
     SDL_GetClipRect(gScreenSurface, &dstsize);
-    dstsize.w = 640;
+    dstsize.w = TARGET_WIDTH;
     dstsize.x = srcsize.w - dstsize.w > 0? (srcsize.w - dstsize.w ) / 2: 0;
-    dstsize.h = 480;
+    dstsize.h = TARGET_HEIGHT;
     dstsize.y = srcsize.h - dstsize.h > 0? (srcsize.h - dstsize.h ) / 2: 0;
 
     SDL_BlitScaled(gBlank, &srcsize, gScreenSurface, &dstsize);
-    SDL_BlitScaled(gScreenSurface, NULL, gBack, NULL);
+    SDL_BlitSurface(gBlank, NULL, gBack, NULL);
 
-    ++warp; //+=randomSlip();
+    ++warp;
     if((warp % 100) == 0) logStats();
-    //randomSlip();
 }
 
 
