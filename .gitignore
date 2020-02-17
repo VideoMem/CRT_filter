@@ -1,0 +1,14 @@
+/CMakeFiles/*
+/cmake-build-debug/*
+/tests/SDL2_CRT_Tests.cbp
+/tests/Makefile
+/tests/cmake_install.cmake
+/tests/SDL2_CRT_Tests
+/tests/CMakeCache.txt
+/cmake_install.cmake
+/CMakeCache.txt
+/SDL2_CRT_Filter
+/SDL_CRT_Filter
+/SDL_CRT_Filter.cbp
+/deprecated/*
+/tests/CMakeFiles/*

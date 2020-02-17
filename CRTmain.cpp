@@ -1,11 +1,25 @@
-//Using SDL and standard IO
+#include <Magick++.h>
+using namespace Magick;
 #include <SDL2/SDL.h>
-#include <stdio.h>
-#include <time.h>
 #include "CRTModel.hpp"
 
 SDL_Window* gWindow = NULL;
 SDL_Surface* gScreenSurface = NULL;
+
+/*
+static void loadImage() {
+    Image image;
+    try {
+        image.read( "Testcard_G_PM5544_KSL.JPG" );
+        image.crop( Geometry(100,100, 100, 100) );
+        image.write( "logo.png" );
+    }
+    catch( Exception &error_ ) {
+        SDL_Log("Caught exception: %s", error_.what());
+    }
+}
+*/
+
 
 bool init() {
 	//Initialization flag
@@ -30,11 +44,12 @@ bool init() {
 
         }
 	}
-
+    //loadImage();
 	return success;
 }
 
 void close() {
+
     //Destroy window
 	SDL_DestroyWindow( gWindow );
 	gWindow = NULL;
@@ -57,14 +72,6 @@ static void powerOff(CRTModel* crt, SDL_Surface* gScreenSurface) {
 
     }
 
-    //int fanout = 10;
-
-    //while (fanout > 0) {
-
-      //  SDL_UpdateWindowSurface(gWindow);
-       // --fanout;
-    //}
-
     crt->noise(false);
 
     float scale =1;
@@ -76,19 +83,19 @@ static void powerOff(CRTModel* crt, SDL_Surface* gScreenSurface) {
         SDL_UpdateWindowSurface(gWindow);
         scale /= 1.2;
     }
-    int fanout = 200;
-    while(fanout > 0) {
+    Uint32 fanout = crt->wTime() + 4347;
+    while(crt->wTime() < fanout) {
         crt->strech(gScreenSurface, scale);
         crt->fade(gScreenSurface);
         SDL_UpdateWindowSurface(gWindow);
-        --fanout;
     }
 }
 
 
-int main( int argc, char* args[] ) {
+//int main( int argc, char* args[] ) {
+int main(  ) {
     static CRTModel* crt = new CRTModel();
-
+//    InitializeMagick(*args);
     //Main loop flag
     bool quit = false;
 
