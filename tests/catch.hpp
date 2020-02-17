@@ -67,7 +67,7 @@
 // start catch_platform.h
 
 #ifdef __APPLE__
-# include <TargetConditionals.h>
+# src <TargetConditionals.h>
 # if TARGET_OS_OSX == 1
 #  define CATCH_PLATFORM_MAC
 # elif TARGET_OS_IPHONE == 1
@@ -320,7 +320,7 @@ namespace Catch {
   #    if defined(__clang__) && (__clang_major__ < 8)
          // work around clang bug with libstdc++ https://bugs.llvm.org/show_bug.cgi?id=31852
          // fix should be in clang 8, workaround in libstdc++ 8.2
-  #      include <ciso646>
+  #      src <ciso646>
   #      if defined(__GLIBCXX__) && defined(_GLIBCXX_RELEASE) && (_GLIBCXX_RELEASE < 9)
   #        define CATCH_CONFIG_NO_CPP17_VARIANT
   #      else
@@ -1474,7 +1474,7 @@ namespace Catch {
 // end catch_interfaces_enum_values_registry.h
 
 #ifdef CATCH_CONFIG_CPP17_STRING_VIEW
-#include <string_view>
+#src <string_view>
 #endif
 
 #ifdef __OBJC__
@@ -1859,7 +1859,7 @@ namespace Catch {
 
 // Separate std::pair specialization
 #if defined(CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER)
-#include <utility>
+#src <utility>
 namespace Catch {
     template<typename T1, typename T2>
     struct StringMaker<std::pair<T1, T2> > {
@@ -1877,7 +1877,7 @@ namespace Catch {
 #endif // CATCH_CONFIG_ENABLE_PAIR_STRINGMAKER
 
 #if defined(CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER) && defined(CATCH_CONFIG_CPP17_OPTIONAL)
-#include <optional>
+#src <optional>
 namespace Catch {
     template<typename T>
     struct StringMaker<std::optional<T> > {
@@ -1896,7 +1896,7 @@ namespace Catch {
 
 // Separate std::tuple specialization
 #if defined(CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER)
-#include <tuple>
+#src <tuple>
 namespace Catch {
     namespace Detail {
         template<
@@ -1936,7 +1936,7 @@ namespace Catch {
 #endif // CATCH_CONFIG_ENABLE_TUPLE_STRINGMAKER
 
 #if defined(CATCH_CONFIG_ENABLE_VARIANT_STRINGMAKER) && defined(CATCH_CONFIG_CPP17_VARIANT)
-#include <variant>
+#src <variant>
 namespace Catch {
     template<>
     struct StringMaker<std::monostate> {
@@ -3673,7 +3673,7 @@ namespace Matchers {
             UnorderedEqualsMatcher(std::vector<T> const& target) : m_target(target) {}
             bool match(std::vector<T> const& vec) const override {
                 // Note: This is a reimplementation of std::is_permutation,
-                //       because I don't want to include <algorithm> inside the common path
+                //       because I don't want to src <algorithm> inside the common path
                 if (m_target.size() != vec.size()) {
                     return false;
                 }
@@ -4793,7 +4793,7 @@ namespace Catch {
 
 #import <objc/runtime.h>
 
-#include <string>
+#src <string>
 
 // NB. Any general catch headers included here must be included
 // in catch.hpp first to make sure they are included by the single
@@ -6368,7 +6368,7 @@ namespace Catch {
 // start catch_benchmarking_all.hpp
 
 // A proxy header that includes all of the benchmarking headers to allow
-// concise include of the benchmarking features. You should prefer the
+// concise src of the benchmarking features. You should prefer the
 // individual includes in standard use.
 
 // start catch_benchmark.hpp
@@ -6385,8 +6385,8 @@ namespace Catch {
 // Clocks
 
 
-#include <chrono>
-#include <ratio>
+#src <chrono>
+#src <ratio>
 
 namespace Catch {
     namespace Benchmark {
@@ -6418,7 +6418,7 @@ namespace Catch {
 
 
 #if defined(_MSC_VER)
-#   include <atomic> // atomic_thread_fence
+#   src <atomic> // atomic_thread_fence
 #endif
 
 namespace Catch {
@@ -6477,8 +6477,8 @@ namespace Catch {
 // Invoke with a special case for void
 
 
-#include <type_traits>
-#include <utility>
+#src <type_traits>
+#src <utility>
 
 namespace Catch {
     namespace Benchmark {
@@ -6621,10 +6621,10 @@ namespace Catch {
  // Dumb std::function implementation for consistent call overhead
 
 
-#include <cassert>
-#include <type_traits>
-#include <utility>
-#include <memory>
+#src <cassert>
+#src <type_traits>
+#src <utility>
+#src <memory>
 
 namespace Catch {
     namespace Benchmark {
@@ -6714,8 +6714,8 @@ namespace Catch {
 // repeat algorithm
 
 
-#include <type_traits>
-#include <utility>
+#src <type_traits>
+#src <utility>
 
 namespace Catch {
     namespace Benchmark {
@@ -6753,8 +6753,8 @@ namespace Catch {
 // Timing
 
 
-#include <tuple>
-#include <type_traits>
+#src <tuple>
+#src <type_traits>
 
 namespace Catch {
     namespace Benchmark {
@@ -6770,7 +6770,7 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_timing.hpp
-#include <utility>
+#src <utility>
 
 namespace Catch {
     namespace Benchmark {
@@ -6788,8 +6788,8 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_measure.hpp
-#include <utility>
-#include <type_traits>
+#src <utility>
+#src <type_traits>
 
 namespace Catch {
     namespace Benchmark {
@@ -6833,7 +6833,7 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_run_for_at_least.hpp
-#include <algorithm>
+#src <algorithm>
 
 namespace Catch {
     namespace Benchmark {
@@ -6881,14 +6881,14 @@ namespace Catch {
 // Statistical analysis tools
 
 
-#include <algorithm>
-#include <functional>
-#include <vector>
-#include <numeric>
-#include <tuple>
-#include <cmath>
-#include <utility>
-#include <cstddef>
+#src <algorithm>
+#src <functional>
+#src <vector>
+#src <numeric>
+#src <tuple>
+#src <cmath>
+#src <utility>
+#src <cstddef>
 
 namespace Catch {
     namespace Benchmark {
@@ -7022,11 +7022,11 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_stats.hpp
-#include <algorithm>
-#include <iterator>
-#include <tuple>
-#include <vector>
-#include <cmath>
+#src <algorithm>
+#src <iterator>
+#src <tuple>
+#src <vector>
+#src <cmath>
 
 namespace Catch {
     namespace Benchmark {
@@ -7125,10 +7125,10 @@ namespace Catch {
 // Benchmark results
 
 
-#include <algorithm>
-#include <vector>
-#include <string>
-#include <iterator>
+#src <algorithm>
+#src <vector>
+#src <string>
+#src <iterator>
 
 namespace Catch {
     namespace Benchmark {
@@ -7158,9 +7158,9 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_sample_analysis.hpp
-#include <algorithm>
-#include <iterator>
-#include <vector>
+#src <algorithm>
+#src <iterator>
+#src <vector>
 
 namespace Catch {
     namespace Benchmark {
@@ -7219,11 +7219,11 @@ namespace Catch {
 } // namespace Catch
 
 // end catch_analyse.hpp
-#include <algorithm>
-#include <functional>
-#include <string>
-#include <vector>
-#include <cmath>
+#src <algorithm>
+#src <functional>
+#src <string>
+#src <vector>
+#src <cmath>
 
 namespace Catch {
     namespace Benchmark {
@@ -7319,7 +7319,7 @@ namespace Catch {
 // Constructor and destructor helpers
 
 
-#include <type_traits>
+#src <type_traits>
 
 namespace Catch {
     namespace Benchmark {
@@ -7565,11 +7565,11 @@ namespace Catch {
 
 #if defined(CATCH_CONFIG_ENABLE_BENCHMARKING)
 
-#include <cassert>
-#include <random>
+#src <cassert>
+#src <random>
 
 #if defined(CATCH_CONFIG_USE_ASYNC)
-#include <future>
+#src <future>
 #endif
 
 namespace {
@@ -7879,7 +7879,7 @@ namespace Catch {
     #if defined(__GNUC__) && (defined(__i386) || defined(__x86_64))
         #define CATCH_TRAP() asm volatile ("int $3") /* NOLINT */
     #else // Fall back to the generic way.
-        #include <signal.h>
+        #src <signal.h>
 
         #define CATCH_TRAP() raise(SIGTRAP)
     #endif
@@ -7916,9 +7916,9 @@ namespace Catch {
 #endif
 
 #ifdef __AFXDLL
-#include <AfxWin.h>
+#src <AfxWin.h>
 #else
-#include <windows.h>
+#src <windows.h>
 #endif
 
 #ifdef CATCH_DEFINED_NOMINMAX
@@ -8376,7 +8376,7 @@ namespace Catch {
 #ifndef CLARA_CONFIG_OPTIONAL_TYPE
 #ifdef __has_include
 #if __has_include(<optional>) && __cplusplus >= 201703L
-#include <optional>
+#src <optional>
 #define CLARA_CONFIG_OPTIONAL_TYPE std::optional
 #endif
 #endif
@@ -8720,7 +8720,7 @@ inline auto Column::operator + (Column const& other) -> Columns {
 }
 }
 
-// ----------- end of #include from clara_textflow.hpp -----------
+// ----------- end of #src from clara_textflow.hpp -----------
 // ........... back in clara.hpp
 
 #include <cctype>
@@ -10260,7 +10260,7 @@ namespace Catch {
 
 // end catch_debug_console.h
 #if defined(CATCH_CONFIG_ANDROID_LOGWRITE)
-#include <android/log.h>
+#src <android/log.h>
 
     namespace Catch {
         void writeToDebugConsole( std::string const& text ) {
@@ -10291,17 +10291,17 @@ namespace Catch {
 
 #if defined(CATCH_PLATFORM_MAC) || defined(CATCH_PLATFORM_IPHONE)
 
-#  include <assert.h>
-#  include <stdbool.h>
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <cstddef>
-#  include <ostream>
+#  src <assert.h>
+#  src <stdbool.h>
+#  src <sys/types.h>
+#  src <unistd.h>
+#  src <cstddef>
+#  src <ostream>
 
 #ifdef __apple_build_version__
     // These headers will only compile with AppleClang (XCode)
     // For other compilers (Clang, GCC, ... ) we need to exclude them
-#  include <sys/sysctl.h>
+#  src <sys/sysctl.h>
 #endif
 
     namespace Catch {
@@ -11031,7 +11031,7 @@ namespace Catch {
 // start catch_leak_detector.cpp
 
 #ifdef CATCH_CONFIG_WINDOWS_CRTDBG
-#include <crtdbg.h>
+#src <crtdbg.h>
 
 namespace Catch {
 
@@ -11919,12 +11919,12 @@ namespace Catch {
 
 #if defined(CATCH_CONFIG_NEW_CAPTURE)
     #if defined(_MSC_VER)
-    #include <io.h>      //_dup and _dup2
+    #src <io.h>      //_dup and _dup2
     #define dup _dup
     #define dup2 _dup2
     #define fileno _fileno
     #else
-    #include <unistd.h>  // dup and dup2
+    #src <unistd.h>  // dup and dup2
     #endif
 #endif
 
@@ -14873,7 +14873,7 @@ std::string StringMaker<wchar_t *>::convert(wchar_t * str) {
 #endif
 
 #if defined(CATCH_CONFIG_CPP17_BYTE)
-#include <cstddef>
+#src <cstddef>
 std::string StringMaker<std::byte>::convert(std::byte value) {
     return ::Catch::Detail::stringify(std::to_integer<unsigned long long>(value));
 }

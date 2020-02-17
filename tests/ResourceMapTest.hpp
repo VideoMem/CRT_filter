@@ -55,6 +55,4 @@ TEST_CASE("Resource Map", "[Core]") {
         REQUIRE(res.size() == 0);
     }
 
-
-
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/02_getting_an_image_on_the_screen.iml" filepath="$PROJECT_DIR$/.idea/02_getting_an_image_on_the_screen.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SDL2_CRT.iml" filepath="$PROJECT_DIR$/.idea/SDL2_CRT.iml" />
     </modules>
   </component>
 </project>

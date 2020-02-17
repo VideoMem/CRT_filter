@@ -1,7 +1,3 @@
-//
-// Created by sebastian on 16/2/20.
-//
-
 #ifndef SDL_CRT_FILTER_ASSET_H
 #define SDL_CRT_FILTER_ASSET_H
 
@@ -39,6 +35,5 @@ private:
 
 typedef Resource<std::string> Channel;
 typedef std::map<int, Channel> ResourceMap;
-
 
 #endif //SDL_CRT_FILTER_ASSET_H
