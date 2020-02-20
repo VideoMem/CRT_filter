@@ -1,4 +1,6 @@
 #include <Asset.h>
+#include <ResourceRoller.hpp>
+#include <Config.hpp>
 
 void ResourceAppend(ResourceMap& res, std::string str) {
     Channel chn;
@@ -53,6 +55,78 @@ TEST_CASE("Resource Map", "[Core]") {
         REQUIRE(res.at(2).GetName() == "Cake Day!!");
         res.clear();
         REQUIRE(res.size() == 0);
+    }
+
+}
+
+
+
+TEST_CASE("Resource Roller", "[Channel selection][App]") {
+    ResourceRoller channels;
+    Config cfg;
+
+    SECTION("Empty map query") {
+        REQUIRE(channels.current().GetName() == "");
+        channels.Up();
+        REQUIRE(channels.Pos() == 0);
+        channels.Dw();
+        REQUIRE(channels.Pos() == 0);
+    }
+
+    SECTION("Adding stuff") {
+        nint count = cfg.fillImages(channels);
+        REQUIRE(channels.size() == count);
+        REQUIRE(channels.current().GetName() == cfg.sampleBitmapsNames[0]);
+        channels.Dw();
+        REQUIRE(channels.current().GetName() == cfg.sampleBitmapsNames[0]);
+        channels.Go(count);
+        REQUIRE(channels.current().GetName() == cfg.sampleBitmapsNames[0]);
+    }
+
+    SECTION("Moving through channels") {
+        nint count = cfg.fillImages(channels);
+        auto str = cfg.sampleBitmapsNames;
+        for (nint i = 0; i < count; ++i)
+            channels.Up();
+        REQUIRE(channels.current().GetName() == str[0]);
+
+        channels.Go(-0xFFFFFF);
+        REQUIRE(channels.current().GetName() == str[0]);
+        channels.Go(0xFFFFFF);
+        REQUIRE(channels.current().GetName() == str[0]);
+
+    }
+
+    SECTION("Iterator tests") {
+        cfg.fillImages(channels);
+        auto str = cfg.sampleBitmapsNames;
+        for(auto &x : channels.Get()) {
+            REQUIRE(x.second.GetName() == str[x.first]);
+        }
+    }
+
+    SECTION("Delete Elements") {
+        cfg.fillImages(channels);
+        auto str = cfg.sampleBitmapsNames;
+        channels.Del(2);
+        channels.Go(2);
+        REQUIRE(channels.current().GetName() == str[3]);
+
+        channels.Del(0);
+        channels.Go(0);
+        REQUIRE(channels.current().GetName() == str[1]);
+
+        channels.Go(2);
+        REQUIRE(channels.current().GetName() == str[3]);
+
+        channels.Del(3);
+        channels.Go(3);
+        REQUIRE(channels.current().GetName() == str[1]);
+
+        channels.Del(1);
+        channels.Go(1);
+        REQUIRE(channels.current().GetName() != str[1]);
+
     }
 
 }

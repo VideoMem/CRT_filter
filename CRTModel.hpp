@@ -530,11 +530,11 @@ void CRTModel::init() {
     setGhost(false);
     SDL_BlitSurface(gFrame, NULL, gBack, NULL);
     resetFrameStats();
-    SDL_SetSurfaceBlendMode(gFrame, SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gBlank, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gFrame , SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBlank , SDL_BLENDMODE_NONE);
     SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gBack, SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gAux, SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gBack  , SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gAux   , SDL_BLENDMODE_NONE);
 
 }
 

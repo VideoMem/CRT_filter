@@ -33,7 +33,8 @@ private:
     Asset<A> type;
 };
 
+typedef int nint;
 typedef Resource<std::string> Channel;
-typedef std::map<int, Channel> ResourceMap;
+typedef std::map<nint, Channel> ResourceMap;
 
 #endif //SDL_CRT_FILTER_ASSET_H

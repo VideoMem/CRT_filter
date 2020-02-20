@@ -33,7 +33,7 @@ bool init() {
 		gWindow = SDL_CreateWindow( "SDL CRT Filter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		        SCREEN_WIDTH  > TARGET_WIDTH ? SCREEN_WIDTH : TARGET_WIDTH,
 		        SCREEN_HEIGHT > TARGET_HEIGHT? SCREEN_HEIGHT: TARGET_HEIGHT,
-		        SDL_WINDOW_OPENGL);
+		        SDL_WINDOW_BORDERLESS);
 		if( gWindow == NULL ) {
 			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
 			success = false;
