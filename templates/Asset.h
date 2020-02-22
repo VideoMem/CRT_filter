@@ -1,5 +1,7 @@
 #ifndef SDL_CRT_FILTER_ASSET_H
 #define SDL_CRT_FILTER_ASSET_H
+#include <string>
+#include <map>
 
 template <typename A>
 class Asset {

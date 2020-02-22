@@ -9,11 +9,11 @@ TEST_CASE( "SDL2 Magick++ App", "[App][SDL2][Magick++]") {
     SECTION("MagickLoader, Surface Allocation") {
         Config cfg;
         MagickLoader loader;
-        cfg.fillImages(loader);
+        cfg.initResources(loader);
         SDL_Surface* sample = nullptr;
         SDL_Surface* copy = nullptr;
-        sample = MagickLoader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-        copy = MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+        sample = MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+        copy   = MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         REQUIRE( sample != nullptr );
         REQUIRE( copy   != nullptr );
 
@@ -29,7 +29,7 @@ TEST_CASE( "SDL2 Magick++ App", "[App][SDL2][Magick++]") {
     SECTION("MagickLoader Surface Mismatch") {
         Config cfg;
         MagickLoader loader;
-        cfg.fillImages(loader);
+        cfg.initResources(loader);
         SDL_Surface* sample = nullptr;
         SDL_Surface* copy = nullptr;
         sample = MagickLoader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );

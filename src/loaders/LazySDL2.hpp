@@ -1,5 +1,7 @@
 #ifndef SDL_CRT_FILTER_LAZYSDL2_HPP
 #define SDL_CRT_FILTER_LAZYSDL2_HPP
+
+#include <Config.hpp>
 #include <loaders/Loader.hpp>
 #include <SDL2/SDL.h>
 
@@ -15,11 +17,12 @@ bool LazyLoader::GetSurface(SDL_Surface* surface) {
 
     //Loads channel still image
     std::string imagePath = current().GetUri();
-    //SDL_Log( "Loading channel [%d] -> %s", Pos(), imagePath.c_str() );
+    //SDL_Log( "Loading channel [%d] -> %prngState", Pos(), imagePath.c_str() );
     gX = SDL_LoadBMP( imagePath.c_str() );
 
     if( gX == nullptr ) {
         SDL_Log( "Unable to load image %s! SDL Error: %s\n", imagePath.c_str(), SDL_GetError() );
+        Up(); return GetSurface(surface);
     } else {
         SDL_GetClipRect( gX, &rect );
         //SDL_Log("Loaded image size: %dx%d", rect.w, rect.h);

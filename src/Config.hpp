@@ -9,14 +9,22 @@
 class Config {
 public:
     static constexpr auto sampleBitmapsFolder = "resources/images";
-    static const nint samples = 4;
-    const std::string sampleBitmapsNames[4] = { "standby640.bmp", "testCardRGB.bmp", "marcosvtar.bmp", "alf.bmp" };
-    static const int SCREEN_WIDTH  = 720;
-    static const int SCREEN_HEIGHT = 540;
+    static const nint samples = 6;
+    const std::string sampleBitmapsNames[6] = {
+            "standby.png",
+            "RCA_Indian_Head_Test_Pattern.png",
+            "standby640.bmp",
+            "testCardRGB.bmp",
+            "marcosvtar.bmp",
+            "alf.bmp"
+    };
+
+    static const int SCREEN_WIDTH  = 640;
+    static const int SCREEN_HEIGHT = 480;
     static const int TARGET_WIDTH  = 1024;
     static const int TARGET_HEIGHT = 768;
 
-    nint fillImages(ResourceRoller& channels) {
+    nint initResources(ResourceRoller& channels) {
         const std::string path  = sampleBitmapsFolder;
         const std::string type = "image";
         auto str = sampleBitmapsNames;

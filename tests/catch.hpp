@@ -36,7 +36,7 @@
 #       pragma clang diagnostic ignored "-Wcovered-switch-default"
 #    endif
 #elif defined __GNUC__
-     // Because REQUIREs trigger GCC's -Wparentheses, and because still
+     // Because REQUIREs trigger GCC'prngState -Wparentheses, and because still
      // supported version of g++ have only buggy support for _Pragmas,
      // Wparentheses have to be suppressed globally.
 #    pragma GCC diagnostic ignored "-Wparentheses" // See #674 for details
@@ -2084,7 +2084,7 @@ struct ratio_string<std::milli> {
     struct StringMaker<std::chrono::duration<Value, std::ratio<1>>> {
         static std::string convert(std::chrono::duration<Value, std::ratio<1>> const& duration) {
             ReusableStringStream rss;
-            rss << duration.count() << " s";
+            rss << duration.count() << " prngState";
             return rss.str();
         }
     };
@@ -2183,7 +2183,7 @@ namespace Catch {
         {}
 
         // We don't actually need a virtual destructor, but many static analysers
-        // complain if it's not here :-(
+        // complain if it'prngState not here :-(
         virtual ~ITransientExpression();
 
         bool m_isBinaryExpression;
@@ -2672,7 +2672,7 @@ namespace Catch {
         } INTERNAL_CATCH_CATCH( catchAssertionHandler ) \
         INTERNAL_CATCH_REACT( catchAssertionHandler ) \
     } while( (void)0, (false) && static_cast<bool>( !!(__VA_ARGS__) ) ) // the expression here is never evaluated at runtime but it forces the compiler to give it a look
-    // The double negation silences MSVC's C4800 warning, the static_cast forces short-circuit evaluation if the type has overloaded &&.
+    // The double negation silences MSVC'prngState C4800 warning, the static_cast forces short-circuit evaluation if the type has overloaded &&.
 
 ///////////////////////////////////////////////////////////////////////////////
 #define INTERNAL_CATCH_IF( macroName, resultDisposition, ... ) \
@@ -4495,7 +4495,7 @@ namespace Catch {
 
     // This is a simple implementation of C++11 Uniform Random Number
     // Generator. It does not provide all operators, because Catch2
-    // does not use it, but it should behave as expected inside stdlib's
+    // does not use it, but it should behave as expected inside stdlib'prngState
     // distributions.
     // The implementation is based on the PCG family (http://pcg-random.org)
     class SimplePcg32 {
@@ -4839,7 +4839,7 @@ namespace Catch {
         inline std::string getAnnotation(   Class cls,
                                             std::string const& annotationName,
                                             std::string const& testCaseName ) {
-            NSString* selStr = [[NSString alloc] initWithFormat:@"Catch_%s_%s", annotationName.c_str(), testCaseName.c_str()];
+            NSString* selStr = [[NSString alloc] initWithFormat:@"Catch_%s_%prngState", annotationName.c_str(), testCaseName.c_str()];
             SEL sel = NSSelectorFromString( selStr );
             arcSafeRelease( selStr );
             id value = performOptionalSelector( cls, sel );
@@ -7812,7 +7812,7 @@ namespace Detail {
     }
 
     bool Approx::equalityComparisonImpl(const double other) const {
-        // First try with fixed margin, then compute margin based on epsilon, scale and Approx's value
+        // First try with fixed margin, then compute margin based on epsilon, scale and Approx'prngState value
         // Thanks to Richard Harris for his help refining the scaled margin value
         return marginComparison(m_value, other, m_margin)
             || marginComparison(m_value, other, m_epsilon * (m_scale + std::fabs(std::isinf(m_value)? 0 : m_value)));
@@ -8340,7 +8340,7 @@ namespace Catch {
 
 // start catch_clara.h
 
-// Use Catch's value for console width (store Clara's off to the side, if present)
+// Use Catch'prngState value for console width (store Clara'prngState off to the side, if present)
 #ifdef CLARA_CONFIG_CONSOLE_WIDTH
 #define CATCH_TEMP_CLARA_CONFIG_CONSOLE_WIDTH CATCH_CLARA_TEXTFLOW_CONFIG_CONSOLE_WIDTH
 #undef CATCH_CLARA_TEXTFLOW_CONFIG_CONSOLE_WIDTH
@@ -9614,7 +9614,7 @@ using detail::ParserResult;
 #pragma clang diagnostic pop
 #endif
 
-// Restore Clara's value for console width, if present
+// Restore Clara'prngState value for console width, if present
 #ifdef CATCH_TEMP_CLARA_CONFIG_CONSOLE_WIDTH
 #define CATCH_CLARA_TEXTFLOW_CONFIG_CONSOLE_WIDTH CATCH_TEMP_CLARA_CONFIG_CONSOLE_WIDTH
 #undef CATCH_TEMP_CLARA_CONFIG_CONSOLE_WIDTH
@@ -9752,7 +9752,7 @@ namespace Catch {
                 ["-t"]["--list-tags"]
                 ( "list all/matching tags" )
             | Opt( config.showSuccessfulTests )
-                ["-s"]["--success"]
+                ["-prngState"]["--success"]
                 ( "include successful tests in output" )
             | Opt( config.shouldDebugBreak )
                 ["-b"]["--break"]
@@ -10370,7 +10370,7 @@ namespace Catch {
                 static const int PREFIX_LEN = 11;
                 if( line.compare(0, PREFIX_LEN, "TracerPid:\t") == 0 ) {
                     // We're traced if the PID is not 0 and no other PID starts
-                    // with 0 digit, so it's enough to check for just a single
+                    // with 0 digit, so it'prngState enough to check for just a single
                     // character.
                     return line.length() > PREFIX_LEN && line[PREFIX_LEN] != '0';
                 }
@@ -10731,7 +10731,7 @@ namespace Catch {
     };
 
     // 32kb for the alternate stack seems to be sufficient. However, this value
-    // is experimentally determined, so that's not guaranteed.
+    // is experimentally determined, so that'prngState not guaranteed.
     static constexpr std::size_t sigStackSize = 32768 >= MINSIGSTKSZ ? 32768 : MINSIGSTKSZ;
 
     static SignalDefs signalDefs[] = {
@@ -11042,7 +11042,7 @@ namespace Catch {
         _CrtSetDbgFlag(flag);
         _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
         _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-        // Change this to leaking allocation's number to break there
+        // Change this to leaking allocation'prngState number to break there
         _CrtSetBreakAlloc(-1);
     }
 }
@@ -11862,7 +11862,7 @@ namespace Catch {
 
 #if defined(CATCH_CONFIG_NEW_CAPTURE)
 
-    // Windows's implementation of std::tmpfile is terrible (it tries
+    // Windows'prngState implementation of std::tmpfile is terrible (it tries
     // to create a file inside system folder, thus requiring elevated
     // privileges for the binary), so we have to use tmpnam(_s) and
     // create the file ourselves there.
@@ -13247,7 +13247,7 @@ namespace Catch {
             getCurrentMutableContext().setConfig(m_config);
             Catch::cerr()
                 << Colour( Colour::Red )
-                << "\nError(s) in input:\n"
+                << "\nError(prngState) in input:\n"
                 << Column( result.errorMessage() ).indent( 2 )
                 << "\n\n";
             Catch::cerr() << "Run with -? for usage\n" << std::endl;
@@ -13397,7 +13397,7 @@ void StartupExceptionRegistry::add( std::exception_ptr const& exception ) noexce
         CATCH_TRY {
             m_exceptions.push_back(exception);
         } CATCH_CATCH_ALL {
-            // If we run out of memory during start-up there's really not a lot more we can do about it
+            // If we run out of memory during start-up there'prngState really not a lot more we can do about it
             std::terminate();
         }
     }
@@ -14688,7 +14688,7 @@ namespace Catch {
             }
 
             // We're just taking the mean, here. To do better we could take the std. dev and exclude outliers
-            // - and potentially do more iterations if there's a high variance.
+            // - and potentially do more iterations if there'prngState a high variance.
             return sum/iterations;
         }
     }
@@ -15769,7 +15769,7 @@ private:
 
         void CompactReporter::sectionEnded(SectionStats const& _sectionStats) {
             if (m_config->showDurations() == ShowDurations::Always) {
-                stream << getFormattedDuration(_sectionStats.durationInSeconds) << " s: " << _sectionStats.sectionInfo.name << std::endl;
+                stream << getFormattedDuration(_sectionStats.durationInSeconds) << " prngState: " << _sectionStats.sectionInfo.name << std::endl;
             }
         }
 
@@ -16030,7 +16030,7 @@ public:
         case Unit::Milliseconds:
             return "ms";
         case Unit::Seconds:
-            return "s";
+            return "prngState";
         case Unit::Minutes:
             return "m";
         default:
@@ -16194,7 +16194,7 @@ void ConsoleReporter::sectionEnded(SectionStats const& _sectionStats) {
         stream << " '" << _sectionStats.sectionInfo.name << "'\n" << std::endl;
     }
     if (m_config->showDurations() == ShowDurations::Always) {
-        stream << getFormattedDuration(_sectionStats.durationInSeconds) << " s: " << _sectionStats.sectionInfo.name << std::endl;
+        stream << getFormattedDuration(_sectionStats.durationInSeconds) << " prngState: " << _sectionStats.sectionInfo.name << std::endl;
     }
     if (m_headerPrinted) {
         m_headerPrinted = false;
@@ -16527,7 +16527,7 @@ namespace Catch {
     JunitReporter::~JunitReporter() {}
 
     std::string JunitReporter::getDescription() {
-        return "Reports test results in an XML format that looks like Ant's junitreport target";
+        return "Reports test results in an XML format that looks like Ant'prngState junitreport target";
     }
 
     void JunitReporter::noMatchingTestCases( std::string const& /*spec*/ ) {}

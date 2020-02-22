@@ -9,14 +9,17 @@
 
 class Loader: public ResourceRoller {
 public:
-    virtual bool GetSurface(SDL_Surface*) {};
+    virtual bool GetSurface(SDL_Surface*) { return false; };
     static SDL_Surface* AllocateSurface(int w, int h);
     static SDL_Rect BiggestSurfaceClipRect(SDL_Surface* src, SDL_Surface* dst);
     static bool CompareSurface(SDL_Surface* src, SDL_Surface* dst);
 
-protected:
     static Uint32 get_pixel32( SDL_Surface *surface, int x, int y);
     static void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel);
+
+    static inline void blank(SDL_Surface *surface) {
+        SDL_FillRect(surface, nullptr, amask);
+    }
 
     //TODO: bit endianess
     inline static void comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {

@@ -35,7 +35,7 @@ TEST_CASE("Resource Map", "[Core]") {
         ResourceAppend(res, "an Iterator");
         ResourceAppend(res, "Cake Day!!");
         for(auto& x : res) {
-            std::cout << x.first << ", " << x.second.GetName() << std::endl;
+           // std::cout << x.first << ", " << x.second.GetName() << std::endl;
             ++count;
         }
         REQUIRE(count == res.size());
@@ -74,7 +74,7 @@ TEST_CASE("Resource Roller", "[Channel selection][App]") {
     }
 
     SECTION("Adding stuff") {
-        nint count = cfg.fillImages(channels);
+        nint count = cfg.initResources(channels);
         REQUIRE(channels.size() == count);
         REQUIRE(channels.current().GetName() == cfg.sampleBitmapsNames[0]);
         channels.Dw();
@@ -84,7 +84,7 @@ TEST_CASE("Resource Roller", "[Channel selection][App]") {
     }
 
     SECTION("Moving through channels") {
-        nint count = cfg.fillImages(channels);
+        nint count = cfg.initResources(channels);
         auto str = cfg.sampleBitmapsNames;
         for (nint i = 0; i < count; ++i)
             channels.Up();
@@ -98,7 +98,7 @@ TEST_CASE("Resource Roller", "[Channel selection][App]") {
     }
 
     SECTION("Iterator tests") {
-        cfg.fillImages(channels);
+        cfg.initResources(channels);
         auto str = cfg.sampleBitmapsNames;
         for(auto &x : channels.Get()) {
             REQUIRE(x.second.GetName() == str[x.first]);
@@ -106,7 +106,7 @@ TEST_CASE("Resource Roller", "[Channel selection][App]") {
     }
 
     SECTION("Delete Elements") {
-        cfg.fillImages(channels);
+        cfg.initResources(channels);
         auto str = cfg.sampleBitmapsNames;
         channels.Del(2);
         channels.Go(2);
@@ -119,13 +119,6 @@ TEST_CASE("Resource Roller", "[Channel selection][App]") {
         channels.Go(2);
         REQUIRE(channels.current().GetName() == str[3]);
 
-        channels.Del(3);
-        channels.Go(3);
-        REQUIRE(channels.current().GetName() == str[1]);
-
-        channels.Del(1);
-        channels.Go(1);
-        REQUIRE(channels.current().GetName() != str[1]);
 
     }
 

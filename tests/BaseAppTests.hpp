@@ -8,7 +8,7 @@ TEST_CASE( "SDL2 Basic App", "[App][SDL2]") {
     SECTION("Loader, Surface Allocation") {
         Config cfg;
         LazyLoader loader;
-        cfg.fillImages(loader);
+        cfg.initResources(loader);
         SDL_Surface* sample = nullptr;
         SDL_Surface* copy = nullptr;
         sample = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
@@ -28,7 +28,7 @@ TEST_CASE( "SDL2 Basic App", "[App][SDL2]") {
     SECTION("Loader Surface Mismatch") {
         Config cfg;
         LazyLoader loader;
-        cfg.fillImages(loader);
+        cfg.initResources(loader);
         SDL_Surface* sample = nullptr;
         SDL_Surface* copy = nullptr;
         sample = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
