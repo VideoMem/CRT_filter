@@ -5,7 +5,7 @@
 #ifndef INC_02_GETTING_AN_IMAGE_ON_THE_SCREEN_PRNGS_H
 #define INC_02_GETTING_AN_IMAGE_ON_THE_SCREEN_PRNGS_H
 
-static uint64_t prngState[2];
+static volatile uint64_t prngState[2];
 
 static inline uint64_t randLCG() {
     //LCG values from numerical recipes

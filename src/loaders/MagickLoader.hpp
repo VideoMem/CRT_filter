@@ -20,14 +20,13 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
     Image image;
     try {
         image.read( path );
-        //SDL_Log("Magick++ loaded image %ldx%ld", image.columns(), image.rows() );
         Geometry newSize = Geometry(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT);
         newSize.aspect(true);
         image.interpolate(BicubicInterpolatePixel );
         image.resize(newSize);
         int imgWidth = image.columns();
         int imgHeight = image.rows();
-        //SDL_Log("Magick++ resized to screen %dx%d", imgWidth, imgHeight);
+
         image.modifyImage();
         Uint32 pixel = 0;
         for ( int row = 0; row < imgHeight; row++ ) {

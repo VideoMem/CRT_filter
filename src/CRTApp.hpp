@@ -3,11 +3,14 @@
 #include <ctime>
 #include <prngs.h>
 #include <loaders/MagickLoader.hpp>
+#include <filters/Noise.hpp>
+#include <filters/BCS.hpp>
 #include <BaseApp.hpp>
 
 #define rand() xorshift()
 #define PERSISTENCE_ALPHA 0xA1000000
 #define PLANE_SPEED 1000
+
 
 class CRTApp : public BaseApp {
     public:
@@ -102,6 +105,8 @@ class CRTApp : public BaseApp {
     float focus;
     int planeidx;
     Uint32 worldTime;
+    NoiseFilter<SDL_Surface> noiseFilter;
+    BCSFilter<SDL_Surface> bcsFilter;
 };
 
 CRTApp::CRTApp(Loader& l):BaseApp(l) {
@@ -236,37 +241,17 @@ void CRTApp::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
 }
 
 void CRTApp::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
-    if(addNoise) {
-        SDL_FillRect(dest, NULL, 0x000000);
-        Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
-        float luma, Db, Dr, noise;
-        for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
-            int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
-            for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
-                pixel = Loader::get_pixel32(surface, x, y) & Loader::cmask;
-                rnd = rand() & 0xFF;
-                noise = fromChar(&rnd) * gnoise;
-                chrnoise = toChar(&noise);
-                Loader::toPixel(&snow, &chrnoise, &chrnoise, &chrnoise);
-                Loader::comp(&pixel, &R, &G, &B);
-                toLuma(&luma, &R, &G, &B);
-                toChroma(&Db, &Dr, &R, &G, &B);
-                luma = luma ==0? fromChar(&rnd) / 20: luma;
-                luma *= (1 - noise) * contrast;
-                luma += (1 - brightness) * contrast;
-                Dr *= (1 - noise) * color * contrast;
-                Db *= (1 - noise) * color * contrast;
 
-                toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
-                Loader::toPixel(&pxno, &BiasR, &BiasG, &BiasB);
-                Loader::put_pixel32(dest, x + noiseSlip, y,
-                            pxno);
-            }
-        }
-        if(gnoise > 1) { desaturate(dest, gBlank); SDL_BlitSurface(gBlank, NULL, dest, NULL); }
-    } else {
-        SDL_BlitSurface(surface, NULL, dest, NULL);
-    }
+    BCSFilterParams params;
+    params.contrast = contrast;
+    params.saturation = color;
+    params.brightness = brightness;
+    if (addNoise) {
+        bcsFilter.run(surface, dest, params);
+        noiseFilter.run(surface, dest);
+    } else
+        SDL_BlitSurface(surface, nullptr, dest, nullptr);
+
 }
 
 float CRTApp::rippleBias(int sync) {

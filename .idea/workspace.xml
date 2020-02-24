@@ -13,25 +13,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/resources/images/RCA_Indian_Head_Test_Pattern.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/images/standby.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/prngs.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/Filter.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/Noise.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/pipeline.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CRTModel.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTModel.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/LazySDL2.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/LazySDL2.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/Asset.h" beforeDir="false" afterPath="$PROJECT_DIR$/templates/Asset.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/BaseAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BaseAppTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/MagickAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickAppTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/catch.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/prngs.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/prngs.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -73,7 +65,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../tbb" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
@@ -106,12 +98,6 @@
   </component>
   <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration name="All Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Assets &amp; Resources" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[CPU Memory Ops][Core]" TEST_METHOD="Assets &amp; Resources" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -169,23 +155,29 @@
       </makefile>
       <method v="2" />
     </configuration>
+    <configuration name="clean/fast" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="clean/fast" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.Resource Map" />
-      <item itemvalue="Catch.Assets &amp; Resources" />
       <item itemvalue="Catch.Resource Roller" />
       <item itemvalue="Catch.SDL2 Base App + Loader" />
       <item itemvalue="Catch.SDL2 Magick++ App" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Tests" />
+      <item itemvalue="Makefile.clean/fast" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Makefile.clean/fast" />
         <item itemvalue="Catch.SDL2 Magick++ App" />
         <item itemvalue="Catch.SDL2 Base App + Loader" />
         <item itemvalue="Catch.Resource Map" />
-        <item itemvalue="Catch.Resource Roller" />
         <item itemvalue="Catch.Resource Roller" />
       </list>
     </recent_temporary>
@@ -217,7 +209,9 @@
       <workItem from="1582058216203" duration="43808000" />
       <workItem from="1582221096591" duration="34524000" />
       <workItem from="1582270017997" duration="2836000" />
-      <workItem from="1582309673796" duration="1240000" />
+      <workItem from="1582309673796" duration="4824000" />
+      <workItem from="1582403672161" duration="10900000" />
+      <workItem from="1582495450054" duration="11951000" />
     </task>
     <servers />
   </component>
@@ -243,24 +237,10 @@
     </ignored-roots>
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/CRTApp.hpp</url>
-          <line>107</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/CRTApp.hpp</url>
-          <line>437</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/CRTApp.hpp</url>
-          <line>121</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CMakeRunConfiguration">
+        <watch expression="top" language="ObjectiveC" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
