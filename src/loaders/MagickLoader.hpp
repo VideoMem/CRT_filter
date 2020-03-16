@@ -9,8 +9,8 @@
 
 class MagickLoader: public Loader {
 public:
-    bool GetSurface(SDL_Surface* surface) override;
-
+    bool GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) override;
+    bool GetSurface(SDL_Surface* surface);
 private:
     static void magickLoad(std::string path, SDL_Surface* surface);
 };
@@ -20,7 +20,7 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
     Image image;
     try {
         image.read( path );
-        Geometry newSize = Geometry(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT);
+        Geometry newSize = Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         newSize.aspect(true);
         image.interpolate(BicubicInterpolatePixel );
         image.resize(newSize);
@@ -46,7 +46,39 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
 
 }
 
-bool MagickLoader::GetSurface(SDL_Surface* surface) {
+bool MagickLoader::GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) {
+    SDL_Rect rect;
+    SDL_Surface * gX;
+    SDL_Surface *gC;
+
+    //Loads channel still image
+    std::string imagePath = current().GetUri();
+    gX = AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+    SDL_FillRect( gX, nullptr,  0x00 );
+
+    if( gX == nullptr ) {
+        SDL_Log( "Unable to allocate image %s! SDL Error: %prngState\n", imagePath.c_str(), SDL_GetError() );
+    } else {
+        magickLoad(imagePath, gX);
+        SDL_GetClipRect( gX, &rect );
+        //SDL_Log("Loaded image size: %dx%d", rect.w, rect.h);
+        SDL_FillRect( surface, nullptr, 0x0);
+        SDL_Rect dst;
+        dst.x = 0;
+        dst.y = 0;
+        dst.w = Config::SCREEN_WIDTH;
+        dst.h = Config::SCREEN_HEIGHT;
+        gC = SDL_ConvertSurface( gX, &format, 0 );
+        SDL_FreeSurface( gX );
+        SDL_BlitScaled( gC, &rect, surface, &dst );
+        SDL_FreeSurface( gC );
+
+    }
+
+    return gX != nullptr;
+}
+
+bool MagickLoader::GetSurface(SDL_Surface *surface) {
     SDL_Rect rect;
     SDL_Surface * gX;
 
@@ -69,6 +101,7 @@ bool MagickLoader::GetSurface(SDL_Surface* surface) {
         dst.h = Config::SCREEN_HEIGHT;
         //SDL_Log("Target image size: %dx%d", dst.w, dst.h);
         SDL_BlitScaled( gX, &rect, surface, &dst );
+
         SDL_FreeSurface( gX );
     }
 

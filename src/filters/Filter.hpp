@@ -11,7 +11,7 @@ template <typename A>
 class Filter {
 public:
     void run(A* input, A* output) {} ;
-protected:
+
 };
 
 

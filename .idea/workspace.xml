@@ -4,26 +4,39 @@
     <generated>
       <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
+      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
     </generated>
   </component>
-  <component name="CMakeSettings">
+  <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
       <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/filters/Filter.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/filters/Noise.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/pipeline.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/Deflection.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/NoiseTBB.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/filters/Sync.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/generators/Generator.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/generators/Ripple.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/2513ROM.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/2513SVG.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/BCS.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/Filter.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Filter.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/Noise.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Noise.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/prngs.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/prngs.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pipeline.h" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -65,23 +78,25 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../tbb" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/tests" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/deprecated" />
       <recent name="$PROJECT_DIR$/cmake-build-debug" />
       <recent name="$PROJECT_DIR$/resources/video" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/utils" />
+      <recent name="$PROJECT_DIR$/src/filters" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/tests" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -97,19 +112,25 @@
     </option>
   </component>
   <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+    <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <configuration name="All Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Resource Map" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Core]" TEST_METHOD="Resource Map" TEST_MODE="SUITE_TEST">
+    <configuration name="Resource Map" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Core]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Resource Roller" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Channel selection]" TEST_METHOD="Resource Roller" TEST_MODE="SUITE_TEST">
+    <configuration name="Resource Roller" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Channel selection]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -121,25 +142,25 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Base App + Loader" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2]" TEST_METHOD="SDL2 Basic App" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Base App + Loader" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick App + Loader " type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2]" TEST_METHOD="SDL2 Magick++ App" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick App + Loader " type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ App" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ App" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick++ App" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2][Magick++]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2_CRT_Tests" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests">
+    <configuration name="CHAR_ROM_GEN" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="CHAR_ROM_GEN" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="CHAR_ROM_GEN">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -148,12 +169,6 @@
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
-    </configuration>
-    <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
-      <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
-        <envs />
-      </makefile>
-      <method v="2" />
     </configuration>
     <configuration name="clean/fast" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
       <makefile filename="$PROJECT_DIR$/Makefile" target="clean/fast" workingDirectory="" arguments="">
@@ -169,12 +184,10 @@
       <item itemvalue="Catch.SDL2 Base App + Loader" />
       <item itemvalue="Catch.SDL2 Magick++ App" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
-      <item itemvalue="CMake Application.SDL2_CRT_Tests" />
-      <item itemvalue="Makefile.clean/fast" />
+      <item itemvalue="CMake Application.CHAR_ROM_GEN" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Makefile.clean/fast" />
         <item itemvalue="Catch.SDL2 Magick++ App" />
         <item itemvalue="Catch.SDL2 Base App + Loader" />
         <item itemvalue="Catch.Resource Map" />
@@ -211,7 +224,24 @@
       <workItem from="1582270017997" duration="2836000" />
       <workItem from="1582309673796" duration="4824000" />
       <workItem from="1582403672161" duration="10900000" />
-      <workItem from="1582495450054" duration="11951000" />
+      <workItem from="1582495450054" duration="25916000" />
+      <workItem from="1582608182353" duration="14596000" />
+      <workItem from="1582623257900" duration="32100000" />
+      <workItem from="1582846838676" duration="37000" />
+      <workItem from="1582847042778" duration="48000" />
+      <workItem from="1582847335110" duration="20000" />
+      <workItem from="1582847560902" duration="320000" />
+      <workItem from="1582848342093" duration="22000" />
+      <workItem from="1582848571894" duration="18000" />
+      <workItem from="1582848633025" duration="3234000" />
+      <workItem from="1582853797630" duration="10131000" />
+      <workItem from="1582878528513" duration="96000" />
+      <workItem from="1582878682709" duration="22087000" />
+      <workItem from="1583045810384" duration="1627000" />
+      <workItem from="1583238929528" duration="4143000" />
+      <workItem from="1583885764193" duration="640000" />
+      <workItem from="1583886702469" duration="2406000" />
+      <workItem from="1584343235645" duration="9327000" />
     </task>
     <servers />
   </component>
@@ -235,12 +265,5 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
-  </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="CMakeRunConfiguration">
-        <watch expression="top" language="ObjectiveC" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>

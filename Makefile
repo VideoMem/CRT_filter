@@ -69,8 +69,8 @@ rebuild_cache/fast: rebuild_cache
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/sebastian/Downloads/clion-2019.2.1/bin/cmake/linux/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
+	/home/sebastian/Downloads/clion-2019.2.1/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -123,6 +123,32 @@ SDL_CRT_Filter/fast:
 	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/build
 .PHONY : SDL_CRT_Filter/fast
 
+#=============================================================================
+# Target rules for targets named SDL2_CRT_Tests
+
+# Build rule for target.
+SDL2_CRT_Tests: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 SDL2_CRT_Tests
+.PHONY : SDL2_CRT_Tests
+
+# fast build rule for target.
+SDL2_CRT_Tests/fast:
+	$(MAKE) -f tests/CMakeFiles/SDL2_CRT_Tests.dir/build.make tests/CMakeFiles/SDL2_CRT_Tests.dir/build
+.PHONY : SDL2_CRT_Tests/fast
+
+#=============================================================================
+# Target rules for targets named CHAR_ROM_GEN
+
+# Build rule for target.
+CHAR_ROM_GEN: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CHAR_ROM_GEN
+.PHONY : CHAR_ROM_GEN
+
+# fast build rule for target.
+CHAR_ROM_GEN/fast:
+	$(MAKE) -f utils/CMakeFiles/CHAR_ROM_GEN.dir/build.make utils/CMakeFiles/CHAR_ROM_GEN.dir/build
+.PHONY : CHAR_ROM_GEN/fast
+
 CRTmain.o: CRTmain.cpp.o
 
 .PHONY : CRTmain.o
@@ -159,6 +185,8 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... SDL_CRT_Filter"
 	@echo "... edit_cache"
+	@echo "... SDL2_CRT_Tests"
+	@echo "... CHAR_ROM_GEN"
 	@echo "... CRTmain.o"
 	@echo "... CRTmain.i"
 	@echo "... CRTmain.s"

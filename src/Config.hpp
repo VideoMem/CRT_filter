@@ -13,16 +13,18 @@ public:
     const std::string sampleBitmapsNames[6] = {
             "standby.png",
             "RCA_Indian_Head_Test_Pattern.png",
-            "standby640.bmp",
+            "Mantis.png",
             "testCardRGB.bmp",
             "marcosvtar.bmp",
             "alf.bmp"
     };
 
-    static const int SCREEN_WIDTH  = 640;
-    static const int SCREEN_HEIGHT = 480;
-    static const int TARGET_WIDTH  = 1024;
-    static const int TARGET_HEIGHT = 768;
+    static const int NKERNEL_WIDTH  = 640;
+    static const int NKERNEL_HEIGHT = 480;
+    static const int SCREEN_WIDTH  = 800  * 4/3;
+    static const int SCREEN_HEIGHT = 600   * 4/3;
+    static const int TARGET_WIDTH  = 1024  * 4/3;
+    static const int TARGET_HEIGHT = 768   * 4/3;
 
     nint initResources(ResourceRoller& channels) {
         const std::string path  = sampleBitmapsFolder;

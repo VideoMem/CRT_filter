@@ -2,15 +2,20 @@
 #define SDL_CRT_FILTER_BCS_HPP
 #include <filters/Filter.hpp>
 #include <prngs.h>
+#include <generators/Ripple.hpp>
 
 struct BCSFilterParams {
-    float saturation, brightness, contrast;
+    float saturation, brightness, contrast, supply_voltage, ripple;
+    int frame_sync;
 };
 
 template <typename A>
 class BCSFilter: public Filter<A> {
 public:
     static void run(A* surface, A* dest, BCSFilterParams&);
+
+protected:
+    Ripple rippleGen;
 };
 
 template <typename A>
@@ -30,8 +35,7 @@ void BCSFilter<A>::run(A *surface, A *dest, BCSFilterParams& ctrl) {
             Db *= ctrl.saturation * ctrl.contrast;
             Loader::toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
             Loader::toPixel(&pixelOut, &BiasR, &BiasG, &BiasB);
-            Loader::put_pixel32(dest, x , y,
-                                pixelOut);
+            Loader::put_pixel32(dest, x , y, pixelOut);
         }
     }
 }

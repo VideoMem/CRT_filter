@@ -6,103 +6,113 @@
 #define SDL_CRT_FILTER_NOISE_HPP
 #include <filters/Filter.hpp>
 #include <prngs.h>
-#include <tbb/parallel_for.h>
-#include <tbb/blocked_range.h>
-#include <tbb/tbb.h>
-using namespace tbb;
+#include <deque>
 
-class ApplyFilter {
-private:
-    SDL_Surface *const src;
-    SDL_Surface *const dst;
-
-public:
-    void operator()( const blocked_range<size_t>& r ) const {
-        SDL_Surface *a = src;
-        SDL_Surface *b = dst;
-
-        Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
-        float luma, Db, Dr, noise;
-        float gnoise = 0.3, color = 1, brightness =1, contrast = 1;
-
-        //int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
-        for( size_t i=r.begin(); i!=r.end(); ++i ) {
-            int top= r.end();
-            int str= r.begin();
-            int res = top + str;
-            int x = i % Config::SCREEN_WIDTH;
-            int y = i / Config::SCREEN_WIDTH;
-            pixel = Loader::get_pixel32(a, x, y) & Loader::cmask;
-            rnd = rand() & 0xFF;
-            noise = Loader::fromChar(&rnd) * gnoise;
-            chrnoise = Loader::toChar(&noise);
-            Loader::toPixel(&snow, &chrnoise, &chrnoise, &chrnoise);
-            Loader::comp(&pixel, &R, &G, &B);
-            Loader::toLuma(&luma, &R, &G, &B);
-            Loader::toChroma(&Db, &Dr, &R, &G, &B);
-            luma = luma ==0? Loader::fromChar(&rnd) / 20: luma;
-            luma *= (1 - noise) * contrast;
-            luma += (1 - brightness) * contrast;
-            Dr *= (1 - noise) * color * contrast;
-            Db *= (1 - noise) * color * contrast;
-
-            Loader::toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
-            Loader::toPixel(&pxno, &BiasR, &BiasG, &BiasB);
-            Loader::put_pixel32(b, x, y,
-                                pxno);
-        }
-    }
-    ApplyFilter( SDL_Surface* s, SDL_Surface* d ) :
-            src(s), dst(d)
-    {}
-
-    ApplyFilter() : dst(nullptr), src(nullptr) {}
-};
+#define rand() xorshift()
 
 template <typename A>
-class NoiseFilter: public Filter<A>, ApplyFilter {
+class NoiseFilter: public Filter<A> {
 public:
-    void parlapply(A* src, A* dst) {
-        static affinity_partitioner ap;
-        tbb::parallel_for(
-            tbb::blocked_range<std::size_t>(0, Config::SCREEN_WIDTH * Config::SCREEN_HEIGHT),
-            ApplyFilter(src, dst), ap);
+    void fill(A* dest);
+    void run(A* surface, A* dest, float& gnoise);
+    NoiseFilter(SDL_PixelFormat& format) {
+        fmt = format;
+//        SDL_Surface* background = Loader::AllocateSurface(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, format);
+//        Loader::blank(background);
+        count = 0;
+        for(int i = 0; i != frames; ++i) {
+            gBack.insert(gBack.end(), Loader::AllocateSurface(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, format));
+            fill(gBack.back());
+            SDL_SetSurfaceBlendMode(gBack.back(), SDL_BLENDMODE_BLEND );
+        }
+//        SDL_FreeSurface(background);
     }
-    static void run(A* surface, A* dest);
+    ~NoiseFilter() {
+        for (int i = 0; i != frames; ++i) {
+            SDL_FreeSurface(gBack.back());
+            gBack.pop_back();
+        }
+    }
+
+protected:
+    static const size_t frames = 60;
+    std::vector<A*> gBack;
+    SDL_PixelFormat fmt;
+    size_t count = 0;
+    static float simpleLoPass(std::deque<float>& samples, size_t range ) {
+        auto it = samples.begin();
+        float sum = 0;
+        while(samples.size() > range) {
+            samples.pop_front();
+        }
+        while (it != samples.end()) {
+            sum+= *it++;
+        }
+
+        return sum / samples.size();
+    }
+
 };
 
 template<typename A>
-void NoiseFilter<A>::run(A *surface, A *dest) {
+void NoiseFilter<A>::fill(A *dest) {
     SDL_FillRect(dest, nullptr, 0x000000);
-    Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
-    float luma, Db, Dr, noise;
-    float gnoise = 0.3, color = 1, brightness =1, contrast = 1;
-    for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
-        int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
-        for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
-            pixel = Loader::get_pixel32(surface, x, y) & Loader::cmask;
-            rnd = rand() & 0xFF;
-            noise = Loader::fromChar(&rnd) * gnoise;
-            chrnoise = Loader::toChar(&noise);
-            Loader::toPixel(&snow, &chrnoise, &chrnoise, &chrnoise);
-            Loader::comp(&pixel, &R, &G, &B);
-            Loader::toLuma(&luma, &R, &G, &B);
-            Loader::toChroma(&Db, &Dr, &R, &G, &B);
-            luma = luma ==0? Loader::fromChar(&rnd) / 20: luma;
-            luma *= (1 - noise) * contrast;
-            luma += (1 - brightness) * contrast;
-            Dr *= (1 - noise) * color * contrast;
-            Db *= (1 - noise) * color * contrast;
+    Uint32 BiasR, BiasG, BiasB, pxno;
+    int32_t rndL, rndDb, rndDr;
+    float luma = 0, Db = 0, Dr = 0;
+    std::deque<float> avgY, avgDb, avgDr;
+    rndL  = (rand() & 0xFF);
+    rndDb = (rand() & 0xFF);
+    rndDr = (rand() & 0xFF);
+    avgY.push_front(Loader::fromChar(&rndL));
+    avgDb.push_front(Loader::fromChar(&rndDb));
+    avgDr.push_front(Loader::fromChar(&rndDr));
+
+    SDL_Surface* noiseSurface = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
+    for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
+        for (int x = 0; x < Config::NKERNEL_WIDTH; ++x) {
+            rndL  = (rand() & 0xFF);
+            rndDb = (rand() & 0xFF);
+            rndDr = (rand() & 0xFF);
+
+            luma = Loader::fromChar(&rndL);
+            Db   = (Loader::fromChar(&rndDb) * 2.666) - 1.333;
+            Dr   = (Loader::fromChar(&rndDr) * 2.666) - 1.333;
+            avgY.push_back(luma);
+            avgDb.push_back(Db);
+            avgDr.push_back(Dr);
+            luma = 2 * abs(simpleLoPass(avgY, 32)  - luma);
+            Db   = simpleLoPass(avgDb, 64);
+            Dr   = simpleLoPass(avgDr, 64);
 
             Loader::toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
             Loader::toPixel(&pxno, &BiasR, &BiasG, &BiasB);
-            Loader::put_pixel32(dest, x + noiseSlip, y,
+            Loader::put_pixel32(noiseSurface, x, y,
                                 pxno);
         }
     }
-    //if(gnoise > 1) { desaturate(dest, gBlank); SDL_BlitSurface(gBlank, NULL, dest, NULL); }
+    SDL_Surface* optimizedNoise = SDL_ConvertSurface(noiseSurface, &fmt, 0);
+    SDL_SetSurfaceAlphaMod(optimizedNoise, 0xFF);
+    SDL_Rect dstRect;
+    SDL_Rect srcRect;
+    SDL_GetClipRect(dest, &dstRect);
+    SDL_GetClipRect(optimizedNoise, &srcRect);
+    SDL_BlitScaled(optimizedNoise, &srcRect, dest, &dstRect);
+    SDL_FreeSurface(noiseSurface);
+    SDL_FreeSurface(optimizedNoise);
 }
 
+template<typename A>
+void NoiseFilter<A>::run(A *surface, A *dest, float& gnoise) {
+    size_t max = gBack.size();
+    size_t select = count;
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+    SDL_BlitSurface(surface, nullptr, dest, nullptr);
+    SDL_SetSurfaceAlphaMod(gBack[select], 0xFF * gnoise);
+    SDL_BlitSurface(gBack[select], nullptr, dest, nullptr);
+    ++count;
+    if(count == max) count = 0;
+}
 
 
 #endif //SDL_CRT_FILTER_NOISE_HPP

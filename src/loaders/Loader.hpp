@@ -9,8 +9,10 @@
 
 class Loader: public ResourceRoller {
 public:
-    virtual bool GetSurface(SDL_Surface*) { return false; };
-    static SDL_Surface* AllocateSurface(int w, int h);
+    virtual bool GetSurface(SDL_Surface*, SDL_PixelFormat&) { return false; };
+    static SDL_Surface *AllocateSurface(int w, int h);
+    static SDL_Surface *AllocateSurface(int w, int h, SDL_PixelFormat &format);
+    //static SDL_Surface* AllocateSurface(int w, int h);
     static SDL_Rect BiggestSurfaceClipRect(SDL_Surface* src, SDL_Surface* dst);
     static bool CompareSurface(SDL_Surface* src, SDL_Surface* dst);
 
@@ -33,8 +35,12 @@ public:
         *pixel = ((*B << 16) + (*G << 8) + *R) | amask;
     }
 
+    inline static float  fromChar(int32_t* c) { return (float) *c / 0xFF; }
     inline static float  fromChar(Uint32* c) { return (float) *c / 0xFF; }
     inline static Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
+    inline static float  hardSaturate(float c) {
+        return c;
+    }
 
     inline static void toLuma(float *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
         *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
@@ -54,6 +60,20 @@ public:
         *B = toChar(&fB);
     }
 
+    inline static void blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, float& scale);
+
+    inline static void blitLine(SDL_Surface *src, SDL_Surface *dst, int& line, int& dstline) {
+        SDL_Rect srcrect;
+        SDL_Rect dstrect;
+        SDL_GetClipRect(src, &srcrect);
+        SDL_GetClipRect(src, &dstrect);
+        srcrect.y = line;
+        dstrect.y = dstline;
+        srcrect.h = 1;
+        dstrect.h = 1;
+        SDL_BlitSurface(src, &srcrect, dst, &dstrect);
+    }
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     static const Uint32 rmask = 0xff000000;
         static const Uint32 gmask = 0x00ff0000;
@@ -67,12 +87,22 @@ public:
     static const Uint32 amask = 0xff000000;
     static const Uint32 cmask = 0x00ffffff;
 #endif
+
 };
 
-SDL_Surface* Loader::AllocateSurface(int w, int h) {
-    return SDL_CreateRGBSurface(0, w, h, 32,
+SDL_Surface* Loader::AllocateSurface(int w, int h, SDL_PixelFormat& format) {
+    SDL_Surface* ns = SDL_CreateRGBSurface(0, w, h, 32,
                                 rmask, gmask, bmask, amask);
+    SDL_Surface* optimized = SDL_ConvertSurface(ns, &format, 0);
+    SDL_FreeSurface(ns);
+    return optimized;
 }
+
+SDL_Surface *Loader::AllocateSurface(int w, int h) {
+    return SDL_CreateRGBSurface(0, w, h, 32,
+            rmask, gmask, bmask, amask);
+}
+
 
 bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
     if (src->format->format == dst->format->format &&
@@ -118,6 +148,22 @@ SDL_Rect Loader::BiggestSurfaceClipRect(SDL_Surface *src, SDL_Surface *dst) {
     //dstsize.x = srcsize.w < dstsize.w ? abs((srcsize.w - dstsize.w )) / 2: 0;
     //dstsize.y = srcsize.h < dstsize.h ? abs((srcsize.h - dstsize.h )) / 2: 0;
     return dstsize;
+}
+
+inline void Loader::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, float& scale) {
+    SDL_Rect srcrect;
+    SDL_Rect dstrect;
+    srcrect.x = 0;
+    srcrect.y = line;
+    srcrect.w = Config::SCREEN_WIDTH;
+    srcrect.h = 1;
+    int width  = round( (float) Config::SCREEN_WIDTH * scale );
+    int center = round( (float) (Config::SCREEN_WIDTH - width) / 2 );
+    dstrect.x = center;
+    dstrect.y = line;
+    dstrect.w = width;
+    dstrect.h = 1;
+    SDL_BlitScaled(src, &srcrect, dst, &dstrect);
 }
 
 #endif //SDL_CRT_FILTER_LOADER_HPP

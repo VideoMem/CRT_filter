@@ -5,12 +5,14 @@
 #include <loaders/MagickLoader.hpp>
 #include <filters/Noise.hpp>
 #include <filters/BCS.hpp>
+#include <filters/Sync.hpp>
+#include <filters/Deflection.hpp>
 #include <BaseApp.hpp>
 
 #define rand() xorshift()
-#define PERSISTENCE_ALPHA 0xA1000000
-#define PLANE_SPEED 1000
 
+#define PERSISTENCE_ALPHA 0xA1
+#define PLANE_SPEED 1000
 
 class CRTApp : public BaseApp {
     public:
@@ -30,6 +32,9 @@ class CRTApp : public BaseApp {
     void setContrast(float v) { contrast = v; }
     void setFocus(float v) { focus = v; }
     void setColor(float v) { color = v; }
+    void setLoop(bool l) { loop = l; }
+    bool getLoop() { return loop; }
+
     void setPlane() { }
     inline double frameRate(double *seconds);
     inline Uint32 wTime() { double seconds; worldTime = 1000 * warp / frameRate(&seconds); return worldTime; }
@@ -67,11 +72,6 @@ class CRTApp : public BaseApp {
 
     static void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
     void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
-    inline void toLuma  (float* luma , Uint32* R, Uint32* G, Uint32* B);
-    inline void toChroma(float* Db, float* Dr , Uint32* R, Uint32* G, Uint32* B);
-    inline void toRGB   (float* luma , float* Db, float* Dr, Uint32* R, Uint32* G, Uint32* B);
-    inline Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
-    inline float  fromChar(Uint32* c) { return (float) *c / 0xFF; }
 
     SDL_Surface* gFrame  = nullptr;
     SDL_Surface* gBuffer = nullptr;
@@ -83,7 +83,14 @@ class CRTApp : public BaseApp {
     time_t execTimer;
     bool createBuffers();
     bool initialized = false;
-    void postInit() { if(!initialized) { createBuffers(); loadMedia(); initialized=true; } }
+    void postInit() {
+        if(!initialized) {
+            createBuffers(); loadMedia();
+            noiseFilter = new NoiseFilter<SDL_Surface>( *gScreenSurface->format );
+            deflectionFilter = new DeflectionFilter<SDL_Surface> ( *gScreenSurface->format );
+            initialized=true;
+        }
+    }
     void init();
     void close();
 
@@ -105,8 +112,11 @@ class CRTApp : public BaseApp {
     float focus;
     int planeidx;
     Uint32 worldTime;
-    NoiseFilter<SDL_Surface> noiseFilter;
+    NoiseFilter<SDL_Surface>* noiseFilter;
     BCSFilter<SDL_Surface> bcsFilter;
+    SyncFilter<SDL_Surface> syncFilter;
+    bool loop;
+    DeflectionFilter<SDL_Surface>* deflectionFilter;
 };
 
 CRTApp::CRTApp(Loader& l):BaseApp(l) {
@@ -118,16 +128,19 @@ CRTApp::~CRTApp() {
 }
 
 bool CRTApp::createBuffers() {
-    gBuffer = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-    gBlank  = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-    gBack   = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-    gFrame  = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-    gAux    = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+    SDL_Surface* aux_gBuffer = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, *gScreenSurface->format );
+    gBuffer = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    gBlank  = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    gBack   = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    gFrame  = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    gAux    = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    SDL_FreeSurface(aux_gBuffer);
 
     if (gBuffer == nullptr || gBlank == nullptr || gBack == nullptr || gFrame == nullptr || gAux == nullptr)  {
-        SDL_Log("SDL_CreateRGBSurface() failed: %prngState", SDL_GetError());
+        SDL_Log("SDL_CreateRGBSurface() failed: %s", SDL_GetError());
         return false;
     }
+
     return true;
 }
 
@@ -206,34 +219,17 @@ void CRTApp::invert( SDL_Surface *surface ) {
         }
 }
 
-inline void CRTApp::toLuma(float *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
-    *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
-}
-
-inline void CRTApp::toChroma(float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
-    *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
-    *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
-}
-
-inline void CRTApp::toRGB(float *luma, float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
-    float fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
-    float fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
-    float fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
-    *R = toChar(&fR);
-    *G = toChar(&fG);
-    *B = toChar(&fB);
-}
-
 void CRTApp::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
-    SDL_FillRect(dest, NULL, 0x000000);
+
+    Loader::blank(dest);
     Uint32 B, G, R, pixel, npx;
     float luma;
     for(int x=0; x< Config::SCREEN_WIDTH; ++x)
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
             pixel = Loader::get_pixel32(surface, x, y);
             Loader::comp(&pixel, &R, &G, &B);
-            toLuma(&luma, &R, &G, &B);
-            Uint32 iluma = toChar(&luma);
+            Loader::toLuma(&luma, &R, &G, &B);
+            Uint32 iluma = Loader::toChar(&luma);
             Loader::toPixel(&npx, &iluma, &iluma, &iluma);
             Loader::put_pixel32(dest, x, y,
                         npx);
@@ -246,11 +242,16 @@ void CRTApp::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
     params.contrast = contrast;
     params.saturation = color;
     params.brightness = brightness;
+    params.supply_voltage = supplyV;
+    params.ripple = ripple;
+    params.frame_sync = warp;
+
     if (addNoise) {
-        bcsFilter.run(surface, dest, params);
-        noiseFilter.run(surface, dest);
+        noiseFilter->run(surface, gAux, gnoise);
     } else
-        SDL_BlitSurface(surface, nullptr, dest, nullptr);
+        SDL_BlitSurface(surface, nullptr, gAux, nullptr);
+
+    bcsFilter.run(gAux, dest , params);
 
 }
 
@@ -273,7 +274,7 @@ inline void CRTApp::blitLine(SDL_Surface *src, SDL_Surface *dst, int line, int d
     dstrect.y = dstline;
     srcrect.h = 1;
     dstrect.h = 1;
-    SDL_BlitScaled(src, &srcrect, dst, &dstrect);
+    SDL_BlitSurface(src, &srcrect, dst, &dstrect);
 }
 
 inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, float scale) {
@@ -293,22 +294,27 @@ inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line,
 }
 
 void CRTApp::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
-    if(addHRipple) {
-        Loader::blank(dest);
+    DeflectionFilterParams params;
+    params.Hcomp = addHRipple;
+    params.Vcomp = addVRipple;
+    params.ripple = ripple;
+    params.vsupply = supplyV;
+    params.warp = warp;
+    deflectionFilter->run( surface, dest, params );
+/*        Loader::blank(dest);
         int sync = warp;
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
             float scale = ((0.337 * supplyV ) + 0.663) * rippleBias(sync);
             ++sync;
             blitLineScaled(surface, dest, y, scale);
-        }
-    } else
-        SDL_BlitSurface(surface, NULL, dest, NULL);
+        }*/
+
 }
 
 void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
     if(addVRipple) {
         Loader::blank(dest);
-        int noiseSlip = round(((rand() & 0xFF) / 0xF0) * 0.3);
+        int noiseSlip = round(((rand() & 0xFF) / 0xF0) * 0.3 );
         int sync = warp;
         int newy = 0 , last_blitY = 0;
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
@@ -318,14 +324,14 @@ void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
             last_blitY = newy;
             newy = round(y * scale) + center + noiseSlip;
             if (newy > 0 && newy < Config::SCREEN_HEIGHT) {
-                blitLine(surface, dest, y, newy);
+                Loader::blitLine( surface, dest, y, newy );
             }
             if(newy > last_blitY && last_blitY != 0)
                 for(int i = last_blitY; i < newy; ++i)
-                    blitLine(surface, dest, y, i);
+                    Loader::blitLine( surface, dest, y, i );
             else
                 for(int i = newy; i < last_blitY; ++i)
-                    blitLine(surface, dest, y, i);
+                    Loader::blitLine( surface, dest, y, i );
         }
     } else
         SDL_BlitSurface(surface, NULL, dest, NULL);
@@ -334,6 +340,7 @@ void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
 void CRTApp::fade(SDL_Surface* surface) {
 
     SDL_BlitSurface(gBack, NULL, gBuffer, NULL);
+/*
     for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
             int persist = Loader::get_pixel32(gBuffer, x, y);
@@ -341,7 +348,8 @@ void CRTApp::fade(SDL_Surface* surface) {
             Loader::put_pixel32(gBuffer, x, y, pxno);
         }
     }
-
+*/
+    SDL_SetSurfaceAlphaMod(gBuffer, PERSISTENCE_ALPHA / 2);
     SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_BLEND);
     SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
     SDL_Rect clipRect, sRect;
@@ -351,6 +359,7 @@ void CRTApp::fade(SDL_Surface* surface) {
     SDL_BlitScaled (gBuffer, &sRect, surface, &clipRect);
     SDL_BlitSurface(gBuffer, NULL, gBack, NULL);
 
+    SDL_SetSurfaceAlphaMod(gBuffer, 0xFF);
     SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_NONE);
     SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     ++warp;
@@ -359,7 +368,7 @@ void CRTApp::fade(SDL_Surface* surface) {
 void CRTApp::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) {
     if (addBlend) {
         Loader::blank(dest);
-
+/*
         for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
             for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
                 int persist = Loader::get_pixel32(last, x, y);
@@ -367,11 +376,13 @@ void CRTApp::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) 
                 Loader::put_pixel32(last, x, y, pxno);
             }
         }
-
+*/
+        SDL_SetSurfaceAlphaMod(last, PERSISTENCE_ALPHA / 2);
         SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_BLEND);
         SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
         SDL_BlitSurface(last, nullptr, dest, nullptr);
         SDL_BlitSurface(surface, nullptr, dest, nullptr);
+        SDL_SetSurfaceAlphaMod(last, 0xFF);
         SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_NONE);
         SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     } else {
@@ -411,7 +422,7 @@ void CRTApp::ghost( SDL_Surface *surface, SDL_Surface *dest, int delay, Uint8 po
 }
 
 bool CRTApp::loadMedia() {
-    return loader->GetSurface( gFrame );
+    return loader->GetSurface( gFrame, *gScreenSurface->format );
 }
 
 void CRTApp::resetFrameStats() {
@@ -424,6 +435,7 @@ void CRTApp::init() {
     channel = 0;
     worldTime = 0;
     lastR =0;
+
     prngState[0] = time(0);
     prngState[1] = time(0);
     setRipple(0.1);
@@ -436,7 +448,7 @@ void CRTApp::init() {
     noise(true);
     setHRipple(true);
     setVRipple(true);
-    setBlend(true);
+    setBlend(false);
     setSupply(1.0);
     setGhost(false);
     SDL_BlitSurface(gFrame, NULL, gBack, NULL);
@@ -451,6 +463,8 @@ void CRTApp::init() {
 
 void CRTApp::close() {
     //Deallocate surfaces
+    delete(noiseFilter);
+    delete(deflectionFilter);
     SDL_FreeSurface( gBuffer );
     SDL_FreeSurface( gBlank );
     SDL_FreeSurface( gBack );
@@ -481,14 +495,18 @@ void CRTApp::logStats() {
 
 void CRTApp::update()  {
     if(!initialized) postInit();
-    Uint8 power = 0, delay = 0;
-    if(addGhost) plane(&delay, &power);
-    ghost(gFrame, gBlank, delay, power);
-    noise(gBlank, gBuffer);
-    HRipple(gBuffer, gBlank, warp);
-    VRipple(gBlank , gBuffer, warp);
-    blend(gBuffer, gBack, gBlank);
+    //Uint8 power = 0, delay = 0;
+    //if(addGhost) plane(&delay, &power);
+    if(gnoise > 0.5) { color = 0; }
+    //ghost(gAux, gBlank, delay, power);
 
+    if(!loop) syncFilter.run(gFrame, gAux, gnoise);
+    else      syncFilter.run(gBack , gAux, gnoise);
+
+    noise(gAux, gBuffer);
+    HRipple(gBuffer, gBlank, warp);
+    //VRipple(gBlank , gBuffer, warp);
+    //blend(gAux, gBack, gBlank);
 
     //Apply the image
     SDL_Rect srcsize;

@@ -44,7 +44,7 @@ int main(  ) {
     //Event handler
     SDL_Event e;
     float ripple = 0.03;
-    float noise = 0.4;
+    float noise = 0.3;
     float brightness = 1;
     float contrast = 1;
     float color = 1;
@@ -65,29 +65,29 @@ int main(  ) {
             //User requests quit
             if (e.type == SDL_QUIT) {
                 quit = true;
-                powerOff(crt);
+                //powerOff(crt);
                 break;
             } else if( e.type == SDL_KEYDOWN ) {
                 switch (e.key.keysym.sym) {
                     case SDLK_5:
                         contrast += 0.01;
-                        if(contrast > 2) contrast = 2;
+                        if(contrast > 1) contrast = 1;
                         break;
                     case SDLK_t:
                         contrast -= 0.01;
                         if(contrast < 0) contrast = 0;
                         break;
-                    case SDLK_6:
+                    case SDLK_y:
                         brightness += 0.01;
                         if(brightness > 1) brightness = 1;
                         break;
-                    case SDLK_y:
+                    case SDLK_6:
                         brightness -= 0.01;
                         if(brightness < 0) brightness = 0;
                         break;
                     case SDLK_7:
                         color += 0.01;
-                        if (color > 2) color = 2;
+                        if (color > 1.5) color = 1.5;
                         break;
                     case SDLK_u:
                         color -= 0.01;
@@ -106,7 +106,8 @@ int main(  ) {
                         if (noise < 0) noise = 0;
                         break;
                     case SDLK_RIGHT:
-                        if (noise < 1.5) noise += 0.01;
+                        noise += 0.01;
+                        if (noise > 1) noise = 1;
                         break;
                     case SDLK_z:
                         crt.resetFrameStats();
@@ -136,6 +137,9 @@ int main(  ) {
                     case SDLK_r:
                         crt.setBlend(false);
                         break;
+                    case SDLK_l:
+                        crt.setLoop(!crt.getLoop());
+                        break;
                     case SDLK_PAGEUP:
                         crt.Up();
                         crt.loadMedia();
@@ -147,12 +151,10 @@ int main(  ) {
                     case SDLK_END:
                         powerOff(crt);
                         crt.noise(true);
-                        crt.setBlend(true);
+                        crt.setBlend(false);
                         crt.setHRipple(true);
                         crt.setVRipple(true);
                         crt.setSupply(1);
-                        crt.Dw();
-                        crt.Up();
                         crt.loadMedia();
                         break;
                     default:

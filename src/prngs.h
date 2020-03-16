@@ -5,6 +5,8 @@
 #ifndef INC_02_GETTING_AN_IMAGE_ON_THE_SCREEN_PRNGS_H
 #define INC_02_GETTING_AN_IMAGE_ON_THE_SCREEN_PRNGS_H
 
+
+
 static volatile uint64_t prngState[2];
 
 static inline uint64_t randLCG() {
@@ -47,4 +49,7 @@ static inline uint64_t xorshift128plus() {
     prngState[1] = x ^ y ^ (x >> 17) ^ (y >> 26);
     return prngState[1] + y;
 }
+
+
+
 #endif //INC_02_GETTING_AN_IMAGE_ON_THE_SCREEN_PRNGS_H
