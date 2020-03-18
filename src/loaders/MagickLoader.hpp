@@ -11,6 +11,7 @@ class MagickLoader: public Loader {
 public:
     bool GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) override;
     bool GetSurface(SDL_Surface* surface);
+    static void image2surface( Magick::Image& img, SDL_Surface* surface );
 private:
     static void magickLoad(std::string path, SDL_Surface* surface);
 };
@@ -24,24 +25,13 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
         newSize.aspect(true);
         image.interpolate(BicubicInterpolatePixel );
         image.resize(newSize);
-        int imgWidth = image.columns();
-        int imgHeight = image.rows();
 
         image.modifyImage();
-        Uint32 pixel = 0;
-        for ( int row = 0; row < imgHeight; row++ ) {
-            for (int column = 0; column < imgWidth; column++) {
-                ColorRGB px = image.pixelColor(column, row);
-                Uint32 r = px.red()   * 0xFF;
-                Uint32 g = px.green() * 0xFF;
-                Uint32 b = px.blue()  * 0xFF;
-                toPixel(&pixel, &r, &g, &b);
-                put_pixel32( surface, column, row, pixel );
-            }
-        }
+        image2surface( image, surface );
+
     }
     catch( Exception &error_ ) {
-        SDL_Log("Caught exception: %prngState", error_.what());
+        SDL_Log("Caught exception: %s", error_.what());
     }
 
 }
@@ -57,7 +47,7 @@ bool MagickLoader::GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) {
     SDL_FillRect( gX, nullptr,  0x00 );
 
     if( gX == nullptr ) {
-        SDL_Log( "Unable to allocate image %s! SDL Error: %prngState\n", imagePath.c_str(), SDL_GetError() );
+        SDL_Log( "Unable to allocate image %s! SDL Error: %s\n", imagePath.c_str(), SDL_GetError() );
     } else {
         magickLoad(imagePath, gX);
         SDL_GetClipRect( gX, &rect );
@@ -88,7 +78,7 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
     SDL_FillRect( gX, nullptr,  0x00 );
 
     if( gX == nullptr ) {
-        SDL_Log( "Unable to allocate image %s! SDL Error: %prngState\n", imagePath.c_str(), SDL_GetError() );
+        SDL_Log( "Unable to allocate image %s! SDL Error: %s\n", imagePath.c_str(), SDL_GetError() );
     } else {
         magickLoad(imagePath, gX);
         SDL_GetClipRect( gX, &rect );
@@ -106,6 +96,24 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
     }
 
     return gX != nullptr;
+}
+
+void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
+    using namespace Magick;
+
+    int imgWidth = image.columns();
+    int imgHeight = image.rows();
+    Uint32 pixel = 0;
+    for ( int row = 0; row < imgHeight; row++ ) {
+        for (int column = 0; column < imgWidth; column++) {
+            ColorRGB px = image.pixelColor(column, row);
+            Uint32 r = px.red()   * 0xFF;
+            Uint32 g = px.green() * 0xFF;
+            Uint32 b = px.blue()  * 0xFF;
+            toPixel(&pixel, &r, &g, &b);
+            put_pixel32( surface, column, row, pixel );
+        }
+    }
 }
 
 #endif //SDL_CRT_FILTER_MAGICKLOADER_HPP

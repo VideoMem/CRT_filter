@@ -4839,7 +4839,7 @@ namespace Catch {
         inline std::string getAnnotation(   Class cls,
                                             std::string const& annotationName,
                                             std::string const& testCaseName ) {
-            NSString* selStr = [[NSString alloc] initWithFormat:@"Catch_%s_%prngState", annotationName.c_str(), testCaseName.c_str()];
+            NSString* selStr = [[NSString alloc] initWithFormat:@"Catch_%s_%s", annotationName.c_str(), testCaseName.c_str()];
             SEL sel = NSSelectorFromString( selStr );
             arcSafeRelease( selStr );
             id value = performOptionalSelector( cls, sel );

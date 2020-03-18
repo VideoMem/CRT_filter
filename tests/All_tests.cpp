@@ -6,6 +6,7 @@
 #include "ResourceMapTest.hpp"
 #include "BaseAppTests.hpp"
 #include "MagickAppTests.hpp"
+#include "MagickOSDTests.hpp"
 
 
 

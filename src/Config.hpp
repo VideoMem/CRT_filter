@@ -35,6 +35,8 @@ public:
             channels.Add(str[i],  path + "/" + str[i], type);
         return count;
     }
+
+
 };
 
 #endif //SDL_CRT_FILTER_CONFIG_HPP

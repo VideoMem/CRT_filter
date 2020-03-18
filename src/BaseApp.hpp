@@ -8,7 +8,7 @@ class BaseApp {
 public:
     void SDL2_Init() {
         if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
-            SDL_Log( "SDL could not initialize! SDL_Error: %prngState\n", SDL_GetError() );
+            SDL_Log( "SDL could not initialize! SDL_Error: %s\n", SDL_GetError() );
         } else {
             //Create window
             gWindow = SDL_CreateWindow( "SDL CRT Filter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,

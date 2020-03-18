@@ -17,7 +17,7 @@ bool LazyLoader::GetSurface(SDL_Surface* surface) {
 
     //Loads channel still image
     std::string imagePath = current().GetUri();
-    //SDL_Log( "Loading channel [%d] -> %prngState", Pos(), imagePath.c_str() );
+    //SDL_Log( "Loading channel [%d] -> %s", Pos(), imagePath.c_str() );
     gX = SDL_LoadBMP( imagePath.c_str() );
 
     if( gX == nullptr ) {
