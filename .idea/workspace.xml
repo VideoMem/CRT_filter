@@ -14,17 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/resources/fonts/Vintage2513ROM.ttf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/filters/OSD.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/MagickOSDTests.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/LazySDL2.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/LazySDL2.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/catch.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/MagickOSDTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickOSDTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -99,7 +91,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.SDL2 Magick++ OSD (1)">
+  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -231,7 +223,7 @@
       <workItem from="1583238929528" duration="4143000" />
       <workItem from="1583885764193" duration="640000" />
       <workItem from="1583886702469" duration="2406000" />
-      <workItem from="1584343235645" duration="21483000" />
+      <workItem from="1584343235645" duration="28445000" />
     </task>
     <servers />
   </component>

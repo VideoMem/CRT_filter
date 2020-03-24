@@ -24,4 +24,5 @@ TEST_CASE( "SDL2 Magick++ OSD", "[OSD][SDL2][Magick++]") {
         SDL_FreeSurface( sample );
     }
 }
+
 #endif //SDL_CRT_FILTER_MAGICKOSDTESTS_HPP
