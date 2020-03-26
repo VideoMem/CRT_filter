@@ -100,17 +100,19 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
 
 void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
     using namespace Magick;
-
-    int imgWidth = image.columns();
-    int imgHeight = image.rows();
+    SDL_Rect dstsize;
+    SDL_GetClipRect( surface, &dstsize );
+    size_t imgWidth  = image.columns() > (size_t) dstsize.w? dstsize.w : image.columns();
+    size_t imgHeight = image.rows() > (size_t) dstsize.h   ? dstsize.h : image.rows();
     Uint32 pixel = 0;
-    for ( int row = 0; row < imgHeight; row++ ) {
-        for (int column = 0; column < imgWidth; column++) {
-            ColorRGB px = image.pixelColor(column, row);
+    for ( size_t row = 0; row < imgHeight; row++ ) {
+        for (size_t column = 0; column < imgWidth; column++) {
+            ColorRGB px = image.pixelColor( column, row );
             Uint32 r = px.red()   * 0xFF;
             Uint32 g = px.green() * 0xFF;
             Uint32 b = px.blue()  * 0xFF;
-            toPixel(&pixel, &r, &g, &b);
+            Uint32 a = 0xFF - (px.alpha() * 0xFF);
+            toPixel( &pixel, &r, &g, &b , &a);
             put_pixel32( surface, column, row, pixel );
         }
     }

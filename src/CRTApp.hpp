@@ -7,6 +7,7 @@
 #include <filters/BCS.hpp>
 #include <filters/Sync.hpp>
 #include <filters/Deflection.hpp>
+#include <generators/MagickOSD.hpp>
 #include <BaseApp.hpp>
 
 #define rand() xorshift()
@@ -70,6 +71,7 @@ class CRTApp : public BaseApp {
     protected:
     void plane(Uint8* delay, Uint8* power);
 
+    void initOSD();
     static void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
     void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
 
@@ -85,7 +87,10 @@ class CRTApp : public BaseApp {
     bool initialized = false;
     void postInit() {
         if(!initialized) {
-            createBuffers(); loadMedia();
+            createBuffers();
+            loadMedia();
+            osdFilter.clear();
+            initOSD();
             noiseFilter = new NoiseFilter<SDL_Surface>( *gScreenSurface->format );
             deflectionFilter = new DeflectionFilter<SDL_Surface> ( *gScreenSurface->format );
             initialized=true;
@@ -117,6 +122,7 @@ class CRTApp : public BaseApp {
     SyncFilter<SDL_Surface> syncFilter;
     bool loop;
     DeflectionFilter<SDL_Surface>* deflectionFilter;
+    MagickOSD osdFilter;
 };
 
 CRTApp::CRTApp(Loader& l):BaseApp(l) {
@@ -368,15 +374,6 @@ void CRTApp::fade(SDL_Surface* surface) {
 void CRTApp::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) {
     if (addBlend) {
         Loader::blank(dest);
-/*
-        for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
-            for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
-                int persist = Loader::get_pixel32(last, x, y);
-                int pxno = (persist & Loader::cmask) | PERSISTENCE_ALPHA;
-                Loader::put_pixel32(last, x, y, pxno);
-            }
-        }
-*/
         SDL_SetSurfaceAlphaMod(last, PERSISTENCE_ALPHA / 2);
         SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_BLEND);
         SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
@@ -523,6 +520,22 @@ void CRTApp::update()  {
     redraw();
     ++warp;
     if((warp % 100) == 0) logStats();
+}
+
+void CRTApp::initOSD() {
+    SDL_BlitSurface( gFrame, nullptr , gBuffer, nullptr );
+
+    osdFilter.centerXtxt(Config::SCREEN_HEIGHT /2, "> INITIALIZING <");
+    SDL_SetSurfaceAlphaMod( gAux, 0xFF );
+    osdFilter.getSurface(gAux);
+    SDL_Surface* osdOverlay = SDL_ConvertSurface(gAux, gScreenSurface->format, 0 );
+    SDL_SetColorKey( osdOverlay, SDL_TRUE,
+            SDL_MapRGB( osdOverlay->format, 0, 0, 0 ) );
+    SDL_SetSurfaceBlendMode( osdOverlay, SDL_BLENDMODE_BLEND );
+
+    SDL_BlitSurface ( osdOverlay, nullptr, gBuffer, nullptr );
+    SDL_BlitScaled( gBuffer, nullptr, gScreenSurface, nullptr);
+    redraw();
 }
 
 

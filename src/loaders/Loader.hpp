@@ -14,10 +14,12 @@ public:
     static SDL_Surface *AllocateSurface(int w, int h, SDL_PixelFormat &format);
     //static SDL_Surface* AllocateSurface(int w, int h);
     static SDL_Rect BiggestSurfaceClipRect(SDL_Surface* src, SDL_Surface* dst);
+    static SDL_Rect SmallerBlitArea( SDL_Surface* src, SDL_Surface* dst);
+    inline static void SurfacePixelsCopy( SDL_Surface* src, SDL_Surface* dst );
     static bool CompareSurface(SDL_Surface* src, SDL_Surface* dst);
 
-    static Uint32 get_pixel32( SDL_Surface *surface, int x, int y);
-    static void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel);
+    static inline Uint32 get_pixel32( SDL_Surface *surface, int x, int y);
+    static inline void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel);
 
     static inline void blank(SDL_Surface *surface) {
         SDL_FillRect(surface, nullptr, amask);
@@ -35,8 +37,14 @@ public:
         *pixel = ((*B << 16) + (*G << 8) + *R) | amask;
     }
 
+    inline static void toPixel(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B, Uint32 *A) {
+        *pixel = 0;
+        *pixel = ((*A << 24) + (*B << 16) + (*G << 8) + *R);
+        //if (*A == 0) * pixel = 0x01F000F0;
+    }
+
     inline static float  fromChar(int32_t* c) { return (float) *c / 0xFF; }
-    inline static float  fromChar(Uint32* c) { return (float) *c / 0xFF; }
+    inline static float  fromChar(Uint32* c)  { return (float) *c / 0xFF; }
     inline static Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
     inline static float  hardSaturate(float c) {
         return c;
@@ -164,6 +172,23 @@ inline void Loader::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line
     dstrect.w = width;
     dstrect.h = 1;
     SDL_BlitScaled(src, &srcrect, dst, &dstrect);
+}
+
+SDL_Rect Loader::SmallerBlitArea(SDL_Surface *src, SDL_Surface *dst) {
+    SDL_Rect srcsize;
+    SDL_Rect dstsize;
+    SDL_Rect retsize;
+    SDL_GetClipRect(src, &srcsize);
+    SDL_GetClipRect(dst, &dstsize);
+    retsize.x = srcsize.x < dstsize.x ? srcsize.x: dstsize.x;
+    retsize.y = srcsize.y < dstsize.y ? srcsize.y: dstsize.y;
+
+    return retsize;
+}
+
+void Loader::SurfacePixelsCopy(SDL_Surface *src, SDL_Surface *dst) {
+    size_t area = src->w * src->h * sizeof(Uint32);
+    memcpy( dst->pixels , src->pixels, area );
 }
 
 #endif //SDL_CRT_FILTER_LOADER_HPP

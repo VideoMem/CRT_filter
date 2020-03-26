@@ -7,6 +7,7 @@
 #include "BaseAppTests.hpp"
 #include "MagickAppTests.hpp"
 #include "MagickOSDTests.hpp"
+#include "BlitterBenchs.hpp"
 
 
 
