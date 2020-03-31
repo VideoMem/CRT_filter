@@ -14,7 +14,7 @@ template <typename A>
 class NoiseFilter: public Filter<A> {
 public:
     void fill(A* dest);
-    void run(A* surface, A* dest, float& gnoise);
+    void run(A* surface, A* dest, double& gnoise);
     NoiseFilter(SDL_PixelFormat& format) {
         fmt = format;
 //        SDL_Surface* background = Loader::AllocateSurface(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, format);
@@ -39,9 +39,9 @@ protected:
     std::vector<A*> gBack;
     SDL_PixelFormat fmt;
     size_t count = 0;
-    static float simpleLoPass(std::deque<float>& samples, size_t range ) {
+    static double simpleLoPass(std::deque<double>& samples, size_t range ) {
         auto it = samples.begin();
-        float sum = 0;
+        double sum = 0;
         while(samples.size() > range) {
             samples.pop_front();
         }
@@ -59,11 +59,11 @@ void NoiseFilter<A>::fill(A *dest) {
     SDL_FillRect(dest, nullptr, 0x000000);
     Uint32 BiasR, BiasG, BiasB, pxno;
     int32_t rndL, rndDb, rndDr;
-    float luma = 0, Db = 0, Dr = 0;
-    std::deque<float> avgY, avgDb, avgDr;
-    rndL  = (rand() & 0xFF);
-    rndDb = (rand() & 0xFF);
-    rndDr = (rand() & 0xFF);
+    double luma = 0, Db = 0, Dr = 0;
+    std::deque<double> avgY, avgDb, avgDr;
+    rndL  = rand() & 0xFF;
+    rndDb = rand() & 0xFF;
+    rndDr = rand() & 0xFF;
     avgY.push_front(Loader::fromChar(&rndL));
     avgDb.push_front(Loader::fromChar(&rndDb));
     avgDr.push_front(Loader::fromChar(&rndDr));
@@ -103,10 +103,9 @@ void NoiseFilter<A>::fill(A *dest) {
 }
 
 template<typename A>
-void NoiseFilter<A>::run(A *surface, A *dest, float& gnoise) {
+void NoiseFilter<A>::run(A *surface, A *dest, double& gnoise) {
     size_t max = gBack.size();
     size_t select = count;
-    //SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     Loader::SurfacePixelsCopy( surface, dest );
     SDL_SetSurfaceAlphaMod(gBack[select], 0xFF * gnoise);
     SDL_BlitSurface(gBack[select], nullptr, dest, nullptr);

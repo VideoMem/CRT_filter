@@ -21,19 +21,19 @@ class CRTApp {
         CRTApp();
         ~CRTApp();
 
-    void setRipple(float r) { ripple = r; }
-    void setNoise(float r) { gnoise = r; }
+    void setRipple(double r) { ripple = r; }
+    void setNoise(double r) { gnoise = r; }
     void setPerfStats(bool f) { perf_stats = f; }
     void noise(bool f) { addNoise = f; }
     void setVRipple(bool f) { addVRipple = f; }
     void setHRipple(bool f) { addHRipple = f; }
     void setBlend(bool f) { addBlend = f; }
     void setGhost(bool f) { addGhost =f; }
-    void setSupply(float v) { supplyV = v; }
-    void setBrightness(float v) { brightness = v; }
-    void setContrast(float v) { contrast = v; }
-    void setFocus(float v) { focus = v; }
-    void setColor(float v) { color = v; }
+    void setSupply(double v) { supplyV = v; }
+    void setBrightness(double v) { brightness = v; }
+    void setContrast(double v) { contrast = v; }
+    void setFocus(double v) { focus = v; }
+    void setColor(double v) { color = v; }
     void setPlane() { }
     inline double frameRate(double *seconds);
     inline Uint32 wTime() { double seconds; worldTime = 1000 * warp / frameRate(&seconds); return worldTime; }
@@ -42,7 +42,7 @@ class CRTApp {
     void focusNoise(SDL_Surface* surface);
     void shutdown();
     void fade( SDL_Surface* surface );
-    float getSupply() { return supplyV; }
+    double getSupply() { return supplyV; }
     int  randomSlip() { return (rand() & 3) == 0? -3: 1; }
     void resetFrameStats();
 
@@ -52,13 +52,13 @@ class CRTApp {
     void invert( SDL_Surface *surface);
     void desaturate(SDL_Surface *surface, SDL_Surface *dest );
     void noise( SDL_Surface *surface, SDL_Surface *dest  );
-    float rippleBias(int sync);
-    float rippleBias() { return rippleBias(warp); }
+    double rippleBias(int sync);
+    double rippleBias() { return rippleBias(warp); }
     void HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void ghost( SDL_Surface *surface, SDL_Surface *dest, int delay, Uint8 power );
     void blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest );
-    void strech( SDL_Surface *surface, float scale);
+    void strech( SDL_Surface *surface, double scale);
     void channelUp() { int size = sizeof(channels) / sizeof(channels[0]); ++channel; if(channel >= size) channel = 0; loadMedia(); }
     void channelDw() { int size = sizeof(channels) / sizeof(channels[0]);--channel; if(channel < 0 ) channel = size -1; loadMedia(); }
 
@@ -69,14 +69,14 @@ class CRTApp {
     void plane(Uint8* delay, Uint8* power);
 
     void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
-    void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
+    void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, double scale);
     inline void comp    (Uint32* pixel, Uint32* R, Uint32* G, Uint32* B);
     inline void toPixel (Uint32* pixel, Uint32* R, Uint32* G, Uint32* B);
-    inline void toLuma  (float* luma , Uint32* R, Uint32* G, Uint32* B);
-    inline void toChroma(float* Db, float* Dr , Uint32* R, Uint32* G, Uint32* B);
-    inline void toRGB   (float* luma , float* Db, float* Dr, Uint32* R, Uint32* G, Uint32* B);
-    inline Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
-    inline float  fromChar(Uint32* c) { return (float) *c / 0xFF; }
+    inline void toLuma  (double* luma , Uint32* R, Uint32* G, Uint32* B);
+    inline void toChroma(double* Db, double* Dr , Uint32* R, Uint32* G, Uint32* B);
+    inline void toRGB   (double* luma , double* Db, double* Dr, Uint32* R, Uint32* G, Uint32* B);
+    inline Uint32 toChar (double* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
+    inline double  fromChar(Uint32* c) { return (double) *c / 0xFF; }
 
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         static const Uint32 rmask = 0xff000000;
@@ -105,21 +105,21 @@ class CRTApp {
     void close();
     bool loadMedia();
     int warp;
-    float ripple;
-    float gnoise;
+    double ripple;
+    double gnoise;
     bool perf_stats;
     bool addNoise;
     bool addVRipple;
     bool addHRipple;
     bool addBlend;
     bool addGhost;
-    float supplyV;
-    float lastR;
+    double supplyV;
+    double lastR;
     int channel;
-    float brightness;
-    float contrast;
-    float color;
-    float focus;
+    double brightness;
+    double contrast;
+    double color;
+    double focus;
     int planeidx;
     Uint32 worldTime;
 };
@@ -196,7 +196,7 @@ void CRTApp::dot(SDL_Surface *surface) {
     SDL_FillRect(gBack, &size, cmask);
 }
 
-void CRTApp::strech(SDL_Surface *surface, float scale) {
+void CRTApp::strech(SDL_Surface *surface, double scale) {
     SDL_Rect src, dst;
     SDL_GetClipRect(gBack, &src);
     SDL_GetClipRect(surface, &dst);
@@ -249,7 +249,7 @@ inline void CRTApp::comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
     *R = *pixel & rmask ;
 }
 
-inline void CRTApp::toLuma(float *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
+inline void CRTApp::toLuma(double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
     *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
 }
 
@@ -257,15 +257,15 @@ inline void CRTApp::toPixel(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
     *pixel = ((*B << 16) + (*G << 8) + *R) | amask;
 }
 
-inline void CRTApp::toChroma(float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+inline void CRTApp::toChroma(double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
     *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
     *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
 }
 
-inline void CRTApp::toRGB(float *luma, float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
-    float fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
-    float fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
-    float fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
+inline void CRTApp::toRGB(double *luma, double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+    double fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
+    double fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
+    double fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
     *R = toChar(&fR);
     *G = toChar(&fG);
     *B = toChar(&fB);
@@ -274,7 +274,7 @@ inline void CRTApp::toRGB(float *luma, float *Db, float *Dr, Uint32 *R, Uint32 *
 void CRTApp::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
     SDL_FillRect(dest, NULL, 0x000000);
     Uint32 B, G, R, pixel, npx;
-    float luma;
+    double luma;
     for(int x=0; x< SCREEN_WIDTH; ++x)
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
             pixel = get_pixel32(surface, x, y);
@@ -291,7 +291,7 @@ void CRTApp::noise(SDL_Surface *surface, SDL_Surface *dest  ) {
     if(addNoise) {
         SDL_FillRect(dest, NULL, 0x000000);
         Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
-        float luma, Db, Dr, noise;
+        double luma, Db, Dr, noise;
         for (int y = 0; y < SCREEN_HEIGHT; ++y) {
             int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
             for (int x = 0; x < SCREEN_WIDTH; ++x) {
@@ -321,12 +321,12 @@ void CRTApp::noise(SDL_Surface *surface, SDL_Surface *dest  ) {
     }
 }
 
-float CRTApp::rippleBias(int sync) {
+double CRTApp::rippleBias(int sync) {
     int line = sync % SCREEN_HEIGHT;
-    float screenpos = (float) line / SCREEN_HEIGHT;
-    float vt = abs(sin(M_PI *  screenpos));
-    float ret = vt > lastR? vt: lastR;
-    float correct = 1 - (10e-4 * ripple);
+    double screenpos = (double) line / SCREEN_HEIGHT;
+    double vt = abs(sin(M_PI *  screenpos));
+    double ret = vt > lastR? vt: lastR;
+    double correct = 1 - (10e-4 * ripple);
     lastR = ret * correct;
     return ret ;
 }
@@ -343,15 +343,15 @@ inline void CRTApp::blitLine(SDL_Surface *src, SDL_Surface *dst, int line, int d
     SDL_BlitScaled(src, &srcrect, dst, &dstrect);
 }
 
-inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, float scale) {
+inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, double scale) {
     SDL_Rect srcrect;
     SDL_Rect dstrect;
     srcrect.x = 0;
     srcrect.y = line;
     srcrect.w = SCREEN_WIDTH;
     srcrect.h = 1;
-    int width = round((float)SCREEN_WIDTH * scale);
-    int center = round( (float) (SCREEN_WIDTH - width) / 2);
+    int width = round((double)SCREEN_WIDTH * scale);
+    int center = round( (double) (SCREEN_WIDTH - width) / 2);
     dstrect.x = center;
     dstrect.y = line;
     dstrect.w = width;
@@ -364,7 +364,7 @@ void CRTApp::HRipple(SDL_Surface *surface, SDL_Surface *dest, int warp ) {
         blank(dest);
         int sync = warp;
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
-            float scale = ((0.337 * supplyV ) + 0.663) * rippleBias(sync);
+            double scale = ((0.337 * supplyV ) + 0.663) * rippleBias(sync);
             ++sync;
             blitLineScaled(surface, dest, y, scale);
         }
@@ -378,9 +378,9 @@ void CRTApp::VRipple(SDL_Surface *surface, SDL_Surface *dest, int warp ) {
         int noiseSlip = round(((rand() & 0xFF) / 0xF0) * gnoise);
         int sync = warp;
         for(int y=0; y< SCREEN_HEIGHT; ++y) {
-            float scale = (supplyV * rippleBias(sync));
-            int height = round((float) SCREEN_HEIGHT * scale);
-            int center = round((float) (SCREEN_HEIGHT - height) / 2);
+            double scale = (supplyV * rippleBias(sync));
+            int height = round((double) SCREEN_HEIGHT * scale);
+            int center = round((double) (SCREEN_HEIGHT - height) / 2);
             ++sync;
             int newy = round(y * scale) + center + noiseSlip;
             if (newy > 0 && newy < SCREEN_HEIGHT) {
@@ -442,7 +442,7 @@ void CRTApp::blend(SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) {
 void CRTApp::plane(Uint8 *delay, Uint8 *power) {
     int mag = PLANE_SPEED;
     int position = (warp % mag) - (mag /2);
-    float height2 = pow(mag/2,2);
+    double height2 = pow(mag/2,2);
     auto distance = sqrt(height2 + pow(position, 2));
     auto fpow = 1/pow(distance/ sqrt(height2),2);
     *power = fpow * 64;

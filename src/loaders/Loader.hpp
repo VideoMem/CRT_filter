@@ -43,32 +43,32 @@ public:
         //if (*A == 0) * pixel = 0x01F000F0;
     }
 
-    inline static float  fromChar(int32_t* c) { return (float) *c / 0xFF; }
-    inline static float  fromChar(Uint32* c)  { return (float) *c / 0xFF; }
-    inline static Uint32 toChar (float* comp) { return *comp < 1? round(0xFF **comp): 0xFF; }
-    inline static float  hardSaturate(float c) {
+    inline static double  fromChar(int32_t* c) { return (double) *c / 0xFF; }
+    inline static double  fromChar(Uint32* c)  { return (double) *c / 0xFF; }
+    inline static Uint32 toChar (double* comp) { return *comp < 1? 0xFF * *comp: 0xFF; }
+    inline static double  hardSaturate(double c) {
         return c;
     }
 
-    inline static void toLuma(float *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
+    inline static void toLuma(double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
         *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
     }
 
-    inline static void toChroma(float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+    inline static void toChroma(double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
         *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
     }
 
-    inline static void toRGB(float *luma, float *Db, float *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
-        float fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
-        float fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
-        float fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
+    inline static void toRGB(const double *luma, const double *Db, const double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+        double fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
+        double fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
+        double fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
         *R = toChar(&fR);
         *G = toChar(&fG);
         *B = toChar(&fB);
     }
 
-    inline static void blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, float& scale);
+    inline static void blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, double& scale);
 
     inline static void blitLine(SDL_Surface *src, SDL_Surface *dst, int& line, int& dstline) {
         SDL_Rect srcrect;
@@ -158,15 +158,15 @@ SDL_Rect Loader::BiggestSurfaceClipRect(SDL_Surface *src, SDL_Surface *dst) {
     return dstsize;
 }
 
-inline void Loader::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, float& scale) {
+inline void Loader::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, double& scale) {
     SDL_Rect srcrect;
     SDL_Rect dstrect;
     srcrect.x = 0;
     srcrect.y = line;
     srcrect.w = Config::SCREEN_WIDTH;
     srcrect.h = 1;
-    int width  = round( (float) Config::SCREEN_WIDTH * scale );
-    int center = round( (float) (Config::SCREEN_WIDTH - width) / 2 );
+    int width  = round( (double) Config::SCREEN_WIDTH * scale );
+    int center = round( (double) (Config::SCREEN_WIDTH - width) / 2 );
     dstrect.x = center;
     dstrect.y = line;
     dstrect.w = width;

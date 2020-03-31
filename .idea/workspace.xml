@@ -16,13 +16,16 @@
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTModel.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTModel.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/filters/BCS.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/filters/Deflection.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Deflection.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/filters/Noise.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Noise.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/NoiseTBB.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/NoiseTBB.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/Sync.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Sync.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generators/Ripple.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generators/Ripple.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -234,7 +237,7 @@
       <workItem from="1583885764193" duration="640000" />
       <workItem from="1583886702469" duration="2406000" />
       <workItem from="1584343235645" duration="88426000" />
-      <workItem from="1585481991405" duration="17956000" />
+      <workItem from="1585481991405" duration="23209000" />
     </task>
     <servers />
   </component>

@@ -22,8 +22,8 @@ public:
         SDL_Surface *b = dst;
 
         Uint32 rnd, snow, pixel, R, G, B, BiasR, BiasG, BiasB, pxno, chrnoise;
-        float luma, Db, Dr, noise;
-        float gnoise = 0.3, color = 1, brightness =1, contrast = 1;
+        double luma, Db, Dr, noise;
+        double gnoise = 0.3, color = 1, brightness =1, contrast = 1;
 
         //int noiseSlip = round(((rand() & 0xFF) / 0x50) * gnoise);
         for( size_t i=r.begin(); i!=r.end(); ++i ) {
@@ -69,7 +69,7 @@ public:
             ApplyFilter(src, dst), ap);
     }
     void fill(A* surface, A* dest);
-    void run(A* surface, A* dest, float& gnoise);
+    void run(A* surface, A* dest, double& gnoise);
     NoiseFilter() {
         SDL_Surface* background = Loader::AllocateSurface(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT);
         SDL_FillRect(background, nullptr, 0x000000);
@@ -98,7 +98,7 @@ void NoiseFilter<A>::fill(A *surface, A *dest) {
     Uint32 BiasR, BiasG, BiasB, pxno;
     int32_t rndL, rndDb, rndDr;
     Uint32 pixel, snow, R, G, B, chrnoise;
-    float luma = 0, Db = 0, Dr = 0;
+    double luma = 0, Db = 0, Dr = 0;
     for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
             rndL  = (rand() & 0xFF);
@@ -122,7 +122,7 @@ void NoiseFilter<A>::fill(A *surface, A *dest) {
 }
 
 template<typename A>
-void NoiseFilter<A>::run(A *surface, A *dest, float& gnoise) {
+void NoiseFilter<A>::run(A *surface, A *dest, double& gnoise) {
     //uint64_t rnd = rand();
     size_t max = gBack.size();
     size_t select = count; //rnd * max / std::numeric_limits<uint64_t>::max();

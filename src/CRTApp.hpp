@@ -21,19 +21,19 @@ class CRTApp : public BaseApp {
         explicit CRTApp(Loader& l);
         ~CRTApp();
 
-    void setRipple(float r) { ripple = r; }
-    void setNoise(float r) { gnoise = r; }
+    void setRipple(double r) { ripple = r; }
+    void setNoise(double r) { gnoise = r; }
     void setPerfStats(bool f) { perf_stats = f; }
     void noise(bool f) { addNoise = f; }
     void setVRipple(bool f) { addVRipple = f; }
     void setHRipple(bool f) { addHRipple = f; }
     void setBlend(bool f) { addBlend = f; }
     void setGhost(bool f) { addGhost =f; }
-    void setSupply(float v) { supplyV = v; }
-    void setBrightness(float v) { brightness = v; }
-    void setContrast(float v) { contrast = v; }
-    void setFocus(float v) { focus = v; }
-    void setColor(float v) { color = v; }
+    void setSupply(double v) { supplyV = v; }
+    void setBrightness(double v) { brightness = v; }
+    void setContrast(double v) { contrast = v; }
+    void setFocus(double v) { focus = v; }
+    void setColor(double v) { color = v; }
     void setLoop(bool l) { loop = l; }
     bool getLoop() { return loop; }
 
@@ -42,7 +42,7 @@ class CRTApp : public BaseApp {
     inline Uint32 wTime() { double seconds; worldTime = 1000 * warp / frameRate(&seconds); return worldTime; }
     inline void blank(SDL_Surface* surface);
     void shutdown();
-    float getSupply() { return supplyV; }
+    double getSupply() { return supplyV; }
     int  randomSlip() { return (rand() & 3) == 0? -3: 1; }
     void resetFrameStats();
 
@@ -50,15 +50,15 @@ class CRTApp : public BaseApp {
     void desaturate(SDL_Surface *surface, SDL_Surface *dest );
     void noise( SDL_Surface *surface, SDL_Surface *dest  );
     void bcs( SDL_Surface *surface, SDL_Surface *dest );
-    float rippleBias(int sync);
-    //float rippleBias() { return rippleBias(warp); }
+    double rippleBias(int sync);
+    //double rippleBias() { return rippleBias(warp); }
     void HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void ghost( SDL_Surface *surface, SDL_Surface *dest, int delay, Uint8 power );
     void blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest );
 
-    void strech( SDL_Surface *surface, float scale);
-    void strech( float scale ) { strech( gScreenSurface, scale );}
+    void strech( SDL_Surface *surface, double scale);
+    void strech( double scale ) { strech( gScreenSurface, scale );}
     void dot(SDL_Surface* surface);
     void dot() { dot(gScreenSurface); }
     void focusNoise(SDL_Surface* surface);
@@ -79,7 +79,7 @@ protected:
 
     void initOSD();
     static void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
-    static void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
+    static void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, double scale);
 
     SDL_Surface* gFrame  = nullptr;
     SDL_Surface* gBuffer = nullptr;
@@ -106,21 +106,21 @@ protected:
     void close();
 
     int warp;
-    float ripple;
-    float gnoise;
+    double ripple;
+    double gnoise;
     bool perf_stats;
     bool addNoise;
     bool addVRipple;
     bool addHRipple;
     bool addBlend;
     bool addGhost;
-    float supplyV;
-    float lastR;
+    double supplyV;
+    double lastR;
     int channel;
-    float brightness;
-    float contrast;
-    float color;
-    float focus;
+    double brightness;
+    double contrast;
+    double color;
+    double focus;
     int planeidx;
     Uint32 worldTime;
     NoiseFilter<SDL_Surface>* noiseFilter;
@@ -202,7 +202,7 @@ void CRTApp::dot(SDL_Surface *surface) {
     SDL_FillRect(gBack, &size, Loader::cmask);
 }
 
-void CRTApp::strech(SDL_Surface *surface, float scale) {
+void CRTApp::strech(SDL_Surface *surface, double scale) {
     SDL_Rect src, dst;
     SDL_GetClipRect(gBack, &src);
     SDL_GetClipRect(surface, &dst);
@@ -238,7 +238,7 @@ void CRTApp::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
 
     Loader::blank(dest);
     Uint32 B, G, R, pixel, npx;
-    float luma;
+    double luma;
     for(int x=0; x< Config::SCREEN_WIDTH; ++x)
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
             pixel = Loader::get_pixel32(surface, x, y);
@@ -275,12 +275,12 @@ void CRTApp::bcs( SDL_Surface *surface, SDL_Surface *dest  ) {
 }
 
 
-float CRTApp::rippleBias(int sync) {
+double CRTApp::rippleBias(int sync) {
     int line = sync % Config::SCREEN_HEIGHT;
-    float screenpos = (float) line / Config::SCREEN_HEIGHT;
-    float vt = abs(sin(M_PI *  screenpos));
-    float ret = vt > lastR? vt: lastR;
-    float correct = 1 - (10e-4 * ripple);
+    double screenpos = (double) line / Config::SCREEN_HEIGHT;
+    double vt = abs(sin(M_PI *  screenpos));
+    double ret = vt > lastR? vt: lastR;
+    double correct = 1 - (10e-4 * ripple);
     lastR = ret * correct;
     return ret ;
 }
@@ -297,15 +297,15 @@ inline void CRTApp::blitLine(SDL_Surface *src, SDL_Surface *dst, int line, int d
     SDL_BlitSurface(src, &srcrect, dst, &dstrect);
 }
 
-inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, float scale) {
+inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, double scale) {
     SDL_Rect srcrect;
     SDL_Rect dstrect;
     srcrect.x = 0;
     srcrect.y = line;
     srcrect.w = Config::SCREEN_WIDTH;
     srcrect.h = 1;
-    int width = round((float)Config::SCREEN_WIDTH * scale);
-    int center = round( (float) (Config::SCREEN_WIDTH - width) / 2);
+    int width = round((double)Config::SCREEN_WIDTH * scale);
+    int center = round( (double) (Config::SCREEN_WIDTH - width) / 2);
     dstrect.x = center;
     dstrect.y = line;
     dstrect.w = width;
@@ -324,7 +324,7 @@ void CRTApp::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
 /*        Loader::blank(dest);
         int sync = warp;
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
-            float scale = ((0.337 * supplyV ) + 0.663) * rippleBias(sync);
+            double scale = ((0.337 * supplyV ) + 0.663) * rippleBias(sync);
             ++sync;
             blitLineScaled(surface, dest, y, scale);
         }*/
@@ -338,9 +338,9 @@ void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
         int sync = warp;
         int newy = 0 , last_blitY = 0;
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
-            float scale = (supplyV * rippleBias(sync)); ++sync;
-            int height = round((float) Config::SCREEN_HEIGHT * scale);
-            int center = round((float) (Config::SCREEN_HEIGHT - height) / 2);
+            double scale = (supplyV * rippleBias(sync)); ++sync;
+            int height = round((double) Config::SCREEN_HEIGHT * scale);
+            int center = round((double) (Config::SCREEN_HEIGHT - height) / 2);
             last_blitY = newy;
             newy = round(y * scale) + center + noiseSlip;
             if (newy > 0 && newy < Config::SCREEN_HEIGHT) {
@@ -404,7 +404,7 @@ void CRTApp::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) 
 void CRTApp::plane(Uint8 *delay, Uint8 *power) {
     int mag = PLANE_SPEED;
     int position = (warp % mag) - (mag /2);
-    float height2 = pow(mag/2,2);
+    double height2 = pow(mag/2,2);
     auto distance = sqrt(height2 + pow(position, 2));
     auto fpow = 1/pow(distance/ sqrt(height2),2);
     *power = fpow * 64;

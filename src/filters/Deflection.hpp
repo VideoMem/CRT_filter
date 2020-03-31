@@ -7,8 +7,8 @@
 #define rand() xorshift()
 
 struct DeflectionFilterParams {
-    float ripple;
-    float vsupply;
+    double ripple;
+    double vsupply;
     int warp;
     bool Hcomp = true;
     bool Vcomp = true;
@@ -28,17 +28,17 @@ public:
     void run( A* surface, A* dest, DeflectionFilterParams& par ) {
         params = par; run(surface, dest, par.ripple, par.vsupply, par.warp);
     }
-    void run(A* surface, A* dest, float& ripple, float& vsupply, int& warp);
+    void run(A* surface, A* dest, double& ripple, double& vsupply, int& warp);
 
 protected:
     inline void HRipple( A *surface, A *dest,
-                         float ripple,
-                         float supplyV,
+                         double ripple,
+                         double supplyV,
                          int sync
     );
     inline void VRipple( A *surface, A *dest,
-            float ripple,
-            float supplyV,
+            double ripple,
+            double supplyV,
             int sync
             );
     Ripple rippleGen;
@@ -47,7 +47,7 @@ protected:
 };
 
 template<typename A>
-void DeflectionFilter<A>::run( A *surface, A *dest, float& ripple, float &supplyV, int& warp ) {
+void DeflectionFilter<A>::run( A *surface, A *dest, double& ripple, double &supplyV, int& warp ) {
     Loader::blank( dest );
     Loader::blank( gBack);
     int sync( warp );
@@ -62,9 +62,9 @@ void DeflectionFilter<A>::run( A *surface, A *dest, float& ripple, float &supply
 }
 
 template<typename A>
-void DeflectionFilter<A>::HRipple(A *surface, A *dest, float ripple, float supplyV, int sync) {
+void DeflectionFilter<A>::HRipple(A *surface, A *dest, double ripple, double supplyV, int sync) {
     for( int y = 0; y < Config::SCREEN_HEIGHT; ++y ) {
-        float scale = ((0.337 * supplyV ) + 0.663) * rippleGen.get(sync, ripple);
+        double scale = ((0.337 * supplyV ) + 0.663) * rippleGen.get(sync, ripple);
         ++sync;
         Loader::blitLineScaled( surface, dest, y, scale );
     }
@@ -72,15 +72,15 @@ void DeflectionFilter<A>::HRipple(A *surface, A *dest, float ripple, float suppl
 
 
 template<typename A>
-void DeflectionFilter<A>::VRipple( A *surface, A *dest, float ripple, float supplyV, int sync ) {
+void DeflectionFilter<A>::VRipple( A *surface, A *dest, double ripple, double supplyV, int sync ) {
     int frameSlip = round(((rand() & 0xFF) / 0xF0) * 0.3 );
     int newy = 0, last_blitY = 0;
 
 
     for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
-        float scale = (supplyV * rippleGen.get(sync, ripple)); ++sync;
-        int height = round((float) Config::SCREEN_HEIGHT * scale);
-        int center = round((float) (Config::SCREEN_HEIGHT - height) / 2);
+        double scale = (supplyV * rippleGen.get(sync, ripple)); ++sync;
+        int height = round((double) Config::SCREEN_HEIGHT * scale);
+        int center = round((double) (Config::SCREEN_HEIGHT - height) / 2);
 
         last_blitY = newy;
         newy = round(y * scale) + center + frameSlip;
@@ -104,9 +104,9 @@ void VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp, ) {
         int sync = warp;
         int newy = 0 , last_blitY = 0;
         for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
-            float scale = (supplyV * rippleBias(sync)); ++sync;
-            int height = round((float) Config::SCREEN_HEIGHT * scale);
-            int center = round((float) (Config::SCREEN_HEIGHT - height) / 2);
+            double scale = (supplyV * rippleBias(sync)); ++sync;
+            int height = round((double) Config::SCREEN_HEIGHT * scale);
+            int center = round((double) (Config::SCREEN_HEIGHT - height) / 2);
             last_blitY = newy;
             newy = round(y * scale) + center + noiseSlip;
             if (newy > 0 && newy < Config::SCREEN_HEIGHT) {

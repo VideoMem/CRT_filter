@@ -10,7 +10,7 @@
 template <typename A>
 class SyncFilter: public Filter<A> {
 public:
-    void run(A* surface, A* dest, float& gnoise);
+    void run(A* surface, A* dest, double& gnoise);
 
 protected:
     int vdrift = 0;
@@ -18,7 +18,7 @@ protected:
 };
 
 template<typename A>
-void SyncFilter<A>::run(A *surface, A *dest, float& gnoise) {
+void SyncFilter<A>::run(A *surface, A *dest, double& gnoise) {
     Loader::blank( dest );
     SDL_Rect srcRect, dstRect;
     SDL_GetClipRect( surface, &srcRect );

@@ -16,7 +16,7 @@ static void powerOff(CRTApp& crt) {
 
     crt.noise(false);
 
-    float scale =1;
+    double scale =1;
     while (scale > 0.9) {
         crt.strech( scale );
         crt.focusNoise();
@@ -43,11 +43,11 @@ int main(  ) {
 
     //Event handler
     SDL_Event e;
-    float ripple = 0.03;
-    float noise = 0.3;
-    float brightness = 1;
-    float contrast = 1;
-    float color = 1;
+    double ripple = 0.03;
+    double noise = 0.3;
+    double brightness = 1;
+    double contrast = 1;
+    double color = 1;
 
     //Start up SDL and create window
     while(!quit) {
