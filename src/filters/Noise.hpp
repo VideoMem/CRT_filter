@@ -106,8 +106,8 @@ template<typename A>
 void NoiseFilter<A>::run(A *surface, A *dest, float& gnoise) {
     size_t max = gBack.size();
     size_t select = count;
-    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
-    SDL_BlitSurface(surface, nullptr, dest, nullptr);
+    //SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+    Loader::SurfacePixelsCopy( surface, dest );
     SDL_SetSurfaceAlphaMod(gBack[select], 0xFF * gnoise);
     SDL_BlitSurface(gBack[select], nullptr, dest, nullptr);
     ++count;

@@ -112,7 +112,7 @@ void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
             Uint32 g = px.green() * 0xFF;
             Uint32 b = px.blue()  * 0xFF;
             Uint32 a = 0xFF - (px.alpha() * 0xFF);
-            toPixel( &pixel, &r, &g, &b , &a);
+            toPixel( &pixel, &r, &g, &b , &a );
             put_pixel32( surface, column, row, pixel );
         }
     }

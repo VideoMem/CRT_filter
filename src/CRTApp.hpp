@@ -9,7 +9,8 @@
 #include <filters/Deflection.hpp>
 #include <generators/MagickOSD.hpp>
 #include <BaseApp.hpp>
-
+#include <chrono>
+using namespace std::chrono;
 #define rand() xorshift()
 
 #define PERSISTENCE_ALPHA 0xA1
@@ -48,8 +49,9 @@ class CRTApp : public BaseApp {
     void invert( SDL_Surface *surface);
     void desaturate(SDL_Surface *surface, SDL_Surface *dest );
     void noise( SDL_Surface *surface, SDL_Surface *dest  );
+    void bcs( SDL_Surface *surface, SDL_Surface *dest );
     float rippleBias(int sync);
-    float rippleBias() { return rippleBias(warp); }
+    //float rippleBias() { return rippleBias(warp); }
     void HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp );
     void ghost( SDL_Surface *surface, SDL_Surface *dest, int delay, Uint8 power );
@@ -68,12 +70,16 @@ class CRTApp : public BaseApp {
     void update();
     bool loadMedia();
 
-    protected:
+
+    void upSpeed() { ++ripplesync; }
+    void dwSpeed() { if(ripplesync > 1) --ripplesync; }
+
+protected:
     void plane(Uint8* delay, Uint8* power);
 
     void initOSD();
     static void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
-    void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
+    static void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, float scale);
 
     SDL_Surface* gFrame  = nullptr;
     SDL_Surface* gBuffer = nullptr;
@@ -123,6 +129,9 @@ class CRTApp : public BaseApp {
     bool loop;
     DeflectionFilter<SDL_Surface>* deflectionFilter;
     MagickOSD osdFilter;
+
+
+    double ripplesync = 1;
 };
 
 CRTApp::CRTApp(Loader& l):BaseApp(l) {
@@ -244,22 +253,27 @@ void CRTApp::desaturate(SDL_Surface *surface, SDL_Surface *dest ) {
 
 void CRTApp::noise( SDL_Surface *surface, SDL_Surface *dest  ) {
 
+    if (addNoise) {
+        noiseFilter->run(surface, dest, gnoise);
+    } else
+        Loader::SurfacePixelsCopy( surface, dest );
+
+}
+
+void CRTApp::bcs( SDL_Surface *surface, SDL_Surface *dest  ) {
+
     BCSFilterParams params;
     params.contrast = contrast;
     params.saturation = color;
     params.brightness = brightness;
     params.supply_voltage = supplyV;
     params.ripple = ripple;
-    params.frame_sync = warp;
+    params.frame_sync = warp * ripplesync;
 
-    if (addNoise) {
-        noiseFilter->run(surface, gAux, gnoise);
-    } else
-        SDL_BlitSurface(surface, nullptr, gAux, nullptr);
-
-    bcsFilter.run(gAux, dest , params);
+    bcsFilter.run(surface, dest , params);
 
 }
+
 
 float CRTApp::rippleBias(int sync) {
     int line = sync % Config::SCREEN_HEIGHT;
@@ -305,7 +319,7 @@ void CRTApp::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
     params.Vcomp = addVRipple;
     params.ripple = ripple;
     params.vsupply = supplyV;
-    params.warp = warp;
+    params.warp = warp * ripplesync;
     deflectionFilter->run( surface, dest, params );
 /*        Loader::blank(dest);
         int sync = warp;
@@ -340,7 +354,7 @@ void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
                     Loader::blitLine( surface, dest, y, i );
         }
     } else
-        SDL_BlitSurface(surface, NULL, dest, NULL);
+        Loader::SurfacePixelsCopy( surface, dest );
 }
 
 void CRTApp::fade(SDL_Surface* surface) {
@@ -380,8 +394,8 @@ void CRTApp::blend( SDL_Surface *surface, SDL_Surface *last, SDL_Surface *dest) 
         SDL_BlitSurface(last, nullptr, dest, nullptr);
         SDL_BlitSurface(surface, nullptr, dest, nullptr);
         SDL_SetSurfaceAlphaMod(last, 0xFF);
-        SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_NONE);
-        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
+        //SDL_SetSurfaceBlendMode(last, SDL_BLENDMODE_NONE);
+        //SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     } else {
         SDL_BlitSurface(surface, nullptr, dest, nullptr);
     }
@@ -450,11 +464,11 @@ void CRTApp::init() {
     setGhost(false);
     SDL_BlitSurface(gFrame, NULL, gBack, NULL);
     resetFrameStats();
-    SDL_SetSurfaceBlendMode(gFrame , SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gBlank , SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gBack  , SDL_BLENDMODE_NONE);
-    SDL_SetSurfaceBlendMode(gAux   , SDL_BLENDMODE_NONE);
+    SDL_SetSurfaceBlendMode(gFrame , SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gBlank , SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gBuffer, SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gBack  , SDL_BLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(gAux   , SDL_BLENDMODE_BLEND);
 
 }
 
@@ -492,6 +506,7 @@ void CRTApp::logStats() {
 
 void CRTApp::update()  {
     if(!initialized) postInit();
+
     //Uint8 power = 0, delay = 0;
     //if(addGhost) plane(&delay, &power);
     if(gnoise > 0.5) { color = 0; }
@@ -500,11 +515,17 @@ void CRTApp::update()  {
     if(!loop) syncFilter.run(gFrame, gAux, gnoise);
     else      syncFilter.run(gBack , gAux, gnoise);
 
-    noise(gAux, gBuffer);
+
+    noise(gAux, gBlank);
+
+    auto start = high_resolution_clock::now();
+    bcs( gBlank, gBuffer );
+    auto stop = high_resolution_clock::now();
+
     HRipple(gBuffer, gBlank, warp);
+
     //VRipple(gBlank , gBuffer, warp);
     //blend(gAux, gBack, gBlank);
-
     //Apply the image
     SDL_Rect srcsize;
     SDL_Rect dstsize;
@@ -516,10 +537,15 @@ void CRTApp::update()  {
     dstsize.y = srcsize.h - dstsize.h > 0? (srcsize.h - dstsize.h ) / 2: 0;
 
     SDL_BlitScaled(gBlank, &srcsize, gScreenSurface, &dstsize);
-    SDL_BlitSurface(gBlank, nullptr, gBack, nullptr);
+    Loader::SurfacePixelsCopy(gBlank, gBack);
     redraw();
+
     ++warp;
-    if((warp % 100) == 0) logStats();
+    if((warp % 100) == 0) {
+        auto duration = duration_cast<microseconds>(stop - start);
+        SDL_Log("Update loop %ld µs", duration.count() );
+        logStats();
+    }
 }
 
 void CRTApp::initOSD() {
@@ -535,6 +561,7 @@ void CRTApp::initOSD() {
 
     SDL_BlitSurface ( osdOverlay, nullptr, gBuffer, nullptr );
     SDL_BlitScaled( gBuffer, nullptr, gScreenSurface, nullptr);
+    SDL_FreeSurface(osdOverlay);
     redraw();
 }
 

@@ -119,6 +119,12 @@ int main(  ) {
                     case SDLK_q:
                         crt.noise(false);
                         break;
+                    case SDLK_s:
+                        crt.upSpeed();
+                        break;
+                    case SDLK_x:
+                        crt.dwSpeed();
+                        break;
                     case SDLK_2:
                         crt.setHRipple(true);
                         break;

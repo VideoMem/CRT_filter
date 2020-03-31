@@ -20,7 +20,7 @@ public:
             } else {
                 //Get window surface
                 gScreenSurface = SDL_GetWindowSurface( gWindow );
-                SDL_SetSurfaceBlendMode( gScreenSurface, SDL_BLENDMODE_NONE );
+                SDL_SetSurfaceBlendMode( gScreenSurface, SDL_BLENDMODE_BLEND );
             }
         }
         SDL_Log("Using SDL2 API major %d, minor %d", SDL_MAJOR_VERSION, SDL_MINOR_VERSION );
@@ -38,7 +38,7 @@ public:
         //Destroy window
         SDL_DestroyWindow( gWindow );
         SDL_FreeSurface( fallbackImage );
-        //SDL_FreeSurface( gScreenSurface );
+        SDL_FreeSurface( gScreenSurface );
         gWindow = nullptr;
         fallbackImage = nullptr;
         gScreenSurface = nullptr;

@@ -14,16 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/BCS.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/Deflection.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Deflection.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/filters/Noise.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/Noise.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/BaseAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BaseAppTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/MagickAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickAppTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -49,6 +48,9 @@
     <select />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FavoritesManager">
+    <favorites_list name="SDL_CRT_Filter" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -65,10 +67,10 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -98,7 +100,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.All Tests">
+  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -166,13 +168,14 @@
     <list>
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
+      <item itemvalue="Catch.Resource Roller" />
       <item itemvalue="Catch.SDL2 Magick++ OSD" />
       <item itemvalue="Catch.SDL2 Magick++ OSD (1)" />
       <item itemvalue="Catch.SDL2 BlitSurface Bench" />
       <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
+      <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
-      <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
     </list>
     <recent_temporary>
       <list>
@@ -230,7 +233,8 @@
       <workItem from="1583238929528" duration="4143000" />
       <workItem from="1583885764193" duration="640000" />
       <workItem from="1583886702469" duration="2406000" />
-      <workItem from="1584343235645" duration="77327000" />
+      <workItem from="1584343235645" duration="88426000" />
+      <workItem from="1585481991405" duration="17956000" />
     </task>
     <servers />
   </component>

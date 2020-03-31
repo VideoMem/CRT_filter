@@ -54,10 +54,10 @@ void DeflectionFilter<A>::run( A *surface, A *dest, float& ripple, float &supply
     if(params.Hcomp) {
         HRipple(surface, gBack, ripple, supplyV, sync);
         if (params.Vcomp) VRipple(gBack, dest, ripple, supplyV, sync);
-        else SDL_BlitSurface( gBack, nullptr, dest, nullptr );
+        else Loader::SurfacePixelsCopy( gBack, dest );
     } else {
         if (params.Vcomp) VRipple(surface, dest, ripple, supplyV, sync);
-        else SDL_BlitSurface( surface, nullptr, dest, nullptr );
+        else Loader::SurfacePixelsCopy( surface, dest );
     }
 }
 
