@@ -25,6 +25,7 @@ class BCSFilter: public Filter<A> {
 public:
     static void run(A* surface, A* dest, BCSFilterParams&);
 protected:
+    inline static Uint32 pixelFilter(Uint32 &px, BCSFilterParams &ctrl);
     inline void toYDbDr(A* surface, BCSFilterParams& ctrl);
     static void surfaceRGB(A* surface, screenMat& R, screenMat& G, screenMat& B );
     static void surfaceYrBrCr(A* surface, screenMat& luma, screenMat& chroma, BCSFilterParams&);
@@ -32,27 +33,86 @@ protected:
     bcsCache cache;
 };
 
+
+
 template <typename A>
 void BCSFilter<A>::run(A *surface, A *dest, BCSFilterParams& ctrl) {
+    static const int div = 13;
     SDL_FillRect(dest, nullptr, 0x000000);
-    static Uint32 pixel, R, G, B, BiasR, BiasG, BiasB, pixelOut;
-    static double luma, Db, Dr;
-    //toYDbDr(surface, ctrl);
-    for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
-        for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
-
-            pixel = Loader::get_pixel32(surface, x, y) & Loader::cmask;
-            Loader::comp(&pixel, &R, &G, &B);
-            Loader::toLuma(&luma, &R, &G, &B);
-            Loader::toChroma(&Db, &Dr, &R, &G, &B);
-            luma += (1 - ctrl.brightness);
-            luma *= ctrl.contrast;
-            Dr *= ctrl.saturation * ctrl.contrast;
-            Db *= ctrl.saturation * ctrl.contrast;
-
-            Loader::toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
-            Loader::toPixel(&pixelOut, &BiasR, &BiasG, &BiasB);
-            Loader::put_pixel32(dest, x , y, pixelOut);
+    static Uint32 pixel[div], pixelOut[div];
+    int offset=0;
+    //duff device?
+    for ( int y = 0; y < Config::SCREEN_HEIGHT; ++y ) {
+        for ( int x = 0; x < Config::SCREEN_WIDTH; ++x ) {
+            pixel[offset] = Loader::get_pixel32(surface, x, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x , y, pixelOut[offset]);
+            /*
+            offset = 0;
+            //0
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //1
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //2
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //3
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //4
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //5
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //6
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //7
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //8
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //9
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //10
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //11
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]);
+            ++offset;
+            //12
+            pixel[offset] = Loader::get_pixel32(surface, x+offset, y) & Loader::cmask;
+            pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
+            Loader::put_pixel32(dest, x+offset , y, pixelOut[offset]); */
         }
     }
 }
@@ -80,6 +140,7 @@ template<typename A>
 void BCSFilter<A>::toYDbDr(A *surface, BCSFilterParams &ctrl) {
     static double luma, Db, Dr;
     static Uint32 pixel, R, G, B;
+
     for (int y = 0; y < Config::SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < Config::SCREEN_WIDTH; ++x) {
             pixel = Loader::get_pixel32(surface, x, y) & Loader::cmask;
@@ -97,6 +158,23 @@ void BCSFilter<A>::toYDbDr(A *surface, BCSFilterParams &ctrl) {
     }
 }
 
+template<typename A>
+Uint32 BCSFilter<A>::pixelFilter(Uint32 &pixel, BCSFilterParams &ctrl) {
+    static double luma, Db, Dr;
+    static Uint32 R, G, B, BiasR, BiasG, BiasB, pixelOut;
+
+    Loader::comp(&pixel, &R, &G, &B);
+    Loader::toLuma(&luma, &R, &G, &B);
+    Loader::toChroma(&Db, &Dr, &R, &G, &B);
+    luma += (1 - ctrl.brightness);
+    luma *= ctrl.contrast;
+    Dr *= ctrl.saturation * ctrl.contrast;
+    Db *= ctrl.saturation * ctrl.contrast;
+    Loader::toRGB(&luma, &Db, &Dr, &BiasR, &BiasG, &BiasB);
+    Loader::toPixel(&pixelOut, &BiasR, &BiasG, &BiasB);
+
+    return pixelOut;
+}
 
 
 #endif //SDL_CRT_FILTER_BCS_HPP

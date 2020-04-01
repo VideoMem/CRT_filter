@@ -78,6 +78,7 @@ protected:
     void plane(Uint8* delay, Uint8* power);
 
     void initOSD();
+    void showOSD();
     static void blitLine(SDL_Surface* src, SDL_Surface* dst, int line, int dstline);
     static void blitLineScaled(SDL_Surface* src, SDL_Surface* dst, int line, double scale);
 
@@ -543,13 +544,14 @@ void CRTApp::update()  {
     ++warp;
     if((warp % 100) == 0) {
         auto duration = duration_cast<microseconds>(stop - start);
-        SDL_Log("Update loop %ld µs", duration.count() );
+        SDL_Log("BCS loop %ld µs", duration.count() );
         logStats();
     }
 }
 
 void CRTApp::initOSD() {
-    SDL_BlitSurface( gFrame, nullptr , gBuffer, nullptr );
+    Loader::SurfacePixelsCopy(gFrame, gBuffer);
+    //SDL_BlitSurface( gFrame, nullptr , gBuffer, nullptr );
 
     osdFilter.centerXtxt(Config::SCREEN_HEIGHT /2, "> INITIALIZING <");
     SDL_SetSurfaceAlphaMod( gAux, 0xFF );
@@ -563,6 +565,10 @@ void CRTApp::initOSD() {
     SDL_BlitScaled( gBuffer, nullptr, gScreenSurface, nullptr);
     SDL_FreeSurface(osdOverlay);
     redraw();
+}
+
+void CRTApp::showOSD() {
+
 }
 
 
