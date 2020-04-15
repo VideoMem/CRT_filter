@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 2.8)
+cmake_policy(SET CMP0015 NEW)
+project(emtest)
+set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build.emscripten)
+set(CMAKE_CXX_COMPILER "/usr/bin/emcc")
+add_definitions("-s DEMANGLE_SUPPORT=1 --preload-file ${CMAKE_SOURCE_DIR}/assets --bind")
+
+find_package(assimp REQUIRED)
+link_directories(emtest ${ASSIMP_LIBRARY_DIRS})
+include_directories(emtest ${ASSIMP_INCLUDE_DIRS})
+
+file(GLOB_RECURSE CORE_HDR *.h)
+file(GLOB_RECURSE CORE_SRC *.cpp)
+add_executable(emtest ${CORE_SRC} ${CORE_HDR})
+
+target_link_libraries (emtest ${ASSIMP_LIBRARIES})
+include_directories("lib/assimp/include")
+link_directories("lib/assimp/lib-js")
+link_libraries("assimp")

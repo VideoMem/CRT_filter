@@ -36,9 +36,10 @@ public:
 
     ~BaseApp() {
         //Destroy window
+        SDL_FreeSurface( gScreenSurface );
         SDL_DestroyWindow( gWindow );
         SDL_FreeSurface( fallbackImage );
-        SDL_FreeSurface( gScreenSurface );
+
         gWindow = nullptr;
         fallbackImage = nullptr;
         gScreenSurface = nullptr;

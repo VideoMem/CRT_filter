@@ -506,6 +506,7 @@ void CRTApp::logStats() {
 }
 
 void CRTApp::update()  {
+    auto s0 = high_resolution_clock::now();
     if(!initialized) postInit();
 
     //Uint8 power = 0, delay = 0;
@@ -542,9 +543,11 @@ void CRTApp::update()  {
     redraw();
 
     ++warp;
+    auto s1 = high_resolution_clock::now();
     if((warp % 100) == 0) {
+        auto d0 = duration_cast<microseconds>(s1 - s0);
         auto duration = duration_cast<microseconds>(stop - start);
-        SDL_Log("BCS loop %ld µs", duration.count() );
+        SDL_Log("BCS loop %ld µs, total loop %ld µs", duration.count(), d0.count() );
         logStats();
     }
 }

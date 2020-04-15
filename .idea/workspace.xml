@@ -14,8 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/emapp/Application.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/emapp/Application.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/emapp/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/filters/BCS.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/MagickOSDTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickOSDTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -60,7 +67,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../cpptk" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
@@ -93,7 +100,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+  <component name="RunManager" selected="Catch.SDL2 Magick++ OSD Benchmarks">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -101,12 +108,6 @@
       <method v="2" />
     </configuration>
     <configuration name="All Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Resource Roller" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Channel selection][App]" TEST_METHOD="Resource Roller" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -130,13 +131,13 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ OSD (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ OSD" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick++ OSD Benchmarks" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++][Benchmaking]" TEST_METHOD="SDL2 Magick++ OSD Benchmarks" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ OSD" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++]" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick++ OSD (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ OSD" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -161,22 +162,21 @@
     <list>
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
-      <item itemvalue="Catch.Resource Roller" />
-      <item itemvalue="Catch.SDL2 Magick++ OSD" />
       <item itemvalue="Catch.SDL2 Magick++ OSD (1)" />
       <item itemvalue="Catch.SDL2 BlitSurface Bench" />
       <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
       <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
+      <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
         <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
         <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
         <item itemvalue="Catch.SDL2 BlitSurface Bench" />
         <item itemvalue="Catch.SDL2 Magick++ OSD (1)" />
-        <item itemvalue="Catch.SDL2 Magick++ OSD" />
       </list>
     </recent_temporary>
   </component>
@@ -229,7 +229,10 @@
       <workItem from="1584343235645" duration="88426000" />
       <workItem from="1585481991405" duration="23904000" />
       <workItem from="1585673379162" duration="7411000" />
-      <workItem from="1585737133566" duration="1098000" />
+      <workItem from="1585737133566" duration="5272000" />
+      <workItem from="1585831332319" duration="3606000" />
+      <workItem from="1585915043539" duration="4678000" />
+      <workItem from="1586989494104" duration="257000" />
     </task>
     <servers />
   </component>

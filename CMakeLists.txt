@@ -26,8 +26,6 @@ target_link_libraries(SDL_CRT_Filter ${SDL2_LIBRARIES})
 target_link_libraries(SDL_CRT_Filter ${ImageMagick_LIBRARIES})
 #target_link_libraries(SDL_CRT_Filter tbb)
 
-
 add_subdirectory(tests)
 add_subdirectory(utils)
-
 

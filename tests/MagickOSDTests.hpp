@@ -23,6 +23,44 @@ TEST_CASE( "SDL2 Magick++ OSD", "[OSD][SDL2][Magick++]") {
         SDL_SaveBMP( sample, "test_OSD_Self_Test.bmp" );
         SDL_FreeSurface( sample );
     }
+
+
+}
+
+TEST_CASE( "SDL2 Magick++ OSD Benchmarks", "[OSD][SDL2][Magick++][Benchmaking]") {
+
+    SECTION( "OSD, text rendering speed" ) {
+        const int iterations = 10e3;
+        MagickOSD osd;
+
+        time_t times[2];
+        time(&times[0]);
+        for(int i = 0; i < iterations; ++i ) {
+            osd.text(0,0, "This is only a test");
+        }
+        time(&times[1]);
+        double  blits = (double) iterations / (double) (times[1] - times[0]);
+        SDL_Log("Test Result (MagickOSD::text) %.02lf lines/s", blits );
+    }
+
+    SECTION( "OSD, shadow text rendering speed" ) {
+        const int iterations = 10e3;
+        MagickOSD osd;
+
+        time_t times[2];
+        time(&times[0]);
+        for(int i = 0; i < iterations; ++i ) {
+            osd.shadowText(0,0, "This is only a test");
+        }
+        time(&times[1]);
+        double  blits = (double) iterations / (double) (times[1] - times[0]);
+        SDL_Log("Test Result (MagickOSD::shadowText) %.02lf lines/s", blits );
+        SDL_Surface* sample = Loader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+        osd.getSurface( sample );
+        SDL_SaveBMP( sample, "test_OSD_shadowText.bmp" );
+        SDL_FreeSurface( sample );
+    }
+
 }
 
 #endif //SDL_CRT_FILTER_MAGICKOSDTESTS_HPP
