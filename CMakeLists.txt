@@ -3,11 +3,9 @@ project (SDL_CRT_Filter)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -Ofast")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
+set(CMAKE_BUILD_TYPE Debug)
 
 ##SDL2 section
 find_package(SDL2 REQUIRED)

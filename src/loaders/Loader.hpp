@@ -10,9 +10,8 @@
 class Loader: public ResourceRoller {
 public:
     virtual bool GetSurface(SDL_Surface*, SDL_PixelFormat&) { return false; };
-    static SDL_Surface *AllocateSurface(int w, int h);
-    static SDL_Surface *AllocateSurface(int w, int h, SDL_PixelFormat &format);
-    //static SDL_Surface* AllocateSurface(int w, int h);
+    static SDL_Surface* AllocateSurface(int w, int h);
+    static SDL_Surface* AllocateSurface(int w, int h, SDL_PixelFormat &format);
     static SDL_Rect BiggestSurfaceClipRect(SDL_Surface* src, SDL_Surface* dst);
     static SDL_Rect SmallerBlitArea( SDL_Surface* src, SDL_Surface* dst);
     inline static void SurfacePixelsCopy( SDL_Surface* src, SDL_Surface* dst );
