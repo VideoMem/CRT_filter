@@ -6,6 +6,7 @@
 #define SDL_CRT_FILTER_LOADER_HPP
 #include <ResourceRoller.hpp>
 #include <SDL2/SDL.h>
+#include <fstream>
 
 class Loader: public ResourceRoller {
 public:
@@ -122,18 +123,44 @@ SDL_Surface *Loader::AllocateSurface(int w, int h) {
 }
 
 
+
 bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
+    struct pxfmt_t {
+        Uint8 r;
+        Uint8 g;
+        Uint8 b;
+        Uint8 a;
+    };
+
+    union pxu_t {
+        pxfmt_t comp;
+        Uint32  px;
+    } pxa, pxb;
+
     if (src->format->format == dst->format->format &&
         src->w == dst->w && src->h == dst->h) {
         bool error = false;
         SDL_LockSurface(src);
         SDL_LockSurface(dst);
         for(int x=0; x < src->w && !error; ++x)
-            for(int y=0; y < src->h; ++y)
+            for(int y=0; y < src->h; ++y) {
+                pxa.px = get_pixel32(src, x, y);
+                pxb.px = get_pixel32(dst, x, y);;
                 if(get_pixel32(src, x, y) != get_pixel32(dst, x, y)) {
                     error = true;
+                    SDL_Log( "CompareSurface:(%d,%d) -> Expected RGBA (%u, %u, %u, %u), got (%u, %u, %u, %u)",
+                             x, y,
+                             pxa.comp.r,
+                             pxa.comp.g,
+                             pxa.comp.b,
+                             pxa.comp.a,
+                             pxb.comp.r,
+                             pxb.comp.g,
+                             pxb.comp.b,
+                             pxb.comp.a);
                     break;
                 }
+            }
         SDL_UnlockSurface(src);
         SDL_UnlockSurface(dst);
         return !error;

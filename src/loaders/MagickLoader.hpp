@@ -6,6 +6,7 @@
 #define SDL_CRT_FILTER_MAGICKLOADER_HPP
 #include <Magick++.h>
 #include <loaders/LazySDL2.hpp>
+#include <picosha2.h>
 
 using namespace Magick;
 
@@ -13,9 +14,17 @@ class MagickLoader: public Loader {
 public:
     bool GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) override;
     bool GetSurface(SDL_Surface* surface);
-    static void image2surface( Magick::Image& img, SDL_Surface* surface );
-private:
+    static void image2surface( Magick::Image& image, SDL_Surface* surface );
+    static void surface2image( SDL_Surface* surface, Magick::Image& img );
     static Blob readBlob( const std::string path );
+    static void saveBlob( SDL_Surface* surface, const std::string path );
+    static std::string sha256Log( std::string string ) {
+        Blob blob = { static_cast<const char*>(string.c_str()), string.size() };
+        return sha256Log( blob );
+    }
+
+private:
+    static std::string sha256Log( Blob& blob );
     static void magickLoad(std::string path, SDL_Surface* surface);
     static void magick2surface(Magick::Image& image, SDL_Surface* surface);
 };
@@ -31,21 +40,60 @@ void MagickLoader::magick2surface(Magick::Image &image, SDL_Surface *surface) {
     image2surface( image, surface );
 }
 
+std::string MagickLoader::sha256Log(Blob &blob) {
+    std::string data( reinterpret_cast<const char*>(blob.data()), 0, blob.length() );
+    std::string hash_hex_str;
+    picosha2::hash256_hex_string(data, hash_hex_str);
+    return hash_hex_str;
+}
+
 Blob MagickLoader::readBlob( const std::string path ) {
     using namespace std;
     ifstream myfile;
     myfile.open ( path, ios::in | ios::binary );
+    char head[5] = { 0 };
     if (myfile.is_open()) {
         myfile.seekg( 0, ios::end );
-        ifstream::pos_type  size = myfile.tellg();
+        ifstream::pos_type size = myfile.tellg();
         char* memblock = new char [size];
+        myfile.seekg( 0, ios::beg );
         myfile.read( memblock, size );
-        myfile.close();
+        SDL_Log("%ld bytes read", (long int) size );
         Blob retblob = Blob( memblock, size );
+        memcpy(head, retblob.data(), 4);
+        SDL_Log("SHA256 (BlobRead) : %s", sha256Log(retblob).c_str() );
+        try {
+            Image image(retblob, Geometry(), "PNG");
+            //image.fileName("info:");
+        } catch ( Magick::Exception& e ) {
+            SDL_Log("Error reading binary Blob (%s) %s", head, e.what() );
+        }
+        myfile.close();
         delete[] memblock;
         return retblob;
     } else
         return Blob();
+}
+
+void MagickLoader::saveBlob( SDL_Surface* surface, const std::string path ) {
+    Blob blob;
+    Image image = { Geometry( surface->w, surface->h ), Color() };
+    surface2image( surface, image );
+    image.magick("PNG");
+    image.write( &blob );
+
+    using namespace std;
+    ofstream myfile;
+    myfile.open ( path, ios::out | ios::binary );
+    char head[5] = { 0 };
+    if (myfile.is_open()) {
+        myfile.write(static_cast<const char *>(blob.data()), blob.length() );
+        memcpy(head, blob.data(), 4);
+        myfile.close();
+        SDL_Log("%ld bytes written (%s)", blob.length(), head );
+        SDL_Log( "SHA256 (BlobSave) : %s", sha256Log(blob).c_str() );
+    } else
+        SDL_Log("Cannot write: %s", path.c_str() );
 }
 
 void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
@@ -57,8 +105,12 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
     try {
         SDL_Log("MagickLoader::Opening image %s", path.c_str() );
         if ( testFile( path ) ) image.read( readBlob( path ) ); else {
-            SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
+             SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
         }
+
+       /*  if ( testFile( path ) ) image.read( path ); else {
+            SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
+        }*/
     }
     catch( Magick::Exception&  error_ ) {
         SDL_Log("MagickLoader::Cannot read Exception %s", error_.what());
@@ -128,6 +180,7 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
     return gX != nullptr;
 }
 
+
 void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
     using namespace Magick;
     SDL_Rect dstsize;
@@ -138,14 +191,35 @@ void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
     for ( size_t row = 0; row < imgHeight; row++ ) {
         for (size_t column = 0; column < imgWidth; column++) {
             ColorRGB px = image.pixelColor( column, row );
-            Uint32 r = px.red()   * 0xFF;
-            Uint32 g = px.green() * 0xFF;
-            Uint32 b = px.blue()  * 0xFF;
-            Uint32 a = 0xFF - (px.alpha() * 0xFF);
+            Uint32 r = round(px.red()   * 0xFF);
+            Uint32 g = round(px.green() * 0xFF);
+            Uint32 b = round(px.blue()  * 0xFF);
+            Uint32 a = round(0xFF - (px.alpha() * 0xFF) );
             toPixel( &pixel, &r, &g, &b , &a );
             put_pixel32( surface, column, row, pixel );
         }
     }
+}
+
+void MagickLoader::surface2image(SDL_Surface *surface, Magick::Image &img) {
+    using namespace Magick;
+    SDL_Rect dstsize;
+    SDL_GetClipRect(surface, &dstsize);
+    size_t imgWidth = img.columns() > (size_t) dstsize.w ? dstsize.w : img.columns();
+    size_t imgHeight = img.rows() > (size_t) dstsize.h ? dstsize.h : img.rows();
+    Uint32 r, g, b;
+    Uint32 pixel = 0;
+    for (size_t y = 0; y < imgHeight; y++) {
+        for (size_t x = 0; x < imgWidth; x++) {
+            pixel = get_pixel32( surface, x, y );
+            comp( &pixel, &r, &g, &b );
+            img.pixelColor( x, y, ColorRGB(
+                    (double) r / 0xFF,
+                    (double) g / 0xFF,
+                    (double) b  / 0xFF) );
+        }
+    }
+    //img.copyPixels(image, image.geometry(), Offset(0));
 }
 
 
