@@ -24,4 +24,10 @@ link_directories(app im/lib/*.la)
 #set_target_properties(app PROPERTIES LINK_FLAGS "-lm -s WASM=1 -s USE_ZLIB=1 -s USE_SDL=2 -s USE_FREETYPE=1 -s USE_LIBPNG=1 -s USE_LIBJPEG=1 --preload-file resources -s INITIAL_MEMORY=1GB -s ALLOW_MEMORY_GROWTH=1")
 set_target_properties(app PROPERTIES LINK_FLAGS "-s DISABLE_EXCEPTION_CATCHING=2 -s LLD_REPORT_UNDEFINED -lm -s WASM=1 -s USE_SDL=2 --preload-file resources -s INITIAL_MEMORY=1GB -s ALLOW_MEMORY_GROWTH=1")
 
+#this will fail with an error, execute this to link
+#libtool --tag=CC --mode=link `cat ./CMakeFiles/app.dir/link.txt ` im/lib/*.la
+#then
+#http-server -p 8000 .
+#open app.wasm.html in browser
+
 
