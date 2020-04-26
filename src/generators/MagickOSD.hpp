@@ -6,6 +6,7 @@
 #define SDL_CRT_FILTER_MAGICKOSD_HPP
 #include <generators/Generator.hpp>
 #include <loaders/MagickLoader.hpp>
+#include <SDL2/SDL.h>
 
 using namespace Magick;
 
@@ -31,11 +32,11 @@ protected:
     void blankMe();
     Magick::Image img {
         Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT ) ,
-        Color( 0, 0, 0, TransparentOpacity )
+        Color()// Color( 0, 0, 0, TransparentAlphaChannel )
     };
     Magick::Image blank {
         Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT ) ,
-        Color( 0, 0, 0, TransparentOpacity )
+        Color()//Color( 0, 0, 0, TransparentAlphaChannel )
     };
     const std::string font = "resources/fonts/Vintage2513ROM.ttf";
     double fontsize = 0;
@@ -57,13 +58,19 @@ MagickOSD::MagickOSD() {
     setFontSize( Config::SCREEN_HEIGHT * txs.p );
     img.fontPointsize( fontsize );
     blank.fontPointsize( fontsize );
-    img.font( font );
-    blank.font( font );
+    img.font(font);
+    blank.font(font);
+
 }
 
 
 void MagickOSD::text( double x, double y, const std::string &txt ) {
-    img.draw(DrawableText{ x, y, txt } );
+    try {
+        const Drawable line = DrawableText{ x, y, txt };
+        img.draw( line );
+    } catch (const std::exception& e) {
+        SDL_Log("Error loading font: %s", e.what());
+    }
 }
 
 
@@ -89,13 +96,18 @@ void MagickOSD::blankMe() {
 }
 
 void MagickOSD::test() {
+
     double ypos = Config::SCREEN_HEIGHT / 2;
     std::string txt = "[ THIS IS A TEST ]";
+    SDL_Log("MagickOSD() test: %s", txt.c_str() );
     double xpos = 10;
     blankMe();
+    SDL_Log("MagickOSD() test: blank" );
     text( xpos, ypos, txt );
+    SDL_Log("MagickOSD() test: text" );
     blankMe();
     centerXtxt( ypos, txt );
+    SDL_Log("MagickOSD() test: centerXtxt" );
 }
 
 void MagickOSD::getSurface( SDL_Surface *surface ) {

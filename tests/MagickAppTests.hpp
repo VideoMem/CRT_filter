@@ -16,7 +16,6 @@ TEST_CASE( "SDL2 Magick++ App", "[App][SDL2][Magick++]") {
         copy   = MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         REQUIRE( sample != nullptr );
         REQUIRE( copy   != nullptr );
-
         loader.GetSurface(sample);
         loader.GetSurface(copy);
         SDL_Rect srcrect;
@@ -36,7 +35,6 @@ TEST_CASE( "SDL2 Magick++ App", "[App][SDL2][Magick++]") {
         copy   = MagickLoader::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         REQUIRE( sample != nullptr );
         REQUIRE( copy   != nullptr );
-
         loader.GetSurface(sample);
         loader.Up();
         loader.GetSurface(copy);

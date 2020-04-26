@@ -24,6 +24,17 @@ public:
         SDL_FillRect(surface, nullptr, amask);
     }
 
+    static bool testFile( std::string path ) {
+        using namespace  std;
+        ofstream myfile;
+        myfile.open ( path, ios::in | ios::binary );
+        if (myfile.is_open()) {
+            myfile.close();
+            return true;
+        } else
+            return false;
+    }
+
     //TODO: bit endianess
     inline static void comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
         *B = (*pixel & bmask) >> 16;

@@ -64,7 +64,6 @@ TEST_CASE( "SDL2 BlitSurface Bench", "[SDL2][BenchMark]") {
 
 }
 
-
 TEST_CASE( "SDL2 ConvertSurface Bench", "[SDL2][BenchMark]") {
 
     SECTION("SDL_ConvertSurface Blit") {
@@ -84,7 +83,7 @@ TEST_CASE( "SDL2 ConvertSurface Bench", "[SDL2][BenchMark]") {
         time_t times[2];
         time(&times[0]);
 
-        int iterations = 2100;
+        int iterations = 1400;
         for( int i=0; i < iterations ; ++i ) {
             SDL_Surface* dst = SDL_ConvertSurfaceFormat(src, src->format->format, src->flags );
             dsts.push_back( dst );
@@ -100,8 +99,6 @@ TEST_CASE( "SDL2 ConvertSurface Bench", "[SDL2][BenchMark]") {
     }
 
 }
-
-
 
 TEST_CASE( "SDL2 Surface memcpy Bench", "[SDL2][BenchMark]") {
 

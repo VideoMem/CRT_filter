@@ -1,0 +1,1 @@
+../MagickAppTests.hpp

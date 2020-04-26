@@ -7,33 +7,63 @@
 #include <Magick++.h>
 #include <loaders/LazySDL2.hpp>
 
+using namespace Magick;
+
 class MagickLoader: public Loader {
 public:
     bool GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) override;
     bool GetSurface(SDL_Surface* surface);
     static void image2surface( Magick::Image& img, SDL_Surface* surface );
 private:
+    static Blob readBlob( const std::string path );
     static void magickLoad(std::string path, SDL_Surface* surface);
+    static void magick2surface(Magick::Image& image, SDL_Surface* surface);
 };
 
+
+void MagickLoader::magick2surface(Magick::Image &image, SDL_Surface *surface) {
+    Geometry newSize = Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+    newSize.aspect(true);
+    image.interpolate(CatromInterpolatePixel  );
+    image.resize(newSize);
+
+    image.modifyImage();
+    image2surface( image, surface );
+}
+
+Blob MagickLoader::readBlob( const std::string path ) {
+    using namespace std;
+    ifstream myfile;
+    myfile.open ( path, ios::in | ios::binary );
+    if (myfile.is_open()) {
+        myfile.seekg( 0, ios::end );
+        ifstream::pos_type  size = myfile.tellg();
+        char* memblock = new char [size];
+        myfile.read( memblock, size );
+        myfile.close();
+        Blob retblob = Blob( memblock, size );
+        delete[] memblock;
+        return retblob;
+    } else
+        return Blob();
+}
+
 void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
-    using namespace Magick;
-    Image image;
+    Image image {
+            Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT ) ,
+            Color()
+    };
+
     try {
-        image.read( path );
-        Geometry newSize = Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
-        newSize.aspect(true);
-        image.interpolate(BicubicInterpolatePixel );
-        image.resize(newSize);
-
-        image.modifyImage();
-        image2surface( image, surface );
-
+        SDL_Log("MagickLoader::Opening image %s", path.c_str() );
+        if ( testFile( path ) ) image.read( readBlob( path ) ); else {
+            SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
+        }
     }
-    catch( Exception &error_ ) {
-        SDL_Log("Caught exception: %s", error_.what());
+    catch( Magick::Exception&  error_ ) {
+        SDL_Log("MagickLoader::Cannot read Exception %s", error_.what());
     }
-
+    magick2surface( image, surface );
 }
 
 bool MagickLoader::GetSurface(SDL_Surface* surface, SDL_PixelFormat& format) {
@@ -117,5 +147,6 @@ void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
         }
     }
 }
+
 
 #endif //SDL_CRT_FILTER_MAGICKLOADER_HPP

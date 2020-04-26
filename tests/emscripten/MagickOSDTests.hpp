@@ -1,0 +1,1 @@
+../MagickOSDTests.hpp

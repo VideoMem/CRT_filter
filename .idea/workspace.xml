@@ -3,6 +3,8 @@
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
       <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
+      <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
+      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -12,14 +14,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/emscripten/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/MagickImageAPITest.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/All_tests.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/Assets and resources.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/BaseAppTests.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/BlitterBenchs.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/MagickAppTests.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/MagickOSDTests.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/ResourceMapTest.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/catch.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/resources" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/src" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/emscripten/templates" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/filesystem_Tests.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/emapp/Application.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/emapp/Application.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/emapp/Application.h" beforeDir="false" afterPath="$PROJECT_DIR$/emapp/Application.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/emapp/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/emapp/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/MagickAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickAppTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/emscripten/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/emscripten/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,6 +61,7 @@
     <expand />
     <select />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FavoritesManager">
     <favorites_list name="SDL_CRT_Filter" />
   </component>
@@ -61,20 +79,21 @@
   <component name="ProjectId" id="1X8DE8pqz1fQGK8KXvjrubH21UH" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/tests/emscripten" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tests" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/tests/emscripten" />
       <recent name="$PROJECT_DIR$/utils" />
       <recent name="$PROJECT_DIR$/src/filters" />
       <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
@@ -96,7 +115,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+  <component name="RunManager" selected="Catch.SDL2 Magick App + Loader ">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -104,6 +123,12 @@
       <method v="2" />
     </configuration>
     <configuration name="All Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Filesystem Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][Filesystem]" TEST_METHOD="Filesystem Tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -127,13 +152,13 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ OSD Benchmarks" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++][Benchmaking]" TEST_METHOD="SDL2 Magick++ OSD Benchmarks" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick++ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Magick++][App]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ OSD (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ OSD" TEST_MODE="SUITE_TEST">
+    <configuration name="SDL2 Magick++ OSD Benchmarks" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++][Benchmaking]" TEST_METHOD="SDL2 Magick++ OSD Benchmarks" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -145,6 +170,11 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="CHAR_ROM_GEN" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="CHAR_ROM_GEN" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="CHAR_ROM_GEN">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="SDL_CRT_Filter" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL_CRT_Filter" EXPLICIT_BUILD_TARGET_NAME="all">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -153,20 +183,22 @@
     <list>
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
-      <item itemvalue="Catch.SDL2 Magick++ OSD (1)" />
+      <item itemvalue="Catch.SDL2 Magick++ API" />
       <item itemvalue="Catch.SDL2 BlitSurface Bench" />
       <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
       <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
       <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
+      <item itemvalue="Catch.Filesystem Tests" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
+      <item itemvalue="CMake Application.CHAR_ROM_GEN" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.Filesystem Tests" />
         <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
         <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
         <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
         <item itemvalue="Catch.SDL2 BlitSurface Bench" />
-        <item itemvalue="Catch.SDL2 Magick++ OSD (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -224,7 +256,7 @@
       <workItem from="1585915043539" duration="4678000" />
       <workItem from="1586989494104" duration="12504000" />
       <workItem from="1587231202480" duration="3277000" />
-      <workItem from="1587244541989" duration="1815000" />
+      <workItem from="1587244541989" duration="52748000" />
     </task>
     <servers />
   </component>
