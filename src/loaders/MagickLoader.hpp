@@ -64,7 +64,7 @@ Blob MagickLoader::readBlob( const std::string path ) {
         SDL_Log("SHA256 (BlobRead) : %s", sha256Log(retblob).c_str() );
         try {
             Image image(retblob, Geometry(), "PNG");
-            //image.fileName("info:");
+            image.fileName("info:");
         } catch ( Magick::Exception& e ) {
             SDL_Log("Error reading binary Blob (%s) %s", head, e.what() );
         }
@@ -103,12 +103,22 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
     };
 
     try {
-        SDL_Log("MagickLoader::Opening image %s", path.c_str() );
-        if ( testFile( path ) ) image.read( readBlob( path ) ); else {
+        SDL_Log("MagickLoader::Opening image %s", path.c_str());
+
+        if (testFile(path)) {
+            Blob blob = readBlob(path);
+            image.fileName( ":");
+            image.ping( blob );
+            if(image.fileSize() > 0) {
+                SDL_Log("Format detected: %s", image.magick().c_str());
+                image.read(blob);
+            } else
+                SDL_Log( "Cannot open a truncated file" );
+        } else {
              SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
         }
-
-       /*  if ( testFile( path ) ) image.read( path ); else {
+/*
+        if ( testFile( path ) ) image.read( path ); else {
             SDL_Log("MagickLoader::Cannot read %s", path.c_str() );
         }*/
     }
@@ -183,6 +193,7 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
 
 void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
     using namespace Magick;
+    blank(surface);
     SDL_Rect dstsize;
     SDL_GetClipRect( surface, &dstsize );
     size_t imgWidth  = image.columns() > (size_t) dstsize.w? dstsize.w : image.columns();
@@ -194,7 +205,7 @@ void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
             Uint32 r = round(px.red()   * 0xFF);
             Uint32 g = round(px.green() * 0xFF);
             Uint32 b = round(px.blue()  * 0xFF);
-            Uint32 a = round(0xFF - (px.alpha() * 0xFF) );
+            Uint32 a = round((1.0 - px.alpha()) * 0xFF );
             toPixel( &pixel, &r, &g, &b , &a );
             put_pixel32( surface, column, row, pixel );
         }
@@ -207,16 +218,17 @@ void MagickLoader::surface2image(SDL_Surface *surface, Magick::Image &img) {
     SDL_GetClipRect(surface, &dstsize);
     size_t imgWidth = img.columns() > (size_t) dstsize.w ? dstsize.w : img.columns();
     size_t imgHeight = img.rows() > (size_t) dstsize.h ? dstsize.h : img.rows();
-    Uint32 r, g, b;
+    Uint32 r, g, b, a;
     Uint32 pixel = 0;
     for (size_t y = 0; y < imgHeight; y++) {
         for (size_t x = 0; x < imgWidth; x++) {
             pixel = get_pixel32( surface, x, y );
-            comp( &pixel, &r, &g, &b );
+            comp( &pixel, &r, &g, &b, &a );
             img.pixelColor( x, y, ColorRGB(
                     (double) r / 0xFF,
                     (double) g / 0xFF,
-                    (double) b  / 0xFF) );
+                    (double) b / 0xFF
+                    ));
         }
     }
     //img.copyPixels(image, image.geometry(), Offset(0));

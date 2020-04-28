@@ -37,6 +37,10 @@ public:
     }
 
     //TODO: bit endianess
+    inline static void comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B, Uint32 *A) {
+        *A = 0xFF - ((*pixel & amask) >> 24);
+        comp( pixel, R, G, B );
+    }
     inline static void comp(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B) {
         *B = (*pixel & bmask) >> 16;
         *G = (*pixel & gmask) >> 8;

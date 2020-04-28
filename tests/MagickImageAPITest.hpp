@@ -10,6 +10,7 @@ TEST_CASE( "SDL2 Magick++ API", "[App][SDL2][Magick++]") {
         Config cfg;
         MagickLoader loader;
         cfg.initResources(loader);
+        SDL_Log("SHA256 null string (test): %s", MagickLoader::sha256Log("").c_str() );
         REQUIRE(
                 loader.sha256Log("The quick brown fox jumps over the lazy dog") ==
                 "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592");
@@ -19,30 +20,41 @@ TEST_CASE( "SDL2 Magick++ API", "[App][SDL2][Magick++]") {
     }
 
     SECTION( "Convert between SDL surface and Magick++ image" ) {
+        SDL_Log("Magick++ API load surface2image, image2surface test");
         Config cfg;
         MagickLoader loader;
         cfg.initResources(loader);
-        SDL_Surface* sample = nullptr;
-        sample = MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+        SDL_Surface* sample =
+                MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         REQUIRE( sample != nullptr );
+        SDL_Log("(test) Reading image from disk");
         loader.GetSurface(sample);
         SDL_Surface* conv =
                 MagickLoader::AllocateSurface  ( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
         REQUIRE( conv != nullptr );
         using namespace Magick;
-        Image image{
-                Geometry( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT ),
-                Color()
-        };
-        loader.surface2image( sample, image );
-        loader.image2surface( image, conv );
-        REQUIRE(loader.CompareSurface(sample, conv));
+        SDL_Log("(test) Initializing image object");
+        try {
+            Image image{
+                    Geometry(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT),
+                    Color()
+            };
+            SDL_Log("(test) Surface to Image");
+            loader.surface2image(sample, image);
+            SDL_Log("(test) Image to Surface");
+            loader.image2surface(image, conv);
+
+            REQUIRE(loader.CompareSurface(sample, conv));
+        } catch (Magick::Exception& e) {
+            SDL_Log("Got exception while handling images: %s", e.what());
+        }
         SDL_FreeSurface( sample );
         SDL_FreeSurface( conv );
     }
 
 
     SECTION( "Save and load blob" ) {
+        SDL_Log("Magick++ API load and save blob");
         Config cfg;
         MagickLoader loader, saver;
         cfg.initResources(loader);
@@ -64,7 +76,7 @@ TEST_CASE( "SDL2 Magick++ API", "[App][SDL2][Magick++]") {
         };
 
         saver.image2surface( image, remote );
-        SDL_SaveBMP( remote, "/tmp/remote.bmp");
+        SDL_SaveBMP( remote, "/tmp/remote.bmp" );
 
         REQUIRE( Loader::CompareSurface( sample, remote ) );
 

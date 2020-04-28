@@ -26,6 +26,7 @@ TEST_CASE( "SDL2 Magick++ App", "[App][SDL2][Magick++]") {
     }
 
     SECTION("MagickLoader Surface Mismatch") {
+        SDL_Log("MagickLoader Surface Compare Mismatch test");
         Config cfg;
         MagickLoader loader;
         cfg.initResources(loader);
