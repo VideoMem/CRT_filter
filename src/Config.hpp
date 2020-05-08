@@ -10,13 +10,14 @@ class Config {
 public:
     static constexpr auto sampleBitmapsFolder = "resources/images";
     static const nint samples = 6;
+    static std::string magick_default_format() { return "BMP"; };
     const std::string sampleBitmapsNames[6] = {
-            "standby.png",
-            "RCA_Indian_Head_Test_Pattern.png",
-            "Mantis.png",
             "testCardRGB.bmp",
-            "marcosvtar.bmp",
-            "alf.bmp"
+            "RCA_Indian_Head_Test_Pattern.bmp"
+  //          "Mantis.png",
+    //        "standby.png",
+      //      "marcosvtar.bmp",
+        //    "alf.bmp"
     };
 
     static const int NKERNEL_WIDTH  = 640;

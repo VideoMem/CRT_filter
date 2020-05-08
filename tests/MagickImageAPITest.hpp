@@ -69,12 +69,14 @@ TEST_CASE( "SDL2 Magick++ API", "[App][SDL2][Magick++]") {
         saver.GetSurface(sample);
         using namespace Magick;
 
+        SDL_Log("(test) Writting image to disk");
         saver.saveBlob( sample, "/tmp/sample.blob" );
-
-        Image image {
-                loader.readBlob("/tmp/sample.blob")
-        };
-
+        SDL_Log("(test) Reading back image from disk");
+        Blob blob = loader.readBlob("/tmp/sample.blob");
+        Image image;
+        image.fileName(":");
+        image.read(blob);
+        SDL_Log("(test) Read!");
         saver.image2surface( image, remote );
         SDL_SaveBMP( remote, "/tmp/remote.bmp" );
 

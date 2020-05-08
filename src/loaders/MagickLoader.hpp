@@ -8,6 +8,7 @@
 #include <loaders/LazySDL2.hpp>
 #include <picosha2.h>
 
+
 using namespace Magick;
 
 class MagickLoader: public Loader {
@@ -41,7 +42,7 @@ void MagickLoader::magick2surface(Magick::Image &image, SDL_Surface *surface) {
 }
 
 std::string MagickLoader::sha256Log(Blob &blob) {
-    std::string data( reinterpret_cast<const char*>(blob.data()), 0, blob.length() );
+    std::string data( static_cast<const char*>(blob.data()), 0, blob.length() );
     std::string hash_hex_str;
     picosha2::hash256_hex_string(data, hash_hex_str);
     return hash_hex_str;
@@ -50,50 +51,51 @@ std::string MagickLoader::sha256Log(Blob &blob) {
 Blob MagickLoader::readBlob( const std::string path ) {
     using namespace std;
     ifstream myfile;
-    myfile.open ( path, ios::in | ios::binary );
     char head[5] = { 0 };
-    if (myfile.is_open()) {
-        myfile.seekg( 0, ios::end );
-        ifstream::pos_type size = myfile.tellg();
-        char* memblock = new char [size];
-        myfile.seekg( 0, ios::beg );
-        myfile.read( memblock, size );
-        SDL_Log("%ld bytes read", (long int) size );
-        Blob retblob = Blob( memblock, size );
-        memcpy(head, retblob.data(), 4);
-        SDL_Log("SHA256 (BlobRead) : %s", sha256Log(retblob).c_str() );
-        try {
-            Image image(retblob, Geometry(), "PNG");
-            image.fileName("info:");
-        } catch ( Magick::Exception& e ) {
-            SDL_Log("Error reading binary Blob (%s) %s", head, e.what() );
+    try {
+        myfile.open(path, ios::in | ios::binary);
+        if (myfile.is_open()) {
+            myfile.seekg(0, ios::end);
+            ifstream::pos_type size = myfile.tellg();
+            char *memblock = new char[size];
+            myfile.seekg(0, ios::beg);
+            myfile.read(memblock, size);
+            SDL_Log("%ld bytes read", (long int) size);
+            Blob retblob = Blob(memblock, size);
+            memcpy(head, retblob.data(), 4);
+            SDL_Log("SHA256 (BlobRead) : %s", sha256Log(retblob).c_str());
+            myfile.close();
+            delete[] memblock;
+            return retblob;
         }
-        myfile.close();
-        delete[] memblock;
-        return retblob;
-    } else
-        return Blob();
+    } catch (Exception& e) {
+        SDL_Log("Cannot open file: %s", e.what() );
+    }
+    //on fail
+    return Blob();
 }
 
 void MagickLoader::saveBlob( SDL_Surface* surface, const std::string path ) {
     Blob blob;
     Image image = { Geometry( surface->w, surface->h ), Color() };
     surface2image( surface, image );
-    image.magick("PNG");
+    image.magick( Config::magick_default_format() );
     image.write( &blob );
 
     using namespace std;
     ofstream myfile;
-    myfile.open ( path, ios::out | ios::binary );
-    char head[5] = { 0 };
-    if (myfile.is_open()) {
-        myfile.write(static_cast<const char *>(blob.data()), blob.length() );
-        memcpy(head, blob.data(), 4);
-        myfile.close();
-        SDL_Log("%ld bytes written (%s)", blob.length(), head );
-        SDL_Log( "SHA256 (BlobSave) : %s", sha256Log(blob).c_str() );
-    } else
-        SDL_Log("Cannot write: %s", path.c_str() );
+    try {
+        myfile.open ( path, ios::out | ios::binary );
+        if (myfile.is_open()) {
+            myfile.write(static_cast<const char *>(blob.data()), blob.length() );
+            myfile.close();
+            SDL_Log("%ld bytes written ", blob.length() );
+            SDL_Log( "SHA256 (BlobSave) : %s", sha256Log(blob).c_str() );
+        } else
+            SDL_Log("Cannot write: %s", path.c_str() );
+    } catch (Exception &e) {
+        SDL_Log("Cannot open file for writing: %s", e.what() );
+    }
 }
 
 void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
@@ -108,7 +110,9 @@ void MagickLoader::magickLoad(std::string path, SDL_Surface* surface) {
         if (testFile(path)) {
             Blob blob = readBlob(path);
             image.fileName( ":");
+            SDL_Log("MagickLoader::readBlob() OK, pinging ...");
             image.ping( blob );
+            SDL_Log("MagickLoader::readBlob() OK, pinging done!");
             if(image.fileSize() > 0) {
                 SDL_Log("Format detected: %s", image.magick().c_str());
                 image.read(blob);
@@ -229,8 +233,10 @@ void MagickLoader::surface2image(SDL_Surface *surface, Magick::Image &img) {
                     (double) g / 0xFF,
                     (double) b / 0xFF
                     ));
+
         }
     }
+    img.alphaChannel(SetAlphaChannel);
     //img.copyPixels(image, image.geometry(), Offset(0));
 }
 

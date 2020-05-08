@@ -151,18 +151,20 @@ bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
                 pxa.px = get_pixel32(src, x, y);
                 pxb.px = get_pixel32(dst, x, y);;
                 if(get_pixel32(src, x, y) != get_pixel32(dst, x, y)) {
-                    error = true;
-                    SDL_Log( "CompareSurface:(%d,%d) -> Expected RGBA (%u, %u, %u, %u), got (%u, %u, %u, %u)",
-                             x, y,
-                             pxa.comp.r,
-                             pxa.comp.g,
-                             pxa.comp.b,
-                             pxa.comp.a,
-                             pxb.comp.r,
-                             pxb.comp.g,
-                             pxb.comp.b,
-                             pxb.comp.a);
-                    break;
+                    if ( pxa.comp.r != pxb.comp.r || pxa.comp.g != pxb.comp.g || pxa.comp.b != pxb.comp.b ) {
+                        error = true;
+                        SDL_Log( "CompareSurface:(%d,%d) -> Expected RGBA (%u, %u, %u, %u), got (%u, %u, %u, %u)",
+                                 x, y,
+                                 pxa.comp.r,
+                                 pxa.comp.g,
+                                 pxa.comp.b,
+                                 pxa.comp.a,
+                                 pxb.comp.r,
+                                 pxb.comp.g,
+                                 pxb.comp.b,
+                                 pxb.comp.a);
+                        break;
+                    }
                 }
             }
         SDL_UnlockSurface(src);

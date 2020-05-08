@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named SDL_CRT_Filter
+# Target rules for targets named CMAKE_PROJECT_NAME
 
 # Build rule for target.
-SDL_CRT_Filter: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 SDL_CRT_Filter
-.PHONY : SDL_CRT_Filter
+CMAKE_PROJECT_NAME: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CMAKE_PROJECT_NAME
+.PHONY : CMAKE_PROJECT_NAME
 
 # fast build rule for target.
-SDL_CRT_Filter/fast:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/build
-.PHONY : SDL_CRT_Filter/fast
+CMAKE_PROJECT_NAME/fast:
+	$(MAKE) -f CMakeFiles/CMAKE_PROJECT_NAME.dir/build.make CMakeFiles/CMAKE_PROJECT_NAME.dir/build
+.PHONY : CMAKE_PROJECT_NAME/fast
 
 #=============================================================================
 # Target rules for targets named SDL2_CRT_Tests
@@ -155,7 +155,7 @@ CRTmain.o: CRTmain.cpp.o
 
 # target to build an object file
 CRTmain.cpp.o:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.o
+	$(MAKE) -f CMakeFiles/CMAKE_PROJECT_NAME.dir/build.make CMakeFiles/CMAKE_PROJECT_NAME.dir/CRTmain.cpp.o
 .PHONY : CRTmain.cpp.o
 
 CRTmain.i: CRTmain.cpp.i
@@ -164,7 +164,7 @@ CRTmain.i: CRTmain.cpp.i
 
 # target to preprocess a source file
 CRTmain.cpp.i:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.i
+	$(MAKE) -f CMakeFiles/CMAKE_PROJECT_NAME.dir/build.make CMakeFiles/CMAKE_PROJECT_NAME.dir/CRTmain.cpp.i
 .PHONY : CRTmain.cpp.i
 
 CRTmain.s: CRTmain.cpp.s
@@ -173,7 +173,7 @@ CRTmain.s: CRTmain.cpp.s
 
 # target to generate assembly for a file
 CRTmain.cpp.s:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.s
+	$(MAKE) -f CMakeFiles/CMAKE_PROJECT_NAME.dir/build.make CMakeFiles/CMAKE_PROJECT_NAME.dir/CRTmain.cpp.s
 .PHONY : CRTmain.cpp.s
 
 # Help Target
@@ -183,7 +183,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... SDL_CRT_Filter"
+	@echo "... CMAKE_PROJECT_NAME"
 	@echo "... edit_cache"
 	@echo "... SDL2_CRT_Tests"
 	@echo "... CHAR_ROM_GEN"

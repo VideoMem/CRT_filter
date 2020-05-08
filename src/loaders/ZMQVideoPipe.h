@@ -1,0 +1,8 @@
+//
+// Created by sebastian on 8/5/20.
+//
+
+#ifndef SDL_CRT_FILTER_ZMQVIDEOPIPE_H
+#define SDL_CRT_FILTER_ZMQVIDEOPIPE_H
+
+#endif //SDL_CRT_FILTER_ZMQVIDEOPIPE_H
