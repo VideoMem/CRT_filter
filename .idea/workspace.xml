@@ -14,15 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/dummyREP.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/MagickAppTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickAppTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/MagickImageAPITest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickImageAPITest.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -55,6 +55,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CMakeLists.txt" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -101,7 +102,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+  <component name="RunManager" selected="Catch.ZMQ API (1)">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -115,12 +116,6 @@
       </method>
     </configuration>
     <configuration name="Filesystem Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][Filesystem]" TEST_METHOD="Filesystem Tests" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="SDL2 ConvertSurface Bench" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][BenchMark]" TEST_METHOD="SDL2 ConvertSurface Bench" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -150,7 +145,13 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Surface memcpy Bench" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][BenchMark]" TEST_METHOD="SDL2 Surface memcpy Bench" TEST_MODE="SUITE_TEST">
+    <configuration name="ZMQ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][GNURadio]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ZMQ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2][Magick++]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -161,7 +162,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL_CRT_Filter" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL_CRT_Filter" EXPLICIT_BUILD_TARGET_NAME="all">
+    <configuration name="SDL_CRT_Filter" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL_CRT_Filter" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL_CRT_Filter">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -170,21 +171,21 @@
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.SDL2 Magick++ API" />
-      <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
-      <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
       <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
       <item itemvalue="Catch.Filesystem Tests" />
       <item itemvalue="Catch.SDL2 Magick++ API (1)" />
+      <item itemvalue="Catch.ZMQ API" />
+      <item itemvalue="Catch.ZMQ API (1)" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.ZMQ API (1)" />
+        <item itemvalue="Catch.ZMQ API" />
         <item itemvalue="Catch.SDL2 Magick++ API (1)" />
         <item itemvalue="Catch.Filesystem Tests" />
         <item itemvalue="Catch.SDL2 Magick++ OSD Benchmarks" />
-        <item itemvalue="Catch.SDL2 Surface memcpy Bench" />
-        <item itemvalue="Catch.SDL2 ConvertSurface Bench" />
       </list>
     </recent_temporary>
   </component>
@@ -244,7 +245,7 @@
       <workItem from="1587231202480" duration="3277000" />
       <workItem from="1587244541989" duration="107963000" />
       <workItem from="1588141816301" duration="558000" />
-      <workItem from="1588950860466" duration="1490000" />
+      <workItem from="1588950860466" duration="50780000" />
     </task>
     <servers />
   </component>

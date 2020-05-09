@@ -10,6 +10,7 @@
 #include "MagickImageAPITest.hpp"
 #include "MagickAppTests.hpp"
 //#include "MagickOSDTests.hpp"
+#include "ZMQTests.hpp"
 
 
 
