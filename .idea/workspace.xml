@@ -14,15 +14,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/dummyREP.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -75,19 +69,19 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/tests" />
-      <recent name="$PROJECT_DIR$/tests/emscripten" />
-      <recent name="$PROJECT_DIR$/utils" />
-      <recent name="$PROJECT_DIR$/src/filters" />
-      <recent name="$PROJECT_DIR$/src" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/deprecated" />
       <recent name="$PROJECT_DIR$/cmake-build-debug" />
       <recent name="$PROJECT_DIR$/resources/video" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests" />
+      <recent name="$PROJECT_DIR$/tests/emscripten" />
+      <recent name="$PROJECT_DIR$/utils" />
+      <recent name="$PROJECT_DIR$/src/filters" />
+      <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -245,7 +239,7 @@
       <workItem from="1587231202480" duration="3277000" />
       <workItem from="1587244541989" duration="107963000" />
       <workItem from="1588141816301" duration="558000" />
-      <workItem from="1588950860466" duration="50780000" />
+      <workItem from="1588950860466" duration="76880000" />
     </task>
     <servers />
   </component>
@@ -272,6 +266,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
+          <line>155</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
       </default-breakpoints>
