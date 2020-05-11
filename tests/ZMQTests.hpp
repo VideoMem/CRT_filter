@@ -8,17 +8,23 @@
 
 
 TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
-
-   /* SECTION( "ZMQ REQ/REP quantized pipe" ) {
+/*
+    SECTION( "ZMQ REQ/REP complex pipe" ) {
         ZMQVideoPipe zPipe;
-        for(int i = 1e3; i > 0; --i)
+        for(int i = 1e4; i > 0; --i)
             zPipe.testPassThru();
-    }*/
+    }
 
-    SECTION( "ZMQ REQ/REP frame pipe" ) {
+    SECTION( "ZMQ REQ/REP quantized pipe" ) {
+        ZMQVideoPipe zPipe;
+        for(int i = 1e4; i > 0; --i)
+            zPipe.testPassThruQuant();
+    }
+*/
+    SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
         ZMQVideoPipe zPipe;
         for(int i = 1e2; i > 0; --i)
-            zPipe.testFramePassThru();
+        zPipe.testFramePassThru();
     }
 
     SECTION( "ZMQ REQ Source" ) {
@@ -54,7 +60,7 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         ZMQVideoPipe zPipe;
         SDL_Surface* sample = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
         sample = SDL_LoadBMP("encoded.bmp");
-        for (int i=1e3; i > 0; --i)
+        for (int i=20; i > 0; --i)
             zPipe.testSendFrame( sample );
         SDL_FreeSurface(sample);
     }
