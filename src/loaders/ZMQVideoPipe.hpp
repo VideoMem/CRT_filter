@@ -9,6 +9,8 @@
 #include <loaders/LazySDL2.hpp>
 #define MAX_RETRIES 3
 #define MAX_WHITE_LEVEL 200
+//#define PIPE_DEBUG_FRAMES
+
 static const int ZMQ_FRAME_SIZE = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
 static const int ZMQ_COMPLEX_SIZE = 2 * ZMQ_FRAME_SIZE;
 
@@ -39,14 +41,16 @@ public:
     static void float_to_frame(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
     void transferEvent();
-
+#ifdef PIPE_DEBUG_FRAMES
     internal_complex_stack_t debug_frames;
+#endif
     bool frameTransfer = false;
     int  byte_index = 0;
     int  copiedBytes = 0;
     void receiveFrame();
     std::string string_to_hex(const std::string& input);
     static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
+    static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
 
 public:
     void testSendFrame( SDL_Surface* surface );
@@ -185,8 +189,10 @@ void ZMQVideoPipe::unquantize(uint8_t &c, float &a, float &b) {
 void ZMQVideoPipe::transferEvent() {
     internal_complex_t stackable = new float[ZMQ_COMPLEX_SIZE];
     memcpy(stackable, internal_store, ZMQ_COMPLEX_SIZE);
+#ifdef PIPE_DEBUG_FRAMES
     debug_frames.push_back(stackable);
-
+#endif
+    SDL_SaveBMP(temporary_frame, "current.bmp");
     float_to_frame(internal_store, temporary_frame);
     SDL_BlitSurface(temporary_frame, nullptr, captured_frame, nullptr);
     frameTransfer = true;
@@ -194,14 +200,13 @@ void ZMQVideoPipe::transferEvent() {
 
 void ZMQVideoPipe::receiveFrame() {
     size_t rx_size = receive( internal );
-   // send( internal, rx_size );
 
     int current_index = byte_index;
     byte_index += rx_size;
 
-    if ( byte_index >= ZMQ_COMPLEX_SIZE ) {
-        SDL_Log("Prepared to transfer frame at %d", byte_index);
-        int remainder = byte_index -  ZMQ_COMPLEX_SIZE;
+    if ( byte_index >= asByteIndex(ZMQ_COMPLEX_SIZE) ) {
+//        SDL_Log("Prepared to transfer frame at %d", byte_index);
+        int remainder = byte_index -  asByteIndex(ZMQ_COMPLEX_SIZE);
         int toCopy_size = rx_size - remainder;
 
         memcpy(
@@ -215,21 +220,20 @@ void ZMQVideoPipe::receiveFrame() {
         memcpy( internal_store,
                 &internal[asFloatIndex(toCopy_size)],
                  remainder );
-        SDL_Log("Copied %d, bytes to last buffer, %d to new one from a %d bytes total",
-            toCopy_size, remainder, (int) rx_size );
+//        SDL_Log("Copied %d, bytes to last buffer, %d to new one from a %d bytes total",
+//            toCopy_size, remainder, (int) rx_size );
         assert((toCopy_size + remainder) == (int) rx_size);
 
         copiedBytes += toCopy_size;
-        SDL_Log("Copied bytes, ZMQ_COMPLEX_SIZE, %d, %d",
-                copiedBytes, ZMQ_COMPLEX_SIZE );
-        assert(copiedBytes  == ZMQ_COMPLEX_SIZE);
+//        SDL_Log("Copied bytes, ZMQ_COMPLEX_SIZE, %d, %d",
+//                copiedBytes, ZMQ_COMPLEX_SIZE );
+        assert(copiedBytes  == asByteIndex(ZMQ_COMPLEX_SIZE));
 
         copiedBytes = remainder;
         byte_index = remainder;
     } else {
         memcpy(&internal_store[asFloatIndex(current_index)], internal, rx_size );
         copiedBytes += rx_size;
-//        byte_index += rx_size;
     }
 }
 
@@ -246,7 +250,7 @@ void ZMQVideoPipe::send( float *src, int size ) {
 void ZMQVideoPipe::testSendFrame(SDL_Surface *surface) {
     auto* front_frame = new float[ ZMQ_COMPLEX_SIZE ];
     frame_to_float( surface, front_frame );
-    send(front_frame, ZMQ_COMPLEX_SIZE );
+    send(front_frame, asByteIndex(ZMQ_COMPLEX_SIZE) );
 
     delete [] front_frame;
 }
@@ -288,27 +292,29 @@ void ZMQVideoPipe::testPassThruQuant() {
 void ZMQVideoPipe::testFramePassThru() {
     std::deque<SDL_Surface*> received_frames;
     //stores  frames
-    for (int i =0; i < 10; ++i) {
+    for (int i =0; i < 2; ++i) {
         SDL_Surface* inst = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
         received_frames.push_back(inst);
         testReceiveFrame();
         SDL_BlitSurface( captured_frame, nullptr, inst, nullptr );
     }
 
+#ifdef PIPE_DEBUG_FRAMES
     //send packetized sequence of complex numbers
     for(auto & debug_frame : debug_frames) {
         send(debug_frame, ZMQ_COMPLEX_SIZE);
         delete [] debug_frame;
     }
     debug_frames.clear();
-/*
+#endif
+
     //send packetized sequence of images
     for(auto & received_frame : received_frames) {
         testSendFrame( received_frame );
         SDL_FreeSurface( received_frame );
     }
     received_frames.clear();
-*/
+
 }
 
 
