@@ -34,9 +34,12 @@ public:
     internal_complex_t internal_store;
     static inline float translate( float &a ) { float r = (a + 1) / 2; return r > 0? r: 0.0;  }
     static inline float untranslate( float &a ) { return (a * 2) - 1;  }
+    static inline uint8_t quantize_amplitude( float &a, float &b );
+    static inline void unquantize_amplitude( uint8_t &c, float &a, float &b );
     static inline uint8_t quantize( float &a, float &b );
-    static inline char quantizePolar( float &a, float &b );
     static inline void unquantize( uint8_t &c, float &a, float &b );
+
+    static inline char quantizePolar( float &a, float &b );
     static void frame_to_float(SDL_Surface* surface, float arr[]);
     static void float_to_frame(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
@@ -51,6 +54,7 @@ public:
     std::string string_to_hex(const std::string& input);
     static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
     static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
+    static inline double angle( float a, float b );
 
 public:
     void testSendFrame( SDL_Surface* surface );
@@ -82,6 +86,8 @@ ZMQVideoPipe::~ZMQVideoPipe() {
     delete [] internal;
     SDL_FreeSurface(captured_frame);
     SDL_FreeSurface( temporary_frame );
+    socket_rep->close();
+    socket->close();
     delete(socket);
     delete(context);
     delete(socket_rep);
@@ -152,17 +158,70 @@ size_t ZMQVideoPipe::receive( float* raw_stream ) {
 }
 
 
-char ZMQVideoPipe::quantizePolar(float &a, float &b) {
-    double intensity = sqrt( pow( a, 2) + pow ( b, 2 ) ) / sqrt(2);
-    double angle = atan(a / b ) /  M_PI ;
-    SDL_Log(" q: %f, %f", intensity, angle );
-    char msb = round(intensity * MAX_WHITE_LEVEL );
-    char lsb = round(angle * MAX_WHITE_LEVEL ) / 16;
-    char assy = (msb & 0xF0) | (lsb & 0x0F);
-    return assy;
+double ZMQVideoPipe::angle(float real, float imaginary) {
+    int quadrant = 0;
+    if(real > 0 && imaginary > 0)
+        quadrant = 1;
+    if(real < 0 && imaginary > 0)
+        quadrant = 2;
+    if(real < 0 && imaginary < 0)
+        quadrant = 3;
+    if(real > 0 && imaginary < 0)
+        quadrant = 4;
+
+    assert(real != 0);
+    double ratio = imaginary / real;
+    double q1angle = atan( ratio ) + M_PI_2;
+    double angle = 0;
+    switch (quadrant) {
+        case 1:
+            angle = q1angle;
+            break;
+        case 2:
+            angle = q1angle + M_PI;
+            break;
+        case 3:
+            angle = q1angle + M_PI;
+            break;
+        case 4:
+            angle = q1angle;
+            break;
+        default:
+            break;
+    }
+
+    if(angle < 0 && angle > M_PI * 2){
+        SDL_Log("Angle range error real, imaginary: %f, %f, %f", angle, real, imaginary );
+        assert(false);
+    }
+    return angle;
 }
 
-uint8_t ZMQVideoPipe::quantize(float &a, float &b) {
+uint8_t ZMQVideoPipe::quantize(float &real, float &imaginary) {
+    double theta = angle(real, imaginary);
+    double theta_normalized = theta / (2 * M_PI);
+    uint8_t quant  = round(theta_normalized * MAX_WHITE_LEVEL);
+    return quant;
+}
+
+void ZMQVideoPipe::unquantize(uint8_t &quant, float &real, float &imaginary) {
+    double theta_normalized = (double) quant  / MAX_WHITE_LEVEL ;
+    double theta = theta_normalized * 2 * M_PI;
+    double angle = theta;
+    double norm  = 1; // sqrt(2);
+//    if(angle < M_PI) {
+        real = norm * cos(angle);
+        imaginary = norm * sin(angle);
+/*    } else {
+        angle -= M_PI;
+        real = norm * cos(angle);
+        imaginary = norm * sin(angle);
+
+    }
+*/
+}
+
+uint8_t ZMQVideoPipe::quantize_amplitude(float &a, float &b) {
     uint8_t msb[2] = {
             static_cast<uint8_t>((uint8_t)round(translate(a) * MAX_WHITE_LEVEL) & 0xF0),
             static_cast<uint8_t>((uint8_t)round(translate(b) * MAX_WHITE_LEVEL) & 0xF0)
@@ -173,7 +232,7 @@ uint8_t ZMQVideoPipe::quantize(float &a, float &b) {
 }
 
 
-void ZMQVideoPipe::unquantize(uint8_t &c, float &a, float &b) {
+void ZMQVideoPipe::unquantize_amplitude(uint8_t &c, float &a, float &b) {
     uint8_t msb[2] = {
             static_cast<uint8_t>( c & 0xF0),
             static_cast<uint8_t>( c << 4 )

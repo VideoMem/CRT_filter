@@ -6,9 +6,46 @@
 #define SDL_CRT_FILTER_ZMQTESTS_HPP
 #include <loaders/ZMQVideoPipe.hpp>
 
+double quadrant_test(ZMQVideoPipe& zPipe, float a, float b) {
+    float c,d;
+    uint8_t q;
+    q = zPipe.quantize(a, b);
+    zPipe.unquantize(q ,c, d);
+    double error = abs( zPipe.angle(a, b) - zPipe.angle(c, d) );
+    SDL_Log("real input %f, imaginary input %f\n quantized value -> q %d\n-> real result %f, imaginary result %f\n angle input: %f, angle transform: %f error %f", a ,b ,q , c, d, zPipe.angle(a,b), zPipe.angle(c,d), error);
+//    assert( (a > 0 && c < 0) || (a < 0 && c > 0) );
+//    assert( (b > 0 && d < 0) || (b < 0 && d > 0) );
+    //assert(error <  M_PI/2 );
+    return zPipe.angle(c, d);
+}
 
 TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
+
+    SECTION( "VideoPipe FM phase quantization" ) {
+        ZMQVideoPipe zPipe;
+
+        //quadrants
+        quadrant_test(zPipe, 1,1);
+        quadrant_test(zPipe, 1,-1);
+        quadrant_test(zPipe, -1,1);
+        quadrant_test(zPipe, -1,-1);
+
+        //zeroes
+        quadrant_test(zPipe, 0.01,1);
+        quadrant_test(zPipe, 0.01,-1);
+        quadrant_test(zPipe, -0.01,1);
+        quadrant_test(zPipe, -0.01,-1);
+        quadrant_test(zPipe,-1,0.01);
+        quadrant_test(zPipe, 1,0.01);
+        quadrant_test(zPipe,-1,-0.01);
+        quadrant_test(zPipe, 1,-0.01);
 /*
+        for(float x = -1; x < 1; x+=0.1)
+            for(float y = -1; y < 1; y+=0.1)
+                quadrant_test(zPipe, x,y);
+ */
+    }
+
     SECTION( "ZMQ REQ/REP complex pipe" ) {
         ZMQVideoPipe zPipe;
         for(int i = 1e2; i > 0; --i)
@@ -20,7 +57,7 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         for(int i = 1e2; i > 0; --i)
             zPipe.testPassThruQuant();
     }
-  */
+
     SECTION( "ZMQ REQ Source" ) {
         ZMQVideoPipe zPipe;
         SDL_Surface* sample = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
@@ -49,7 +86,7 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         SDL_FreeSurface(recover);
     }
 
-*/
+
     SECTION( "ZMQ REP Sink" ) {
         ZMQVideoPipe zPipe;
         SDL_Surface* sample = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
@@ -86,12 +123,12 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
-        /*
+
         sample = SDL_LoadBMP("loop_dropped.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
-*/
- /*
+
+
         sample = SDL_LoadBMP("loop_noisy.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
@@ -103,9 +140,10 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         sample = SDL_LoadBMP("loop_blurry.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
-*/
+
         SDL_FreeSurface(sample);
     }
+*/
 
     SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
         ZMQVideoPipe zPipe;
