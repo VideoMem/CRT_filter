@@ -66,7 +66,6 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         SDL_SaveBMP(sample, "encoded.bmp");
         SDL_FreeSurface(sample);
     }
-/*
 
     SECTION( "GNURadio surface to complex, complex to surface") {
         ZMQVideoPipe zPipe;
@@ -95,15 +94,11 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
-        sample = SDL_LoadBMP("loop_backwards.bmp");
+        sample = SDL_LoadBMP("loop_blurry.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
         sample = SDL_LoadBMP("loop_copied.bmp");
-        for (int i=3; i > 0; --i)
-            zPipe.testSendFrame( sample );
-
-        sample = SDL_LoadBMP("loop_blurry.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
@@ -119,35 +114,30 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
+        sample = SDL_LoadBMP("loop_flip.bmp");
+        for (int i=3; i > 0; --i)
+            zPipe.testSendFrame( sample );
+
         sample = SDL_LoadBMP("loop_flipflop.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
-
-
-        sample = SDL_LoadBMP("loop_dropped.bmp");
-        for (int i=3; i > 0; --i)
-            zPipe.testSendFrame( sample );
-
 
         sample = SDL_LoadBMP("loop_noisy.bmp");
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
-        sample = SDL_LoadBMP("loop_reversed.bmp");
+        sample = SDL_LoadBMP("loop_webp.bmp");
+        assert(sample != nullptr);
         for (int i=3; i > 0; --i)
             zPipe.testSendFrame( sample );
 
-        sample = SDL_LoadBMP("loop_blurry.bmp");
-        for (int i=3; i > 0; --i)
-            zPipe.testSendFrame( sample );
 
         SDL_FreeSurface(sample);
     }
-*/
 
     SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
         ZMQVideoPipe zPipe;
-        for(int i = 1e2; i > 0; --i)
+        for(int i = 1e6; i > 0; --i)
             zPipe.testFramePassThru();
     }
 
