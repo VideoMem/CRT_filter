@@ -5,6 +5,8 @@
 #ifndef SDL_CRT_FILTER_ZMQTESTS_HPP
 #define SDL_CRT_FILTER_ZMQTESTS_HPP
 #include <loaders/ZMQVideoPipe.hpp>
+#include <loaders/ZMQLoader.hpp>
+#include <thread>
 
 double quadrant_test(ZMQVideoPipe& zPipe, float a, float b) {
     float c,d;
@@ -20,6 +22,16 @@ double quadrant_test(ZMQVideoPipe& zPipe, float a, float b) {
 }
 
 TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
+
+    SECTION( "Wav File handler" ) {
+        size_t size = 1024;
+        char* data = new char[size];
+        memset(data, 0, size);
+        ZMQVideoPipe zPipe;
+        zPipe.wave.setFM();
+        zPipe.wave.write("test.wav", data, size);
+        SDL_Log("head:\n%s", zPipe.wave.getInfo().c_str());
+    }
 
     SECTION( "VideoPipe FM phase quantization" ) {
         ZMQVideoPipe zPipe;
@@ -78,17 +90,29 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         zPipe.frame_to_float( sample, copy );
         zPipe.float_to_frame( copy, recover );
         SDL_SaveBMP(recover, "error.bmp");
-
+        auto* wave = new uint8_t[Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT];
+        auto* hoo = new uint8_t[Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT];
+        size_t siz = zPipe.surface_to_wave( sample, wave );
+        zPipe.wave.setFM();
+        zPipe.wave.write("encoded.wav", wave, siz );
+        SDL_Log("->>> encoded:\n%s", zPipe.wave.getInfo().c_str());
+        zPipe.wave.read("encoded_mess.wav", hoo );
+        zPipe.wave_to_surface( hoo, sample );
+        SDL_SaveBMP(recover, "encoded_mess.bmp");
+        delete [] wave;
         //REQUIRE(ZMQVideoPipe::CompareSurface(sample, recover));
         delete [] copy;
         SDL_FreeSurface(sample);
         SDL_FreeSurface(recover);
     }
 
-
     SECTION( "ZMQ REP Sink" ) {
         ZMQVideoPipe zPipe;
         SDL_Surface* sample = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+
+        sample = SDL_LoadBMP("phone_test.bmp");
+        for (int i=6; i > 0; --i)
+            zPipe.testSendFrame( sample );
 
         sample = SDL_LoadBMP("loop.bmp");
         for (int i=3; i > 0; --i)
@@ -142,5 +166,33 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
     }
 
 }
+
+void send_frame(ZMQVideoPipe* zPipe) {
+    while(true)
+    zPipe->pushFrame();
+}
+
+void pull_frame(ZMQLoader* zLoader) {
+    while(true)
+    zLoader->pullFrame();
+}
+
+TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
+    SECTION( "ZMQ Loader inproc data flow" ) {
+        Config cfg;
+        ZMQLoader zLoader;
+        cfg.initResources(zLoader);
+        ZMQVideoPipe zPipe;
+        //BaseApp app(zLoader);
+        //app.Standby();
+        std::thread radio_tx(send_frame, &zPipe);
+        while(true) {
+            zLoader.pullFrame();
+            //app.Standby();
+        }
+        radio_tx.join();
+    }
+}
+
 
 #endif //SDL_CRT_FILTER_ZMQTESTS_HPP

@@ -7,6 +7,9 @@
 #include <ResourceRoller.hpp>
 #include <SDL2/SDL.h>
 #include <fstream>
+#include <picosha2.h>
+
+#define MAX_WHITE_LEVEL 200
 
 class Loader: public ResourceRoller {
 public:
@@ -111,7 +114,58 @@ public:
     static const Uint32 cmask = 0x00ffffff;
 #endif
 
+    size_t surface_to_wave(SDL_Surface *surface, uint8_t *wav);
+    void wave_to_surface(uint8_t *wav, SDL_Surface *surface);
+    static std::string sha256Log(uint8_t data[], size_t len);
+
+    void wave_to_surface(uint8_t *wav, SDL_Surface *surface, int flag);
 };
+
+size_t Loader::surface_to_wave( SDL_Surface *surface, uint8_t *wav ) {
+    size_t area = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
+    Uint32 R, G, B;
+    //double luma;
+    for (int x = 0; x < Config::NKERNEL_WIDTH; ++x)
+        for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
+            Uint32 pixel = get_pixel32(surface, x, y);
+            comp(&pixel, &R, &G, &B);
+            int media = static_cast<int>(R + G + B) / 3;
+            wav[( y * Config::NKERNEL_WIDTH ) + x] = media;// + (0xFF - MAX_WHITE_LEVEL) / 2;
+            //toLuma(&luma, &R, &G, &B);
+            //int lumaInt = luma * MAX_WHITE_LEVEL + (0xFF - MAX_WHITE_LEVEL)/4;
+            //wav[x * y] = lumaInt > 0xFF? 0xFF: lumaInt;
+        }
+    return area;
+}
+
+void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface, int flag ) {
+    size_t size = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
+    SDL_Log("DEBUG: wave_to_surface, input sha256: %s", sha256Log(wav, size).c_str());
+    wave_to_surface(wav, surface);
+}
+
+void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
+    SDL_Surface* temporary_surface = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
+    blank(temporary_surface);
+    Uint32 pixel = 0xFFFFFFFF;
+    Uint32 alpha = 0xFF;
+    for (int x = 0; x < Config::NKERNEL_WIDTH; ++x) {
+        for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
+            auto wsample = wav[( y * Config::NKERNEL_WIDTH ) + x];
+            Uint32 sample = wsample;// - (0xFF - MAX_WHITE_LEVEL) / 2;
+            toPixel(&pixel, &sample, &sample, &sample);
+            //printf("px %u, sm %u ", pixel, sample);
+            put_pixel32(temporary_surface, x, y, pixel);
+        }
+    }
+    printf("\n");
+    //SDL_SetSurfaceAlphaMod(temporary_surface, 0xff);
+    SDL_SetSurfaceBlendMode(temporary_surface, SDL_BLENDMODE_NONE);
+    SDL_SaveBMP(temporary_surface, "Debug.bmp");
+    SDL_BlitSurface(temporary_surface, nullptr, surface, nullptr);
+    SDL_FreeSurface(temporary_surface);
+}
+
 
 SDL_Surface* Loader::AllocateSurface(int w, int h, SDL_PixelFormat& format) {
     SDL_Surface* ns = SDL_CreateRGBSurface(0, w, h, 32,
@@ -232,6 +286,14 @@ SDL_Rect Loader::SmallerBlitArea(SDL_Surface *src, SDL_Surface *dst) {
 void Loader::SurfacePixelsCopy(SDL_Surface *src, SDL_Surface *dst) {
     size_t area = src->w * src->h * sizeof(Uint32);
     memcpy( dst->pixels , src->pixels, area );
+}
+
+std::string Loader::sha256Log(uint8_t *data, size_t len) {
+    picosha2::hash256_one_by_one hasher;
+    hasher.process(data, &data[len]);
+    hasher.finish();
+    std::string hex_str = picosha2::get_hash_hex_string(hasher);
+    return hex_str;
 }
 
 #endif //SDL_CRT_FILTER_LOADER_HPP

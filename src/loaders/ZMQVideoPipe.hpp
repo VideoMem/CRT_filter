@@ -7,8 +7,10 @@
 #include <zmq.hpp>
 #include <pmt/pmt.h>
 #include <loaders/LazySDL2.hpp>
+#include <loaders/fmt_tools/WaveFile.hpp>
+#include <submodules/lpc/lpclient/lpc.hpp>
 #define MAX_RETRIES 3
-#define MAX_WHITE_LEVEL 200
+
 //#define PIPE_DEBUG_FRAMES
 
 static const int ZMQ_FRAME_SIZE = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
@@ -19,6 +21,8 @@ typedef std::deque<internal_complex_t> internal_complex_stack_t;
 
 class ZMQVideoPipe: public Loader {
 public:
+    Worker* thread_client;
+    WaveIO wave;
     SDL_Surface* temporary_frame;
     SDL_Surface* captured_frame;
     void init();
@@ -34,16 +38,19 @@ public:
     internal_complex_t internal_store;
     static inline float translate( float &a ) { float r = (a + 1) / 2; return r > 0? r: 0.0;  }
     static inline float untranslate( float &a ) { return (a * 2) - 1;  }
-    static inline uint8_t quantize_amplitude( float &a, float &b );
-    static inline void unquantize_amplitude( uint8_t &c, float &a, float &b );
+
     static inline uint8_t quantize( float &a, float &b );
     static inline void unquantize( uint8_t &c, float &a, float &b );
 
-    static inline char quantizePolar( float &a, float &b );
+    static inline uint8_t quantize_amplitude( float &a, float &b );
+    static inline void unquantize_amplitude( uint8_t &c, float &a, float &b );
+
     static void frame_to_float(SDL_Surface* surface, float arr[]);
     static void float_to_frame(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
     void transferEvent();
+    //static size_t surface_to_wave(SDL_Surface* surface, uint8_t *wav);
+    //static void wave_to_surface(uint8_t* wav, SDL_Surface* surface);
 #ifdef PIPE_DEBUG_FRAMES
     internal_complex_stack_t debug_frames;
 #endif
@@ -59,6 +66,7 @@ public:
 public:
     void testSendFrame( SDL_Surface* surface );
     void testReceiveFrame() { while(!frameTransfer) receiveFrame(); frameTransfer = false; }
+    void pushFrame();
     void testPassThru();
     void testPassThruQuant();
     void testFramePassThru();
@@ -92,6 +100,7 @@ ZMQVideoPipe::~ZMQVideoPipe() {
     delete(context);
     delete(socket_rep);
     delete(context_rep);
+    delete(thread_client);
 }
 
 ZMQVideoPipe::ZMQVideoPipe() {
@@ -120,7 +129,8 @@ void ZMQVideoPipe::init() {
     socket = new zmq::socket_t( *context, ZMQ_REQ );
     context_rep = new zmq::context_t(1);
     socket_rep = new zmq::socket_t(*context_rep, ZMQ_REP);
-
+    thread_client = new Worker("tcp://localhost:5133");
+    thread_client->setName("Internal thread communicator");
     try {
         socket->connect ("tcp://localhost:5656");
     } catch (zmq::error_t &e) {
@@ -169,8 +179,8 @@ double ZMQVideoPipe::angle(float real, float imaginary) {
     if(real > 0 && imaginary < 0)
         quadrant = 4;
 
-    assert(real != 0);
-    double ratio = imaginary / real;
+    if (real == 0) real = 1e-6;
+    assert(real != 0); double ratio = imaginary / real;
     double q1angle = atan( ratio ) + M_PI_2;
     double angle = 0;
     switch (quadrant) {
@@ -208,17 +218,9 @@ void ZMQVideoPipe::unquantize(uint8_t &quant, float &real, float &imaginary) {
     double theta_normalized = (double) quant  / MAX_WHITE_LEVEL ;
     double theta = theta_normalized * 2 * M_PI;
     double angle = theta;
-    double norm  = 1; // sqrt(2);
-//    if(angle < M_PI) {
-        real = norm * cos(angle);
-        imaginary = norm * sin(angle);
-/*    } else {
-        angle -= M_PI;
-        real = norm * cos(angle);
-        imaginary = norm * sin(angle);
-
-    }
-*/
+    double norm  = sqrt(2);
+    real = norm * cos(angle);
+    imaginary = norm * sin(angle);
 }
 
 uint8_t ZMQVideoPipe::quantize_amplitude(float &a, float &b) {
@@ -408,5 +410,14 @@ void ZMQVideoPipe::float_to_frame(float *arr, SDL_Surface *surface ) {
     }
 }
 
+
+void ZMQVideoPipe::pushFrame() {
+    testReceiveFrame();
+    size_t size = captured_frame->w * captured_frame->h;
+    auto stream = new char[size];
+    surface_to_wave(captured_frame, (uint8_t *) stream );
+    thread_client->sendTX(*stream, size);
+    delete[] stream;
+}
 
 #endif //SDL_CRT_FILTER_ZMQVIDEOPIPE_H

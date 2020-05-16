@@ -41,6 +41,9 @@ pkg_check_modules(GRRUNTIME REQUIRED gnuradio-runtime )
 #        PATHS ${PC_GrRuntime_LIBRARY_DIRS}
 #        )
 
+#pthread
+find_package (Threads)
+
 ##executable / link section
 add_executable(${CMAKE_PROJECT_NAME} ${BUILD_TARGET})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${SDL2_LIBRARIES})
@@ -51,3 +54,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${ZeroMQ_LIBRARY})
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${GRRUNTIME_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${GRRUNTIME_LIBRARY})
+
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})

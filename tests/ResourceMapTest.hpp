@@ -35,7 +35,7 @@ TEST_CASE("Resource Map", "[Core]") {
         ResourceAppend(res, "an Iterator");
         ResourceAppend(res, "Cake Day!!");
         for(auto& x : res) {
-           // std::cout << x.first << ", " << x.second.GetName() << std::endl;
+            std::cout << x.first << ", " << x.second.GetName() << std::endl;
             ++count;
         }
         REQUIRE(count == res.size());

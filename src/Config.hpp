@@ -9,16 +9,7 @@
 class Config {
 public:
     static constexpr auto sampleBitmapsFolder = "resources/images";
-    static const nint samples = 6;
     static std::string magick_default_format() { return "BMP"; };
-    const std::string sampleBitmapsNames[6] = {
-            "testCardRGB.bmp",
-            "RCA_Indian_Head_Test_Pattern.bmp"
-  //          "Mantis.png",
-    //        "standby.png",
-      //      "marcosvtar.bmp",
-        //    "alf.bmp"
-    };
 
     static const int NKERNEL_WIDTH  = 640;
     static const int NKERNEL_HEIGHT = 480;
@@ -27,7 +18,18 @@ public:
     static const int TARGET_WIDTH  = 1024 * 4/3;
     static const int TARGET_HEIGHT = 768  * 4/3;
 
+    static const nint samples = 6;
+    const std::string sampleBitmapsNames[6] = {
+            "testCardRGB.bmp",
+            "RCA_Indian_Head_Test_Pattern.bmp"
+            //          "Mantis.png",
+            //        "standby.png",
+            //      "marcosvtar.bmp",
+            //    "alf.bmp"
+    };
+
     nint initResources(ResourceRoller& channels) {
+
         const std::string path  = sampleBitmapsFolder;
         const std::string type = "image";
         auto str = sampleBitmapsNames;

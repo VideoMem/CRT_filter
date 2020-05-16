@@ -1,0 +1,3 @@
+[submodule "submodules/mql-lpclient-latest"]
+	path = submodules/mql-lpclient-latest
+	url = git@github.com:swilwerth/mql-lpclient-latest.git

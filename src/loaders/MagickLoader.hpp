@@ -6,7 +6,7 @@
 #define SDL_CRT_FILTER_MAGICKLOADER_HPP
 #include <Magick++.h>
 #include <loaders/LazySDL2.hpp>
-#include <picosha2.h>
+
 
 
 using namespace Magick;
