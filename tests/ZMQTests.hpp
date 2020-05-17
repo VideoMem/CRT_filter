@@ -161,7 +161,7 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
 
     SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
         ZMQVideoPipe zPipe;
-        for(int i = 1e6; i > 0; --i)
+        for(int i = 10; i > 0; --i)
             zPipe.testFramePassThru();
     }
 
@@ -172,24 +172,22 @@ void send_frame(ZMQVideoPipe* zPipe) {
     zPipe->pushFrame();
 }
 
-void pull_frame(ZMQLoader* zLoader) {
-    while(true)
-    zLoader->pullFrame();
-}
-
 TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
     SECTION( "ZMQ Loader inproc data flow" ) {
         Config cfg;
         ZMQLoader zLoader;
         cfg.initResources(zLoader);
+        BaseApp app(zLoader);
         ZMQVideoPipe zPipe;
-        //BaseApp app(zLoader);
-        //app.Standby();
         std::thread radio_tx(send_frame, &zPipe);
+        SDL_Surface *frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
         while(true) {
             zLoader.pullFrame();
-            //app.Standby();
+            zLoader.GetSurface(frame);
+            app.publish(frame);
+            zPipe.testSendFrame(frame);
         }
+        SDL_FreeSurface(frame);
         radio_tx.join();
     }
 }

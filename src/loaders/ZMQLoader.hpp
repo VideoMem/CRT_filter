@@ -9,13 +9,16 @@
 #include <loaders/fmt_tools/WaveFile.hpp>
 #include <picosha2.h>
 
-class ZMQLoader: public MagickLoader {
+class ZMQLoader: public Loader {
 public:
     WaveIO wave;
     SDL_Surface* current_frame = nullptr;
-    bool readLock = false;
+    volatile bool readLock;
+    volatile bool writeLock;
     zmq::context_t* context = nullptr;
     zmq::socket_t* socket = nullptr;
+    volatile unsigned long rxFrameId;
+    volatile unsigned long rxFrameCurrentId;
 
 public:
     void pullFrame();
@@ -24,14 +27,22 @@ public:
     //bool GetSurface(SDL_Surface* surface) { if(!readLock) surface = SDL_LoadBMP("encoded.bmp"); return true; }
 
     bool GetSurface(SDL_Surface* surface) {
-        while(!readLock);
-        SDL_BlitSurface(current_frame, nullptr, surface, nullptr);
+        while(readLock);
+        writeLock = true;
+        blitFill(current_frame, surface);
+        writeLock = false;
         return true;
     }
-
+    bool frameEventRead() { return rxFrameId != rxFrameCurrentId; }
+    void frameEventReset()  { rxFrameCurrentId = rxFrameId; }
+    bool frameEvent() { if(frameEventRead()) { frameEventReset(); return true; } return false; }
 };
 
 ZMQLoader::ZMQLoader() {
+    readLock = false;
+    writeLock = false;
+    rxFrameId = 0;
+    rxFrameCurrentId = 0;
     current_frame = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
     assert(current_frame != nullptr && "Cannot allocate surface");
     context = new zmq::context_t(1);
@@ -47,6 +58,8 @@ ZMQLoader::~ZMQLoader() {
 }
 
 void ZMQLoader::pullFrame()  {
+    while(writeLock);
+
     readLock = true;
     zmq::message_t request;
     socket->recv(&request);
@@ -54,25 +67,23 @@ void ZMQLoader::pullFrame()  {
     uint8_t* data = new uint8_t[request.size()];
     uint8_t* copy = new uint8_t[request.size()];
     memcpy((void *) data, request.data(), request.size());
-    SDL_Log("request() size: %ld", request.size() );
 
-    SDL_Log("received sha256: %s", Loader::sha256Log(data, request.size()).c_str());
+   // SDL_Log("request() size: %ld", request.size() );
+    //SDL_Log("received sha256: %s", Loader::sha256Log(data, request.size()).c_str());
     blank(current_frame);
-    wave_to_surface(data, current_frame, 1 );
-    SDL_SaveBMP( current_frame, "pull_frame.bmp" );
+    wave_to_surface(data, current_frame );
     surface_to_wave( current_frame, copy );
-    SDL_Log("copied sha256: %s", Loader::sha256Log(copy, request.size()).c_str());
-    //    assert(memcmp(data, copy, request.size()) == 0 && "Non idempotent wave_to_frame(frame_to_wave) conversion allowed");
-    //SDL_Log("Recived data: %s", request.data());
+    //SDL_Log("copied sha256: %s", Loader::sha256Log(copy, request.size()).c_str());
+    assert(memcmp(data, copy, request.size()) == 0 && "Idempotent wave_to_frame(frame_to_wave) conversion allowed");
+    ++rxFrameId;
+
     auto control_message = std::string("200");
     zmq::message_t reply( control_message.size() );
     memcpy ( reply.data(), control_message.c_str(), control_message.size() );
     socket->send(reply);
-
     readLock = false;
     delete [] copy;
     delete [] data;
 }
-
 
 #endif //SDL_CRT_FILTER_ZMQLOADER_HPP

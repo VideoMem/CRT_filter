@@ -10,6 +10,9 @@
 #include <generators/MagickOSD.hpp>
 #include <BaseApp.hpp>
 #include <chrono>
+#include <loaders/ZMQVideoPipe.hpp>
+#include <loaders/ZMQLoader.hpp>
+
 using namespace std::chrono;
 #define rand() xorshift()
 
@@ -68,6 +71,8 @@ class CRTApp : public BaseApp {
 
     void logStats();
     void update();
+    void update(ZMQVideoPipe *pipe, ZMQLoader *zmqloader);
+    void update(SDL_Surface* surface, ZMQVideoPipe* pipe);
     bool loadMedia();
 
 
@@ -133,6 +138,7 @@ protected:
 
 
     double ripplesync = 1;
+
 };
 
 CRTApp::CRTApp(Loader& l):BaseApp(l) {
@@ -483,11 +489,11 @@ void CRTApp::close() {
 	SDL_FreeSurface( gFrame );
     SDL_FreeSurface( gAux );
 
-	gFrame  = NULL;
-    gBuffer = NULL;
-    gBlank  = NULL;
-    gBack   = NULL;
-    gAux    = NULL;
+	gFrame  = nullptr;
+    gBuffer = nullptr;
+    gBlank  = nullptr;
+    gBack   = nullptr;
+    gAux    = nullptr;
 }
 
 inline double CRTApp::frameRate(double *seconds) {
@@ -505,6 +511,7 @@ void CRTApp::logStats() {
     SDL_Log("%.02f frames/s: %.f seconds elapsed, %d World milli Seconds", frameRate(&seconds), seconds, wTime());
 }
 
+
 void CRTApp::update()  {
     auto s0 = high_resolution_clock::now();
     if(!initialized) postInit();
@@ -514,9 +521,9 @@ void CRTApp::update()  {
     if(gnoise > 0.5) { color = 0; }
     //ghost(gAux, gBlank, delay, power);
 
+
     if(!loop) syncFilter.run(gFrame, gAux, gnoise);
     else      syncFilter.run(gBack , gAux, gnoise);
-
 
     noise(gAux, gBlank);
 
@@ -529,6 +536,10 @@ void CRTApp::update()  {
     //VRipple(gBlank , gBuffer, warp);
     //blend(gAux, gBack, gBlank);
     //Apply the image
+    publish(gBlank);
+
+
+    /*
     SDL_Rect srcsize;
     SDL_Rect dstsize;
     SDL_GetClipRect(gBlank, &srcsize);
@@ -539,9 +550,9 @@ void CRTApp::update()  {
     dstsize.y = srcsize.h - dstsize.h > 0? (srcsize.h - dstsize.h ) / 2: 0;
 
     SDL_BlitScaled(gBlank, &srcsize, gScreenSurface, &dstsize);
-    Loader::SurfacePixelsCopy(gBlank, gBack);
     redraw();
-
+    */
+    Loader::SurfacePixelsCopy(gBlank, gBack);
     ++warp;
     auto s1 = high_resolution_clock::now();
     if((warp % 100) == 0) {
@@ -549,6 +560,20 @@ void CRTApp::update()  {
         auto duration = duration_cast<microseconds>(stop - start);
         SDL_Log("BCS loop %ld µs, total loop %ld µs", duration.count(), d0.count() );
         logStats();
+    }
+}
+
+
+void CRTApp::update(SDL_Surface* recover_frame, ZMQVideoPipe* zPipe) {
+    update();
+    if(loader->frameEvent()) {
+        SDL_Rect srcframe;
+        SDL_Rect dstframe;
+        SDL_GetClipRect(recover_frame, &dstframe);
+        SDL_GetClipRect(gScreenSurface, &srcframe);
+        SDL_BlitScaled(gScreenSurface, &srcframe, recover_frame, &dstframe);
+        zPipe->testSendFrame(recover_frame);
+        loader->GetSurface(gFrame);
     }
 }
 

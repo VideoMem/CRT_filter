@@ -13,7 +13,9 @@
 
 class Loader: public ResourceRoller {
 public:
+    virtual bool GetSurface(SDL_Surface*) { return false; };
     virtual bool GetSurface(SDL_Surface*, SDL_PixelFormat&) { return false; };
+    virtual bool frameEvent() { return false; };
     static SDL_Surface* AllocateSurface(int w, int h);
     static SDL_Surface* AllocateSurface(int w, int h, SDL_PixelFormat &format);
     static SDL_Rect BiggestSurfaceClipRect(SDL_Surface* src, SDL_Surface* dst);
@@ -100,6 +102,23 @@ public:
         SDL_BlitSurface(src, &srcrect, dst, &dstrect);
     }
 
+    static void blitFill(SDL_Surface* src, SDL_Surface* dst) {
+        SDL_Rect srcsize;
+        SDL_Rect dstsize;
+        SDL_GetClipRect(src, &srcsize);
+        SDL_GetClipRect(dst, &dstsize);
+        SDL_Surface* copy = AllocateSurface(srcsize.w, srcsize.h);
+        SDL_BlitSurface(src, nullptr, copy, nullptr);
+        //dstsize.w = dst->w;
+        //dstsize.h = dst->h;
+        //dstsize.x = srcsize.w - dstsize.w > 0? ( srcsize.w - dstsize.w )/ 2: 0;
+        //dstsize.y = srcsize.h - dstsize.h > 0? ( srcsize.h - dstsize.h )/ 2: 0;
+
+        SDL_BlitScaled(copy, &srcsize, dst, &dstsize);
+        SDL_FreeSurface(copy);
+    }
+
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     static const Uint32 rmask = 0xff000000;
         static const Uint32 gmask = 0x00ff0000;
@@ -147,21 +166,16 @@ void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface, int flag ) {
 void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
     SDL_Surface* temporary_surface = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
     blank(temporary_surface);
-    Uint32 pixel = 0xFFFFFFFF;
-    Uint32 alpha = 0xFF;
+    Uint32 pixel = 0;
     for (int x = 0; x < Config::NKERNEL_WIDTH; ++x) {
         for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
             auto wsample = wav[( y * Config::NKERNEL_WIDTH ) + x];
             Uint32 sample = wsample;// - (0xFF - MAX_WHITE_LEVEL) / 2;
             toPixel(&pixel, &sample, &sample, &sample);
-            //printf("px %u, sm %u ", pixel, sample);
             put_pixel32(temporary_surface, x, y, pixel);
         }
     }
-    printf("\n");
-    //SDL_SetSurfaceAlphaMod(temporary_surface, 0xff);
     SDL_SetSurfaceBlendMode(temporary_surface, SDL_BLENDMODE_NONE);
-    SDL_SaveBMP(temporary_surface, "Debug.bmp");
     SDL_BlitSurface(temporary_surface, nullptr, surface, nullptr);
     SDL_FreeSurface(temporary_surface);
 }

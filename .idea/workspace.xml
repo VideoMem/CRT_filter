@@ -14,20 +14,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/loaders/fmt_tools/WaveFile.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/submodules/lpc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/create_test_images.sh" beforeDir="false" afterPath="$PROJECT_DIR$/tests/create_test_images.sh" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -107,7 +102,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.ZMQ Loader">
+  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -249,7 +244,7 @@
       <workItem from="1587231202480" duration="3277000" />
       <workItem from="1587244541989" duration="107963000" />
       <workItem from="1588141816301" duration="558000" />
-      <workItem from="1588950860466" duration="228381000" />
+      <workItem from="1588950860466" duration="246697000" />
     </task>
     <servers />
   </component>
@@ -279,7 +274,7 @@
       <breakpoints>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>209</line>
+          <line>223</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -291,11 +286,6 @@
           <url>file://$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp</url>
           <line>97</line>
           <option name="timeStamp" value="37" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>164</line>
-          <option name="timeStamp" value="60" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

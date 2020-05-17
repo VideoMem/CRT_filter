@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <CRTApp.hpp>
-#include <loaders/MagickLoader.hpp>
+#include <loaders/ZMQLoader.hpp>
+#include <loaders/ZMQVideoPipe.hpp>
+#include <thread>
 
 static void powerOff(CRTApp& crt) {
     //crt.setBlend(true);
@@ -33,10 +35,27 @@ static void powerOff(CRTApp& crt) {
     }
 }
 
-//int main( int argc, char* args[] ) {
+void send_frame(ZMQVideoPipe* zPipe,  ZMQLoader* zLoader) {
+    while(true) {
+        zPipe->pushFrame();
+        while(!zLoader->frameEventRead());
+    }
+}
+
+void recv_frame( ZMQLoader* zLoader, ZMQVideoPipe* zPipe, SDL_Surface* frame ) {
+    while(true) {
+        zLoader->pullFrame();
+    }
+}
+
+//int main( int argc, char* args[] ) {z
 int main(  ) {
-    static MagickLoader loader;
+    SDL_Surface *frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
+    static ZMQLoader loader;
     static CRTApp crt = CRTApp(loader);
+    ZMQVideoPipe zPipe;
+    std::thread radio_tx(send_frame, &zPipe, &loader);
+    std::thread radio_rx(recv_frame, &loader, &zPipe, frame);
     crt.Standby();
 
     bool quit = false;
@@ -52,7 +71,7 @@ int main(  ) {
     //Start up SDL and create window
     while(!quit) {
 
-        crt.update();
+        crt.update(frame, &zPipe);
         //Update the surface
 
         crt.setRipple(ripple);
@@ -170,6 +189,7 @@ int main(  ) {
         }
     }
 
+    SDL_FreeSurface(frame);
 	//Free resources and close SDL
 	return 0;
 }

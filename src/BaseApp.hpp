@@ -59,6 +59,10 @@ public:
         redraw();
     }
 
+    void publish(SDL_Surface *surface) {
+        Loader::blitFill(surface, gScreenSurface);
+        redraw();
+    }
 
 protected:
     Loader* loader;
