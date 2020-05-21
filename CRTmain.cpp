@@ -38,7 +38,7 @@ static void powerOff(CRTApp& crt) {
 void send_frame(ZMQVideoPipe* zPipe,  ZMQLoader* zLoader) {
     while(true) {
         zPipe->pushFrame();
-        while(!zLoader->frameEventRead());
+        //while(!zLoader->frameEventRead());
     }
 }
 

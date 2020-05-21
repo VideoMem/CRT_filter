@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
+      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
     </generated>
   </component>
@@ -14,14 +14,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -102,7 +101,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+  <component name="RunManager" selected="Catch.ZMQ API (1)">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -134,6 +133,12 @@
       </method>
     </configuration>
     <configuration name="SDL2 Magick++ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Magick++][App]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ZMQ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][GNURadio]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -177,14 +182,15 @@
       <item itemvalue="Catch.ZMQ Loader" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
+      <item itemvalue="Catch.ZMQ API (1)" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.ZMQ API (1)" />
+        <item itemvalue="Catch.ZMQ API" />
         <item itemvalue="Catch.ZMQ Loader" />
         <item itemvalue="Catch.ZMQ API" />
-        <item itemvalue="Catch.ZMQ API" />
         <item itemvalue="Catch.SDL2 Magick++ API (1)" />
-        <item itemvalue="Catch.Filesystem Tests" />
       </list>
     </recent_temporary>
   </component>
@@ -244,7 +250,8 @@
       <workItem from="1587231202480" duration="3277000" />
       <workItem from="1587244541989" duration="107963000" />
       <workItem from="1588141816301" duration="558000" />
-      <workItem from="1588950860466" duration="246697000" />
+      <workItem from="1588950860466" duration="252033000" />
+      <workItem from="1589811890008" duration="15630000" />
     </task>
     <servers />
   </component>

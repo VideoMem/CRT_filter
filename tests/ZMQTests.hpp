@@ -161,7 +161,7 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
 
     SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
         ZMQVideoPipe zPipe;
-        for(int i = 10; i > 0; --i)
+        for(int i = 1e4; i > 0; --i)
             zPipe.testFramePassThru();
     }
 

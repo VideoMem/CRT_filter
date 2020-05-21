@@ -536,7 +536,7 @@ void CRTApp::update()  {
     //VRipple(gBlank , gBuffer, warp);
     //blend(gAux, gBack, gBlank);
     //Apply the image
-    publish(gBlank);
+    publish(gBuffer);
 
 
     /*
