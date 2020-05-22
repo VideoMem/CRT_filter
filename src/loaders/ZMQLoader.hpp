@@ -9,12 +9,15 @@
 #include <loaders/fmt_tools/WaveFile.hpp>
 #include <picosha2.h>
 
-class ZMQLoader: public Loader {
+class ZMQLoader: public MagickLoader {
 public:
     WaveIO wave;
     SDL_Surface* current_frame = nullptr;
+    SDL_Surface* cache_frame = nullptr;
+    SDL_Surface* last_cache = nullptr;
     volatile bool readLock;
     volatile bool writeLock;
+    volatile bool ready;
     zmq::context_t* context = nullptr;
     zmq::socket_t* socket = nullptr;
     volatile unsigned long rxFrameId;
@@ -26,6 +29,15 @@ public:
     ~ZMQLoader();
     //bool GetSurface(SDL_Surface* surface) { if(!readLock) surface = SDL_LoadBMP("encoded.bmp"); return true; }
 
+    void pushCache(SDL_Surface* frame) { SurfacePixelsCopy( frame, cache_frame ); ready = true; }
+
+    void GetRAWSurface(SDL_Surface* surface) {
+        //while(readLock);
+        writeLock = true;
+        SurfacePixelsCopy(current_frame, surface);
+        writeLock = false;
+    }
+
     bool GetSurface(SDL_Surface* surface) {
         while(readLock);
         writeLock = true;
@@ -36,15 +48,20 @@ public:
     bool frameEventRead() { return rxFrameId != rxFrameCurrentId; }
     void frameEventReset()  { rxFrameCurrentId = rxFrameId; }
     bool frameEvent() { if(frameEventRead()) { frameEventReset(); return true; } return false; }
+
+    SDL_Surface *cacheFrame();
 };
 
 ZMQLoader::ZMQLoader() {
     readLock = false;
     writeLock = false;
+    ready = false;
     rxFrameId = 0;
     rxFrameCurrentId = 0;
     current_frame = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-    assert(current_frame != nullptr && "Cannot allocate surface");
+    cache_frame = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
+    last_cache = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
+    assert(current_frame != nullptr && cache_frame != nullptr && last_cache != nullptr && "Cannot allocate surface");
     context = new zmq::context_t(1);
     socket = new zmq::socket_t(*context, ZMQ_REP);
     socket->bind ("tcp://0.0.0.0:5133" );
@@ -74,7 +91,7 @@ void ZMQLoader::pullFrame()  {
     wave_to_surface(data, current_frame );
     surface_to_wave( current_frame, copy );
     //SDL_Log("copied sha256: %s", Loader::sha256Log(copy, request.size()).c_str());
-    assert(memcmp(data, copy, request.size()) == 0 && "Idempotent wave_to_frame(frame_to_wave) conversion allowed");
+//    assert(memcmp(data, copy, request.size()) == 0 && "Idempotent wave_to_frame(frame_to_wave) conversion allowed");
     ++rxFrameId;
 
     auto control_message = std::string("200");
@@ -84,6 +101,14 @@ void ZMQLoader::pullFrame()  {
     readLock = false;
     delete [] copy;
     delete [] data;
+}
+
+SDL_Surface *ZMQLoader::cacheFrame() {
+    while(!ready); //if new push
+    //while(CompareSurface(last_cache, cache_frame)); //if new frame
+    ready = false;
+    SurfacePixelsCopy(cache_frame, last_cache);
+    return cache_frame;
 }
 
 #endif //SDL_CRT_FILTER_ZMQLOADER_HPP

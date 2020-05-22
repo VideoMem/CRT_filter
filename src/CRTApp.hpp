@@ -21,7 +21,7 @@ using namespace std::chrono;
 
 class CRTApp : public BaseApp {
     public:
-        explicit CRTApp(Loader& l);
+        explicit CRTApp(Loader &l);
         ~CRTApp();
 
     void setRipple(double r) { ripple = r; }
@@ -72,14 +72,17 @@ class CRTApp : public BaseApp {
     void logStats();
     void update();
     void update(ZMQVideoPipe *pipe, ZMQLoader *zmqloader);
-    void update(SDL_Surface* surface, ZMQVideoPipe* pipe);
+    void update(SDL_Surface *recover_frame, ZMQVideoPipe *zPipe);
     bool loadMedia();
 
 
     void upSpeed() { ++ripplesync; }
     void dwSpeed() { if(ripplesync > 1) --ripplesync; }
 
+    void getCode(SDL_Surface *dst);
+
 protected:
+    volatile bool hold;
     void plane(Uint8* delay, Uint8* power);
 
     void initOSD();
@@ -92,11 +95,12 @@ protected:
     SDL_Surface* gBlank  = nullptr;
     SDL_Surface* gBack   = nullptr;
     SDL_Surface* gAux    = nullptr;
+    SDL_Surface* gCode   = nullptr;
 
     time_t frameTimer;
     time_t execTimer;
     bool createBuffers();
-    bool initialized = false;
+    volatile bool initialized = false;
     void postInit() {
         if(!initialized) {
             createBuffers();
@@ -139,9 +143,10 @@ protected:
 
     double ripplesync = 1;
 
+
 };
 
-CRTApp::CRTApp(Loader& l):BaseApp(l) {
+CRTApp::CRTApp(Loader &l) : BaseApp(l) {
     init();
 }
 
@@ -156,16 +161,17 @@ bool CRTApp::createBuffers() {
     gBack   = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
     gFrame  = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
     gAux    = SDL_ConvertSurface(aux_gBuffer, gScreenSurface->format, 0);
+    gCode = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     SDL_FreeSurface(aux_gBuffer);
 
-    if (gBuffer == nullptr || gBlank == nullptr || gBack == nullptr || gFrame == nullptr || gAux == nullptr)  {
+    if (gBuffer == nullptr || gBlank == nullptr || gBack == nullptr || gFrame == nullptr || gAux == nullptr || gCode == nullptr )  {
         SDL_Log("SDL_CreateRGBSurface() failed: %s", SDL_GetError());
+        assert(false && "Cannot allocate required memory buffers");
         return false;
     }
 
     return true;
 }
-
 
 
 void CRTApp::focusNoise(SDL_Surface *surface) {
@@ -449,6 +455,7 @@ void CRTApp::resetFrameStats() {
 }
 
 void CRTApp::init() {
+    hold=false;
     srand(time(0));
     channel = 0;
     worldTime = 0;
@@ -511,16 +518,23 @@ void CRTApp::logStats() {
     SDL_Log("%.02f frames/s: %.f seconds elapsed, %d World milli Seconds", frameRate(&seconds), seconds, wTime());
 }
 
+void CRTApp::getCode(SDL_Surface *dst) {
+    while(!initialized);
+    loader->GetSurface(gFrame);
+    Loader::blitFill(gFrame, dst);
+}
 
 void CRTApp::update()  {
     auto s0 = high_resolution_clock::now();
+
     if(!initialized) postInit();
 
+
+   // getCode();
     //Uint8 power = 0, delay = 0;
     //if(addGhost) plane(&delay, &power);
     if(gnoise > 0.5) { color = 0; }
     //ghost(gAux, gBlank, delay, power);
-
 
     if(!loop) syncFilter.run(gFrame, gAux, gnoise);
     else      syncFilter.run(gBack , gAux, gnoise);
@@ -539,20 +553,11 @@ void CRTApp::update()  {
     publish(gBuffer);
 
 
-    /*
-    SDL_Rect srcsize;
-    SDL_Rect dstsize;
-    SDL_GetClipRect(gBlank, &srcsize);
-    SDL_GetClipRect(gScreenSurface, &dstsize);
-    dstsize.w = Config::TARGET_WIDTH;
-    dstsize.x = srcsize.w - dstsize.w > 0? (srcsize.w - dstsize.w ) / 2: 0;
-    dstsize.h = Config::TARGET_HEIGHT;
-    dstsize.y = srcsize.h - dstsize.h > 0? (srcsize.h - dstsize.h ) / 2: 0;
-
-    SDL_BlitScaled(gBlank, &srcsize, gScreenSurface, &dstsize);
-    redraw();
-    */
     Loader::SurfacePixelsCopy(gBlank, gBack);
+
+    Loader::blitFill(gBack, gCode);
+
+
     ++warp;
     auto s1 = high_resolution_clock::now();
     if((warp % 100) == 0) {
@@ -564,17 +569,9 @@ void CRTApp::update()  {
 }
 
 
-void CRTApp::update(SDL_Surface* recover_frame, ZMQVideoPipe* zPipe) {
+void CRTApp::update(SDL_Surface *recover_frame, ZMQVideoPipe *zPipe) {
+    zPipe->testSendFrame(recover_frame);
     update();
-    if(loader->frameEvent()) {
-        SDL_Rect srcframe;
-        SDL_Rect dstframe;
-        SDL_GetClipRect(recover_frame, &dstframe);
-        SDL_GetClipRect(gScreenSurface, &srcframe);
-        SDL_BlitScaled(gScreenSurface, &srcframe, recover_frame, &dstframe);
-        zPipe->testSendFrame(recover_frame);
-        loader->GetSurface(gFrame);
-    }
 }
 
 void CRTApp::initOSD() {
@@ -598,5 +595,6 @@ void CRTApp::initOSD() {
 void CRTApp::showOSD() {
 
 }
+
 
 

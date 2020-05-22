@@ -170,13 +170,13 @@ size_t ZMQVideoPipe::receive( float* raw_stream ) {
 
 double ZMQVideoPipe::angle(float real, float imaginary) {
     int quadrant = 0;
-    if(real > 0 && imaginary > 0)
+    if(real >= 0 && imaginary >= 0)
         quadrant = 1;
-    if(real < 0 && imaginary > 0)
+    if(real < 0 && imaginary >= 0)
         quadrant = 2;
     if(real < 0 && imaginary < 0)
         quadrant = 3;
-    if(real > 0 && imaginary < 0)
+    if(real >= 0 && imaginary < 0)
         quadrant = 4;
 
     if (real == 0) real = 1e-6;
@@ -197,6 +197,7 @@ double ZMQVideoPipe::angle(float real, float imaginary) {
             angle = q1angle;
             break;
         default:
+            assert(false && "This quadrant is unexpected");
             break;
     }
 
@@ -218,7 +219,7 @@ void ZMQVideoPipe::unquantize(uint8_t &quant, float &real, float &imaginary) {
     double theta_normalized = (double) quant  / MAX_WHITE_LEVEL ;
     double theta = theta_normalized * 2 * M_PI;
     double angle = theta;
-    double norm  = sqrt(2);
+    double norm  = 1; //sqrt(2);
     real = norm * cos(angle);
     imaginary = norm * sin(angle);
 }

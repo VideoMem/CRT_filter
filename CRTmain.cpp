@@ -35,30 +35,36 @@ static void powerOff(CRTApp& crt) {
     }
 }
 
-void send_frame(ZMQVideoPipe* zPipe,  ZMQLoader* zLoader) {
-    while(true) {
+void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
+    SDL_Log("Frame send thread initialized");
+    while(!*quit) {
         zPipe->pushFrame();
-        //while(!zLoader->frameEventRead());
     }
+    SDL_Log("Frame send thread done!");
 }
 
-void recv_frame( ZMQLoader* zLoader, ZMQVideoPipe* zPipe, SDL_Surface* frame ) {
-    while(true) {
+void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
+    SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    SDL_Log("Frame receive thread initialized.");
+    while(!*quit) {
         zLoader->pullFrame();
+        app->getCode(frame);
+        //SDL_SaveBMP(frame, "frame_debug.bmp");
+        zPipe->testSendFrame(frame);
     }
+    SDL_FreeSurface(frame);
+    SDL_Log("Frame receive thread done!");
 }
 
-//int main( int argc, char* args[] ) {z
+//int main( int argc, char* args[] ) {
 int main(  ) {
-    SDL_Surface *frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
     static ZMQLoader loader;
-    static CRTApp crt = CRTApp(loader);
     ZMQVideoPipe zPipe;
-    std::thread radio_tx(send_frame, &zPipe, &loader);
-    std::thread radio_rx(recv_frame, &loader, &zPipe, frame);
+    static bool quit = false;
+    static CRTApp crt = CRTApp(loader);
+    std::thread radio_tx(send_frame, &quit, &zPipe);
+    std::thread radio_rx(recv_frame, &quit, &loader, &zPipe, &crt);
     crt.Standby();
-
-    bool quit = false;
 
     //Event handler
     SDL_Event e;
@@ -71,9 +77,9 @@ int main(  ) {
     //Start up SDL and create window
     while(!quit) {
 
-        crt.update(frame, &zPipe);
+        //crt.update(frame, &zPipe);
         //Update the surface
-
+        crt.update();
         crt.setRipple(ripple);
         crt.setNoise(noise);
         crt.setContrast(contrast);
@@ -88,6 +94,9 @@ int main(  ) {
                 break;
             } else if( e.type == SDL_KEYDOWN ) {
                 switch (e.key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        quit = true;
+                        break;
                     case SDLK_5:
                         contrast += 0.01;
                         if(contrast > 1) contrast = 1;
@@ -188,8 +197,8 @@ int main(  ) {
             }
         }
     }
-
-    SDL_FreeSurface(frame);
 	//Free resources and close SDL
+	radio_rx.join();
+    radio_tx.join();
 	return 0;
 }

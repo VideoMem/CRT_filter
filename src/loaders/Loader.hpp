@@ -13,8 +13,10 @@
 
 class Loader: public ResourceRoller {
 public:
+    virtual void GetRAWSurface(SDL_Surface *pSurface);
     virtual bool GetSurface(SDL_Surface*) { return false; };
     virtual bool GetSurface(SDL_Surface*, SDL_PixelFormat&) { return false; };
+    virtual void pushCache(SDL_Surface* frame );
     virtual bool frameEvent() { return false; };
     static SDL_Surface* AllocateSurface(int w, int h);
     static SDL_Surface* AllocateSurface(int w, int h, SDL_PixelFormat &format);
@@ -79,6 +81,11 @@ public:
         *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
     }
 
+    inline static void toRGB(const double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
+        const double DbDr = 0.0;
+        toRGB(luma, &DbDr, &DbDr, R, G, B);
+    }
+
     inline static void toRGB(const double *luma, const double *Db, const double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         double fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
         double fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
@@ -107,15 +114,16 @@ public:
         SDL_Rect dstsize;
         SDL_GetClipRect(src, &srcsize);
         SDL_GetClipRect(dst, &dstsize);
-        SDL_Surface* copy = AllocateSurface(srcsize.w, srcsize.h);
-        SDL_BlitSurface(src, nullptr, copy, nullptr);
-        //dstsize.w = dst->w;
-        //dstsize.h = dst->h;
-        //dstsize.x = srcsize.w - dstsize.w > 0? ( srcsize.w - dstsize.w )/ 2: 0;
-        //dstsize.y = srcsize.h - dstsize.h > 0? ( srcsize.h - dstsize.h )/ 2: 0;
+/*
+        if(memcmp(&src, &dst, sizeof(SDL_Rect)) == 0) {
+            SDL_BlitSurface(src, nullptr, dst, nullptr);
+            return;
+        }
+*/
 
-        SDL_BlitScaled(copy, &srcsize, dst, &dstsize);
-        SDL_FreeSurface(copy);
+  //      dstsize.x = srcsize.w - dstsize.w > 0? ( srcsize.w - dstsize.w )/ 2: 0;
+   //     dstsize.y = srcsize.h - dstsize.h > 0? ( srcsize.h - dstsize.h )/ 2: 0;
+        SDL_BlitScaled(src, &srcsize, dst, &dstsize);
     }
 
 
@@ -138,20 +146,22 @@ public:
     static std::string sha256Log(uint8_t data[], size_t len);
 
     void wave_to_surface(uint8_t *wav, SDL_Surface *surface, int flag);
+
+
 };
 
 size_t Loader::surface_to_wave( SDL_Surface *surface, uint8_t *wav ) {
     size_t area = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
     Uint32 R, G, B;
-    //double luma;
+    double luma = 0;
     for (int x = 0; x < Config::NKERNEL_WIDTH; ++x)
         for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
             Uint32 pixel = get_pixel32(surface, x, y);
             comp(&pixel, &R, &G, &B);
             int media = static_cast<int>(R + G + B) / 3;
-            wav[( y * Config::NKERNEL_WIDTH ) + x] = media;// + (0xFF - MAX_WHITE_LEVEL) / 2;
-            //toLuma(&luma, &R, &G, &B);
-            //int lumaInt = luma * MAX_WHITE_LEVEL + (0xFF - MAX_WHITE_LEVEL)/4;
+            int lumaInt = luma * MAX_WHITE_LEVEL;
+            toLuma(&luma, &R, &G, &B);
+            wav[( y * Config::NKERNEL_WIDTH ) + x] = media; //lumaInt;// + (0xFF - MAX_WHITE_LEVEL) / 2;
             //wav[x * y] = lumaInt > 0xFF? 0xFF: lumaInt;
         }
     return area;
@@ -166,11 +176,14 @@ void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface, int flag ) {
 void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
     SDL_Surface* temporary_surface = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
     blank(temporary_surface);
-    Uint32 pixel = 0;
+    Uint32 pixel = 0, R = 0, G = 0, B = 0;
+    double luma = 0;
     for (int x = 0; x < Config::NKERNEL_WIDTH; ++x) {
         for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
             auto wsample = wav[( y * Config::NKERNEL_WIDTH ) + x];
-            Uint32 sample = wsample;// - (0xFF - MAX_WHITE_LEVEL) / 2;
+            Uint32 sample = wsample;
+            luma = (double) wsample / MAX_WHITE_LEVEL;
+            toRGB(&luma, &R, &G, &B);
             toPixel(&pixel, &sample, &sample, &sample);
             put_pixel32(temporary_surface, x, y, pixel);
         }
@@ -221,7 +234,7 @@ bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
                 if(get_pixel32(src, x, y) != get_pixel32(dst, x, y)) {
                     if ( pxa.comp.r != pxb.comp.r || pxa.comp.g != pxb.comp.g || pxa.comp.b != pxb.comp.b ) {
                         error = true;
-                        SDL_Log( "CompareSurface:(%d,%d) -> Expected RGBA (%u, %u, %u, %u), got (%u, %u, %u, %u)",
+                        /*SDL_Log( "CompareSurface:(%d,%d) -> Expected RGBA (%u, %u, %u, %u), got (%u, %u, %u, %u)",
                                  x, y,
                                  pxa.comp.r,
                                  pxa.comp.g,
@@ -230,7 +243,7 @@ bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
                                  pxb.comp.r,
                                  pxb.comp.g,
                                  pxb.comp.b,
-                                 pxb.comp.a);
+                                 pxb.comp.a);*/
                         break;
                     }
                 }
@@ -309,5 +322,12 @@ std::string Loader::sha256Log(uint8_t *data, size_t len) {
     std::string hex_str = picosha2::get_hash_hex_string(hasher);
     return hex_str;
 }
+
+void Loader::GetRAWSurface(SDL_Surface *pSurface) {
+}
+
+void Loader::pushCache(SDL_Surface* frame) {
+}
+
 
 #endif //SDL_CRT_FILTER_LOADER_HPP
