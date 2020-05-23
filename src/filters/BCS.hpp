@@ -29,8 +29,8 @@ void BCSFilter<A>::run(A *surface, A *dest, BCSFilterParams& ctrl) {
     int offset=0;
 
     //duff device makes it slower
-    for ( int y = 0; y < Config::SCREEN_HEIGHT; ++y ) {
-        for ( int x = 0; x < Config::SCREEN_WIDTH; ++x ) {
+    for ( int y = 0; y < dest->h; ++y ) {
+        for ( int x = 0; x < dest->w; ++x ) {
             pixel[offset] = Loader::get_pixel32(surface, x, y) & Loader::cmask;
             pixelOut[offset] = pixelFilter( pixel[offset], ctrl );
             Loader::put_pixel32(dest, x , y, pixelOut[offset]);

@@ -4,6 +4,7 @@
 #include <loaders/ZMQVideoPipe.hpp>
 #include <thread>
 
+
 static void powerOff(CRTApp& crt) {
     //crt.setBlend(true);
     crt.setHRipple(true);
@@ -48,22 +49,22 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
     SDL_Log("Frame receive thread initialized.");
     while(!*quit) {
         zLoader->pullFrame();
+        app->update();
         app->getCode(frame);
-        //SDL_SaveBMP(frame, "frame_debug.bmp");
         zPipe->testSendFrame(frame);
     }
     SDL_FreeSurface(frame);
     SDL_Log("Frame receive thread done!");
 }
 
-//int main( int argc, char* args[] ) {
 int main(  ) {
-    static ZMQLoader loader;
+    SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    static ZMQLoader zLoader;
     ZMQVideoPipe zPipe;
     static bool quit = false;
-    static CRTApp crt = CRTApp(loader);
+    static CRTApp crt = CRTApp(zLoader);
     std::thread radio_tx(send_frame, &quit, &zPipe);
-    std::thread radio_rx(recv_frame, &quit, &loader, &zPipe, &crt);
+    std::thread radio_rx(recv_frame, &quit, &zLoader, &zPipe, &crt);
     crt.Standby();
 
     //Event handler
@@ -77,9 +78,6 @@ int main(  ) {
     //Start up SDL and create window
     while(!quit) {
 
-        //crt.update(frame, &zPipe);
-        //Update the surface
-        crt.update();
         crt.setRipple(ripple);
         crt.setNoise(noise);
         crt.setContrast(contrast);
@@ -198,7 +196,8 @@ int main(  ) {
         }
     }
 	//Free resources and close SDL
-	radio_rx.join();
+	SDL_FreeSurface(frame);
+	//radio_rx.join();
     radio_tx.join();
 	return 0;
 }

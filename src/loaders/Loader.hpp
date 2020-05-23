@@ -8,6 +8,9 @@
 #include <SDL2/SDL.h>
 #include <fstream>
 #include <picosha2.h>
+#include <transcoders/Surfaceable.hpp>
+#include <transcoders/Waveable.hpp>
+#include <transcoders/Pixelable.hpp>
 
 #define MAX_WHITE_LEVEL 200
 
@@ -73,10 +76,12 @@ public:
     }
 
     inline static void toLuma(double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
-        *luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
+        *luma = Pixelable::luma(R, G, B);
+        //*luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
     }
 
     inline static void toChroma(double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
+        return Pixelable::chroma(Db, Dr, R, G, B);
         *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
         *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
     }
@@ -87,9 +92,10 @@ public:
     }
 
     inline static void toRGB(const double *luma, const double *Db, const double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
-        double fR = *luma + 0.000092303716148 * *Db - 0.525912630661865 * *Dr;
-        double fG = *luma - 0.129132898890509 * *Db + 0.267899328207599 * *Dr;
-        double fB = *luma + 0.664679059978955 * *Db - 0.000079202543533 * *Dr;
+        return Pixelable::RGB(luma, Db, Dr, R, G, B);
+        double fR = *luma + 0.0000923037 * *Db - 0.525913          * *Dr;
+        double fG = *luma - 0.129133     * *Db + 0.267899328207599 * *Dr;
+        double fB = *luma + 0.664679     * *Db - 0.0000792025      * *Dr;
         *R = toChar(&fR);
         *G = toChar(&fG);
         *B = toChar(&fB);
@@ -110,6 +116,7 @@ public:
     }
 
     static void blitFill(SDL_Surface* src, SDL_Surface* dst) {
+        return Surfaceable::encode(dst, src);
         SDL_Rect srcsize;
         SDL_Rect dstsize;
         SDL_GetClipRect(src, &srcsize);
@@ -150,7 +157,10 @@ public:
 
 };
 
+//deprecated
 size_t Loader::surface_to_wave( SDL_Surface *surface, uint8_t *wav ) {
+    WaveLuma::decode( wav, surface );
+    return ( surface->w * surface->h );
     size_t area = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
     Uint32 R, G, B;
     double luma = 0;
@@ -167,13 +177,16 @@ size_t Loader::surface_to_wave( SDL_Surface *surface, uint8_t *wav ) {
     return area;
 }
 
+//deprecated
 void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface, int flag ) {
     size_t size = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
     SDL_Log("DEBUG: wave_to_surface, input sha256: %s", sha256Log(wav, size).c_str());
     wave_to_surface(wav, surface);
 }
 
+//deprecated
 void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
+    return WaveLuma::encode( surface, wav );
     SDL_Surface* temporary_surface = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
     blank(temporary_surface);
     Uint32 pixel = 0, R = 0, G = 0, B = 0;
@@ -195,6 +208,7 @@ void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
 
 
 SDL_Surface* Loader::AllocateSurface(int w, int h, SDL_PixelFormat& format) {
+    return Surfaceable::AllocateSurface( w, h, format );
     SDL_Surface* ns = SDL_CreateRGBSurface(0, w, h, 32,
                                 rmask, gmask, bmask, amask);
     SDL_Surface* optimized = SDL_ConvertSurface(ns, &format, 0);
@@ -203,6 +217,7 @@ SDL_Surface* Loader::AllocateSurface(int w, int h, SDL_PixelFormat& format) {
 }
 
 SDL_Surface *Loader::AllocateSurface(int w, int h) {
+    return Surfaceable::AllocateSurface( w, h );
     return SDL_CreateRGBSurface(0, w, h, 32,
             rmask, gmask, bmask, amask);
 }
@@ -210,6 +225,7 @@ SDL_Surface *Loader::AllocateSurface(int w, int h) {
 
 
 bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
+
     struct pxfmt_t {
         Uint8 r;
         Uint8 g;
@@ -255,7 +271,9 @@ bool Loader::CompareSurface(SDL_Surface *src, SDL_Surface *dst) {
     return false;
 }
 
+//deprecated
 Uint32 Loader::get_pixel32(SDL_Surface *surface, int x, int y) {
+    return Pixelable::get32( surface, x, y );
     //Convert the pixels to 32 bit
     auto *pixels = (Uint32 *)surface->pixels;
 
@@ -263,7 +281,9 @@ Uint32 Loader::get_pixel32(SDL_Surface *surface, int x, int y) {
     return pixels[ ( y * surface->w ) + x ];
 }
 
+//deprecated
 void Loader::put_pixel32(SDL_Surface *surface, int x, int y, Uint32 pixel) {
+    return Pixelable::put32( surface, x, y , pixel );
     //Convert the pixels to 32 bit
     auto *pixels = (Uint32 *)surface->pixels;
     //Set the pixel
@@ -310,7 +330,9 @@ SDL_Rect Loader::SmallerBlitArea(SDL_Surface *src, SDL_Surface *dst) {
     return retsize;
 }
 
+//deprecated
 void Loader::SurfacePixelsCopy(SDL_Surface *src, SDL_Surface *dst) {
+    //Surfaceable::encode(dst, src);
     size_t area = src->w * src->h * sizeof(Uint32);
     memcpy( dst->pixels , src->pixels, area );
 }

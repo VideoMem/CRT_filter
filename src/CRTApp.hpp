@@ -137,6 +137,7 @@ protected:
     BCSFilter<SDL_Surface> bcsFilter;
     SyncFilter<SDL_Surface> syncFilter;
     bool loop;
+    volatile bool updateLock;
     DeflectionFilter<SDL_Surface>* deflectionFilter;
     MagickOSD osdFilter;
 
@@ -144,6 +145,7 @@ protected:
     double ripplesync = 1;
 
 
+    void updateScreen();
 };
 
 CRTApp::CRTApp(Loader &l) : BaseApp(l) {
@@ -456,6 +458,7 @@ void CRTApp::resetFrameStats() {
 
 void CRTApp::init() {
     hold=false;
+    updateLock = false;
     srand(time(0));
     channel = 0;
     worldTime = 0;
@@ -521,16 +524,13 @@ void CRTApp::logStats() {
 void CRTApp::getCode(SDL_Surface *dst) {
     while(!initialized);
     loader->GetSurface(gFrame);
-    Loader::blitFill(gFrame, dst);
+    //updateScreen();
+    Loader::blitFill(gBack, dst);
 }
 
-void CRTApp::update()  {
+void CRTApp::updateScreen() {
     auto s0 = high_resolution_clock::now();
-
-    if(!initialized) postInit();
-
-
-   // getCode();
+    // getCode();
     //Uint8 power = 0, delay = 0;
     //if(addGhost) plane(&delay, &power);
     if(gnoise > 0.5) { color = 0; }
@@ -550,15 +550,12 @@ void CRTApp::update()  {
     //VRipple(gBlank , gBuffer, warp);
     //blend(gAux, gBack, gBlank);
     //Apply the image
-    publish(gBuffer);
+    publish(gBlank);
 
 
     Loader::SurfacePixelsCopy(gBlank, gBack);
-
-    Loader::blitFill(gBack, gCode);
-
-
     ++warp;
+
     auto s1 = high_resolution_clock::now();
     if((warp % 100) == 0) {
         auto d0 = duration_cast<microseconds>(s1 - s0);
@@ -568,10 +565,12 @@ void CRTApp::update()  {
     }
 }
 
+void CRTApp::update()  {
 
-void CRTApp::update(SDL_Surface *recover_frame, ZMQVideoPipe *zPipe) {
-    zPipe->testSendFrame(recover_frame);
-    update();
+    if(!initialized) postInit();
+    while(updateLock);
+    updateScreen();
+
 }
 
 void CRTApp::initOSD() {

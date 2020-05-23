@@ -91,7 +91,7 @@ void ZMQLoader::pullFrame()  {
     wave_to_surface(data, current_frame );
     surface_to_wave( current_frame, copy );
     //SDL_Log("copied sha256: %s", Loader::sha256Log(copy, request.size()).c_str());
-//    assert(memcmp(data, copy, request.size()) == 0 && "Idempotent wave_to_frame(frame_to_wave) conversion allowed");
+    assert(memcmp(data, copy, request.size()) == 0 && "Idempotent wave_to_frame(frame_to_wave) conversion allowed");
     ++rxFrameId;
 
     auto control_message = std::string("200");
