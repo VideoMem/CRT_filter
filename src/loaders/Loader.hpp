@@ -11,6 +11,7 @@
 #include <transcoders/Surfaceable.hpp>
 #include <transcoders/Waveable.hpp>
 #include <transcoders/Pixelable.hpp>
+#include <transcoders/Magickable.hpp>
 
 #define MAX_WHITE_LEVEL 200
 
@@ -116,7 +117,8 @@ public:
     }
 
     static void blitFill(SDL_Surface* src, SDL_Surface* dst) {
-        return Surfaceable::encode(dst, src);
+        //return Surfaceable::encode(dst, src);
+        return Magickable::blitScaled(dst, src);
         SDL_Rect srcsize;
         SDL_Rect dstsize;
         SDL_GetClipRect(src, &srcsize);

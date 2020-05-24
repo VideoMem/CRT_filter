@@ -15,6 +15,8 @@ find_package(PkgConfig)
 ## use pkg-config to get hints for 0mq locations
 pkg_check_modules(PC_ZeroMQ REQUIRED libzmq)
 
+pkg_check_modules(VIPS REQUIRED vips-cpp)
+
 ## use the hint from above to find where 'zmq.hpp' is located
 #find_path(ZeroMQ_INCLUDE_DIR
 #        NAMES zmq.hpp
@@ -54,5 +56,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${ZeroMQ_LIBRARY})
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${GRRUNTIME_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${GRRUNTIME_LIBRARY})
+
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${VIPS_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${VIPS_LIBRARIES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})

@@ -8,8 +8,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -std=c++11")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 include_directories(${CMAKE_PROJECT_NAME} ../templates)
 include_directories(${CMAKE_PROJECT_NAME} ../src)

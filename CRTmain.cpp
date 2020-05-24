@@ -4,6 +4,7 @@
 #include <loaders/ZMQVideoPipe.hpp>
 #include <thread>
 
+#define FRONT_SAMPLERATE 200e3
 
 static void powerOff(CRTApp& crt) {
     //crt.setBlend(true);
@@ -38,8 +39,15 @@ static void powerOff(CRTApp& crt) {
 
 void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
     SDL_Log("Frame send thread initialized");
+    duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
+    SDL_Log("Frontend Samplerate: %lf, frame time %02lf ms", FRONT_SAMPLERATE, frameTime.count() );
     while(!*quit) {
+        auto start = high_resolution_clock::now();
         zPipe->pushFrame();
+        auto stop = high_resolution_clock::now();
+        auto elapsed = duration_cast<milliseconds>(stop - start);
+        auto error = frameTime - elapsed;
+        //std::this_thread::sleep_for(error);
     }
     SDL_Log("Frame send thread done!");
 }
@@ -58,6 +66,9 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 }
 
 int main(  ) {
+    if (VIPS_INIT ("namefile"))
+        vips_error_exit (nullptr);
+
     SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     static ZMQLoader zLoader;
     ZMQVideoPipe zPipe;
@@ -69,8 +80,8 @@ int main(  ) {
 
     //Event handler
     SDL_Event e;
-    double ripple = 0.03;
-    double noise = 0.3;
+    double ripple = 0.01;
+    double noise = 0.01;
     double brightness = 1;
     double contrast = 1;
     double color = 1;
@@ -197,7 +208,7 @@ int main(  ) {
     }
 	//Free resources and close SDL
 	SDL_FreeSurface(frame);
-	//radio_rx.join();
+	radio_rx.join();
     radio_tx.join();
 	return 0;
 }

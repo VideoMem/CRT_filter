@@ -1,8 +1,7 @@
 #define CATCH_CONFIG_FAST_COMPILE
 #define CATCH_CONFIG_MAIN
 
-
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include "TranscoderTests.hpp"
 #include "filesystem_Tests.h"
 #include "Assets and resources.hpp"

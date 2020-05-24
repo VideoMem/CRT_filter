@@ -9,7 +9,7 @@ class Pixelable: public Surfaceable {
 public:
     //TODO: bit endianess
     inline static void toComponents(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B, Uint32 *A) {
-        *A = 0xFF - ((*pixel & mask_t::a) >> 24);
+        *A = (*pixel & mask_t::a) >> 24;
         toComponents( pixel, R, G, B );
     }
 
@@ -25,7 +25,6 @@ public:
     }
 
     inline static void fromComponents(Uint32 *pixel, Uint32 *R, Uint32 *G, Uint32 *B, Uint32 *A) {
-        *pixel = 0;
         *pixel = ((*A << 24) + (*B << 16) + (*G << 8) + *R);
     }
 

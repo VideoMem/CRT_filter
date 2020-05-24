@@ -197,7 +197,7 @@ bool MagickLoader::GetSurface(SDL_Surface *surface) {
 
 void MagickLoader::image2surface( Magick::Image &image, SDL_Surface *surface ) {
     using namespace Magick;
-    blank(surface);
+    //blank(surface);
     SDL_Rect dstsize;
     SDL_GetClipRect( surface, &dstsize );
     size_t imgWidth  = image.columns() > (size_t) dstsize.w? dstsize.w : image.columns();
@@ -236,7 +236,7 @@ void MagickLoader::surface2image(SDL_Surface *surface, Magick::Image &img) {
 
         }
     }
-    img.alphaChannel(SetAlphaChannel);
+    //img.alphaChannel(SetAlphaChannel);
     //img.copyPixels(image, image.geometry(), Offset(0));
 }
 

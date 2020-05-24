@@ -86,7 +86,8 @@ SDL_Surface *Surfaceable::AllocateSurface( SDL_Surface *mock, double scale ) {
     SDL_GetClipRect( mock, &mock_size );
     mock_size.w = static_cast<int>( round(mock_size.w * scale ) );
     mock_size.h = static_cast<int>( round(mock_size.h * scale ) );
-    return AllocateSurface( mock_size.w, mock_size.h, *mock->format );
+    return AllocateSurface( mock_size.w, mock_size.h );
+    //return AllocateSurface( mock_size.w, mock_size.h, *mock->format );
 }
 
 

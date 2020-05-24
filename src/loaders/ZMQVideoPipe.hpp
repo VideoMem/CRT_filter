@@ -62,7 +62,7 @@ public:
     static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
     static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
     static inline double angle( float a, float b );
-
+    SDL_Surface* reference() { return captured_frame; }
 public:
     void testSendFrame( SDL_Surface* surface );
     void testReceiveFrame() { while(!frameTransfer) receiveFrame(); frameTransfer = false; }
@@ -254,7 +254,7 @@ void ZMQVideoPipe::transferEvent() {
 #ifdef PIPE_DEBUG_FRAMES
     debug_frames.push_back(stackable);
 #endif
-    SDL_SaveBMP(temporary_frame, "current.bmp");
+    //SDL_SaveBMP(temporary_frame, "current.bmp");
     float_to_frame(internal_store, temporary_frame);
     SDL_BlitSurface(temporary_frame, nullptr, captured_frame, nullptr);
     frameTransfer = true;

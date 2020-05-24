@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
       <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
+      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
     </generated>
   </component>
@@ -14,23 +14,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/transcoders/Waveable.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/TranscoderTests.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/vips_example.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/filters/BCS.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/filters/BCS.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/fmt_tools/WaveFile.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/fmt_tools/WaveFile.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/TranscoderTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TranscoderTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -83,19 +85,19 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src" />
-      <recent name="$PROJECT_DIR$/tests" />
-      <recent name="$PROJECT_DIR$/deprecated" />
-      <recent name="$PROJECT_DIR$/cmake-build-debug" />
-      <recent name="$PROJECT_DIR$/resources/video" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/tests/emscripten" />
       <recent name="$PROJECT_DIR$/utils" />
       <recent name="$PROJECT_DIR$/src/filters" />
       <recent name="$PROJECT_DIR$/src" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests/cmake-build-debug" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$/tests" />
+      <recent name="$PROJECT_DIR$/deprecated" />
+      <recent name="$PROJECT_DIR$/cmake-build-debug" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -135,25 +137,19 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Type Conversions (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" WORKING_DIR="file://$PROJECT_DIR$/tests" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Transcodeable]" TEST_METHOD="Type Conversions" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Type Conversions (2)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Transcodeable]" TEST_METHOD="Type Conversions" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Type Conversions" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Transcodeable]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ZMQ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][GNURadio]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
+    <configuration name="Type Conversions" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" WORKING_DIR="file://$PROJECT_DIR$/tests" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Transcodeable]" TEST_METHOD="Type Conversions" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ZMQ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][GNURadio]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -165,7 +161,7 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ZMQ Loader" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][App]" TEST_METHOD="ZMQ Loader" TEST_MODE="SUITE_TEST">
+    <configuration name="ZMQ Loader" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][App]" TEST_METHOD="ZMQ Loader" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -185,21 +181,19 @@
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.SDL2 Magick++ API" />
+      <item itemvalue="Catch.ZMQ API" />
       <item itemvalue="Catch.ZMQ API (1)" />
       <item itemvalue="Catch.Type Conversions" />
-      <item itemvalue="Catch.Type Conversions (1)" />
+      <item itemvalue="Catch.ZMQ Loader" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
-      <item itemvalue="Catch.Type Conversions (2)" />
-      <item itemvalue="Catch.ZMQ Loader" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Catch.ZMQ Loader" />
-        <item itemvalue="Catch.ZMQ API (1)" />
         <item itemvalue="Catch.Type Conversions" />
-        <item itemvalue="Catch.Type Conversions (2)" />
-        <item itemvalue="Catch.Type Conversions (1)" />
+        <item itemvalue="Catch.ZMQ Loader" />
+        <item itemvalue="Catch.Type Conversions" />
+        <item itemvalue="Catch.ZMQ API (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -261,7 +255,8 @@
       <workItem from="1588141816301" duration="558000" />
       <workItem from="1588950860466" duration="252033000" />
       <workItem from="1589811890008" duration="18475000" />
-      <workItem from="1590099463151" duration="50641000" />
+      <workItem from="1590099463151" duration="58686000" />
+      <workItem from="1590240898629" duration="64513000" />
     </task>
     <servers />
   </component>
@@ -291,7 +286,7 @@
       <breakpoints>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>252</line>
+          <line>254</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -306,12 +301,18 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/Config.hpp</url>
-          <line>21</line>
+          <line>23</line>
           <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/Magickable.hpp</url>
+          <line>69</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
+        <breakpoint enabled="true" type="javascript-exception" />
       </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
