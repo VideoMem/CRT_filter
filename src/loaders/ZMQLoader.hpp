@@ -11,13 +11,9 @@
 
 class ZMQLoader: public MagickLoader {
 public:
-    WaveIO wave;
     SDL_Surface* current_frame = nullptr;
-    SDL_Surface* cache_frame = nullptr;
-    SDL_Surface* last_cache = nullptr;
     volatile bool readLock;
     volatile bool writeLock;
-    volatile bool ready;
     zmq::context_t* context = nullptr;
     zmq::socket_t* socket = nullptr;
     volatile unsigned long rxFrameId;
@@ -27,9 +23,6 @@ public:
     void pullFrame();
     ZMQLoader();
     ~ZMQLoader();
-    //bool GetSurface(SDL_Surface* surface) { if(!readLock) surface = SDL_LoadBMP("encoded.bmp"); return true; }
-
-    void pushCache(SDL_Surface* frame) { SurfacePixelsCopy( frame, cache_frame ); ready = true; }
 
     void GetRAWSurface(SDL_Surface* surface) {
         //while(readLock);
@@ -49,22 +42,18 @@ public:
     void frameEventReset()  { rxFrameCurrentId = rxFrameId; }
     bool frameEvent() { if(frameEventRead()) { frameEventReset(); return true; } return false; }
 
-    SDL_Surface *cacheFrame();
 };
 
 ZMQLoader::ZMQLoader() {
     readLock = false;
     writeLock = false;
-    ready = false;
     rxFrameId = 0;
     rxFrameCurrentId = 0;
     current_frame = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-    cache_frame = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-    last_cache = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-    assert(current_frame != nullptr && cache_frame != nullptr && last_cache != nullptr && "Cannot allocate surface");
+    assert(current_frame != nullptr && "Cannot allocate surface");
     context = new zmq::context_t(1);
     socket = new zmq::socket_t(*context, ZMQ_REP);
-    socket->bind ("tcp://0.0.0.0:5133" );
+    socket->bind ( Config::transport::int_frame_puller );
 }
 
 ZMQLoader::~ZMQLoader() {
@@ -103,12 +92,5 @@ void ZMQLoader::pullFrame()  {
     delete [] data;
 }
 
-SDL_Surface *ZMQLoader::cacheFrame() {
-    while(!ready); //if new push
-    //while(CompareSurface(last_cache, cache_frame)); //if new frame
-    ready = false;
-    SurfacePixelsCopy(cache_frame, last_cache);
-    return cache_frame;
-}
 
 #endif //SDL_CRT_FILTER_ZMQLOADER_HPP

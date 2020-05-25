@@ -32,8 +32,7 @@ public:
     zmq::context_t* context_rep = nullptr;
     zmq::socket_t* socket_rep = nullptr;
     int retries = MAX_RETRIES;
-    float nullresponse[4] = { 0x00 };
-    //float internal[4] = { 0 };
+
     internal_complex_t internal;
     internal_complex_t internal_store;
     static inline float translate( float &a ) { float r = (a + 1) / 2; return r > 0? r: 0.0;  }
@@ -49,8 +48,6 @@ public:
     static void float_to_frame(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
     void transferEvent();
-    //static size_t surface_to_wave(SDL_Surface* surface, uint8_t *wav);
-    //static void wave_to_surface(uint8_t* wav, SDL_Surface* surface);
 #ifdef PIPE_DEBUG_FRAMES
     internal_complex_stack_t debug_frames;
 #endif
@@ -58,7 +55,6 @@ public:
     int  byte_index = 0;
     int  copiedBytes = 0;
     void receiveFrame();
-    std::string string_to_hex(const std::string& input);
     static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
     static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
     static inline double angle( float a, float b );
@@ -75,18 +71,6 @@ public:
     ~ZMQVideoPipe();
     bool GetSurface(SDL_Surface* surface) { SDL_BlitSurface(captured_frame, nullptr, surface, nullptr); return true; }
 };
-
-std::string ZMQVideoPipe::string_to_hex(const std::string& input) {
-    static const char hex_digits[] = "0123456789ABCDEF";
-
-    std::string output;
-    output.reserve(input.length() * 2);
-    for (unsigned char c : input) {
-        output.push_back(hex_digits[c >> 4]);
-        output.push_back(hex_digits[c & 15]);
-    }
-    return output;
-}
 
 
 ZMQVideoPipe::~ZMQVideoPipe() {
@@ -128,17 +112,17 @@ void ZMQVideoPipe::init() {
     context = new zmq::context_t(1);
     socket = new zmq::socket_t( *context, ZMQ_REQ );
     context_rep = new zmq::context_t(1);
-    socket_rep = new zmq::socket_t(*context_rep, ZMQ_REP);
-    thread_client = new Worker("tcp://localhost:5133");
+    socket_rep = new zmq::socket_t(*context_rep, ZMQ_REP );
+    thread_client = new Worker( Config::transport::int_frame_pusher );
     thread_client->setName("Internal thread communicator");
     try {
-        socket->connect ("tcp://localhost:5656");
+        socket->connect ( Config::transport::grc_source );
     } catch (zmq::error_t &e) {
         SDL_Log("Cannot Connect: %s", e.what());
     }
 
     try {
-        socket_rep->bind ("tcp://0.0.0.0:5555");
+        socket_rep->bind ( Config::transport::grc_sink );
     } catch (zmq::error_t &e) {
         SDL_Log("Cannot Bind: %s", e.what());
     }

@@ -40,26 +40,36 @@ static void powerOff(CRTApp& crt) {
 void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
     SDL_Log("Frame send thread initialized");
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
-    SDL_Log("Frontend Samplerate: %lf, frame time %02lf ms", FRONT_SAMPLERATE, frameTime.count() );
+    //SDL_Log("Frontend Samplerate: %lf, frame time %02lf ms", FRONT_SAMPLERATE, frameTime.count() );
     while(!*quit) {
         auto start = high_resolution_clock::now();
         zPipe->pushFrame();
         auto stop = high_resolution_clock::now();
         auto elapsed = duration_cast<milliseconds>(stop - start);
-        auto error = frameTime - elapsed;
-        //std::this_thread::sleep_for(error);
+        auto error = duration_cast<milliseconds>(frameTime - elapsed) * 0.8;
+        std::this_thread::sleep_for(error);
     }
     SDL_Log("Frame send thread done!");
 }
 
 void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
     SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
     SDL_Log("Frame receive thread initialized.");
     while(!*quit) {
+        auto start = high_resolution_clock::now();
         zLoader->pullFrame();
         app->update();
         app->getCode(frame);
         zPipe->testSendFrame(frame);
+        auto stop = high_resolution_clock::now();
+        auto elapsed = duration_cast<milliseconds>(stop - start);
+        if(duration_cast<milliseconds>(frameTime) > elapsed) {
+            auto error = (duration_cast<milliseconds>(frameTime) - elapsed) * 0.8;
+            //SDL_Log("Elapsed %ld ms, waiting %02f ms: total %02f ms, frame %ld ms", elapsed.count(), error.count(),
+            //        (elapsed + error).count(), duration_cast<milliseconds>(frameTime).count() );
+            std::this_thread::sleep_for(error);
+        }
     }
     SDL_FreeSurface(frame);
     SDL_Log("Frame receive thread done!");
@@ -71,7 +81,7 @@ int main(  ) {
 
     SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     static ZMQLoader zLoader;
-    ZMQVideoPipe zPipe;
+    static ZMQVideoPipe zPipe;
     static bool quit = false;
     static CRTApp crt = CRTApp(zLoader);
     std::thread radio_tx(send_frame, &quit, &zPipe);

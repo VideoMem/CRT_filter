@@ -117,22 +117,7 @@ public:
     }
 
     static void blitFill(SDL_Surface* src, SDL_Surface* dst) {
-        //return Surfaceable::encode(dst, src);
         return Magickable::blitScaled(dst, src);
-        SDL_Rect srcsize;
-        SDL_Rect dstsize;
-        SDL_GetClipRect(src, &srcsize);
-        SDL_GetClipRect(dst, &dstsize);
-/*
-        if(memcmp(&src, &dst, sizeof(SDL_Rect)) == 0) {
-            SDL_BlitSurface(src, nullptr, dst, nullptr);
-            return;
-        }
-*/
-
-  //      dstsize.x = srcsize.w - dstsize.w > 0? ( srcsize.w - dstsize.w )/ 2: 0;
-   //     dstsize.y = srcsize.h - dstsize.h > 0? ( srcsize.h - dstsize.h )/ 2: 0;
-        SDL_BlitScaled(src, &srcsize, dst, &dstsize);
     }
 
 

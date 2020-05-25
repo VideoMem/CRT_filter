@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
+      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
     </generated>
   </component>
@@ -14,25 +14,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/vips_example.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/MagickLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tests/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/TranscoderTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TranscoderTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -190,8 +182,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Catch.Type Conversions" />
         <item itemvalue="Catch.ZMQ Loader" />
+        <item itemvalue="Catch.Type Conversions" />
         <item itemvalue="Catch.Type Conversions" />
         <item itemvalue="Catch.ZMQ API (1)" />
       </list>
@@ -256,7 +248,8 @@
       <workItem from="1588950860466" duration="252033000" />
       <workItem from="1589811890008" duration="18475000" />
       <workItem from="1590099463151" duration="58686000" />
-      <workItem from="1590240898629" duration="64513000" />
+      <workItem from="1590240898629" duration="73928000" />
+      <workItem from="1590413094086" duration="557000" />
     </task>
     <servers />
   </component>
@@ -286,7 +279,7 @@
       <breakpoints>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>254</line>
+          <line>239</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">

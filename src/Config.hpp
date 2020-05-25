@@ -41,7 +41,18 @@ public:
         return count;
     }
 
+    struct transport {
+        static const std::string int_frame_puller;
+        static const std::string int_frame_pusher;
+        static const std::string grc_sink;
+        static const std::string grc_source;
+    };
 
 };
+
+const std::string Config::transport::int_frame_puller = "tcp://0.0.0.0:5133";
+const std::string Config::transport::int_frame_pusher = "tcp://localhost:5133";
+const std::string Config::transport::grc_sink = "tcp://0.0.0.0:5555";
+const std::string Config::transport::grc_source = "tcp://localhost:5656";
 
 #endif //SDL_CRT_FILTER_CONFIG_HPP

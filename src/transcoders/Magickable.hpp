@@ -97,7 +97,7 @@ void Magickable::encode(void *dst, void* src) {
         SDL_Log("Wrong source image/destination surface depth %zu != %d", source_image->depth(), destination_surface->format->BitsPerPixel );
         assert(false && "Wrong image bit depth combination");
     }
-    //assert( destination_surface->format->format == SDL_PIXELFORMAT_RGBA32 && "Wrong source image/destination surface pixel format" );
+    assert( destination_surface->format->format == SDL_PIXELFORMAT_RGBA32 && "Wrong source image/destination surface pixel format" );
     magick2surface(*source_image, destination_surface );
 }
 
@@ -143,15 +143,15 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
             if ( src->w > dst->w ) {
                 //shrink
                 double scale = (double) src->w / dst->w;
-                SDL_Log("Scaling down ...");
+                //SDL_Log("Scaling down ...");
                 io = in.reduce(scale, scale, VImage::option()->set("kernel", VIPS_KERNEL_NEAREST ) );
-                SDL_Log("Image info: %d, %d", io.width(), io.height() );
-                SDL_Log("Source info: %d, %d", source->w, source->h );
-                SDL_Log("Band format %d", io.format() );
-                SDL_Log("Bands %d", io.bands() );
+                //SDL_Log("Image info: %d, %d", io.width(), io.height() );
+                //SDL_Log("Source info: %d, %d", source->w, source->h );
+                //SDL_Log("Band format %d", io.format() );
+                //SDL_Log("Bands %d", io.bands() );
 
                 memcpy( dst->pixels, io.data(), dst_size * bands );
-                io.write_to_file("test_vimage.bmp");
+                //io.write_to_file("test_vimage.bmp");
             } else {
                 //resize
                 double scale = (double) dst->w / src->w;

@@ -167,9 +167,11 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
 
 }
 
+volatile bool quit_signal = false;
+
 void send_frame(ZMQVideoPipe* zPipe) {
-    while(true)
-    zPipe->pushFrame();
+    while(!quit_signal)
+        zPipe->pushFrame();
 }
 
 TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
@@ -181,16 +183,18 @@ TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
         ZMQVideoPipe zPipe;
         std::thread radio_tx(send_frame, &zPipe);
         SDL_Surface *frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-        while(true) {
+
+        for( int count = 20; count > 0 ; --count ) {
             zLoader.pullFrame();
             zLoader.GetSurface(frame);
             app.publish(frame);
             zPipe.testSendFrame(frame);
         }
+
+        quit_signal = true;
         SDL_FreeSurface(frame);
         radio_tx.join();
     }
 }
-
 
 #endif //SDL_CRT_FILTER_ZMQTESTS_HPP
