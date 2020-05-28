@@ -51,6 +51,7 @@ find_library( AVUTIL_LIBRARY avutil )
 #pthread
 find_package (Threads)
 
+
 ##executable / link section
 add_executable(${CMAKE_PROJECT_NAME} ${BUILD_TARGET})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${SDL2_LIBRARIES})

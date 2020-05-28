@@ -111,39 +111,25 @@ public:
 };
 
 void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb, size_t ycrcb_pitch) {
-    int fid = 0, cid = 0, pxid = 0;
+    int fid = 0, cid = 0, yid = 0;
 
-    //YVYU
+    //YVYU Luminance
     for (int y = 0; y < frame->height ; y++) {
         for (int x = 0; x < frame->width; x++) {
             fid = y * frame->linesize[0] + x;
             frame->data[0][ fid ] = ycrcb[ fid * 2 ];
-//            if (pxid % 4 == 0) {
-  //              cid = (int) SDL_floor((double) pxid / 4 ); // 4 Uint8 contains two Y values, one V and one U
-                //cid = (y/2) * frame->linesize[1] + (x / 2);
-    //            frame->data[1][ cid ] = ycrcb[ 8 * cid + 3 ]; // Cb <-> U
-      //          frame->data[2][ cid ] = ycrcb[ 8 * cid + 1 ]; // Cr <-> V
-        //    }
-            pxid++;
         }
     }
 
-    pxid = 0;
     /* Cb and Cr */
     for (int y = 0; y < frame->height/2; y++) {
         for (int x = 0; x < frame->width/2; x++) {
             cid = y * frame->linesize[1] + x;
-            frame->data[1][ cid ] = ycrcb[ 4 * cid + 3 ]; // Cb <-> U;
-            frame->data[2][ cid ] = ycrcb[ 4 * cid + 1 ]; // Cr <-> V;
-            pxid++;
+            yid = 4 * ( 2 * y * frame->linesize[1] + x );
+            frame->data[1][ cid ] = ycrcb[ yid + 3 ]; // Cb <-> U;
+            frame->data[2][ cid ] = ycrcb[ yid + 1 ]; // Cr <-> V;
         }
     }
-
-
-    //memcpy( frame->data[0], ycrcb, frame->height * frame->width );
-    //memset(frame->data[1], 128, frame->height * frame->width / 4 );
-    //memset(frame->data[2], 128, frame->height * frame->width / 4 );
-
 }
 
 void LibAVable::decode(void *dst, void *src) {

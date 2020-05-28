@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/sebastian/Develop/CRT_filter
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/sebastian/Downloads/clion-2019.2.1/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/home/sebastian/Downloads/clion-2019.2.1/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -122,6 +122,19 @@ SDL_CRT_Filter: cmake_check_build_system
 SDL_CRT_Filter/fast:
 	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/build
 .PHONY : SDL_CRT_Filter/fast
+
+#=============================================================================
+# Target rules for targets named CRT_FILTERS
+
+# Build rule for target.
+CRT_FILTERS: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CRT_FILTERS
+.PHONY : CRT_FILTERS
+
+# fast build rule for target.
+CRT_FILTERS/fast:
+	$(MAKE) -f CMakeFiles/CRT_FILTERS.dir/build.make CMakeFiles/CRT_FILTERS.dir/build
+.PHONY : CRT_FILTERS/fast
 
 #=============================================================================
 # Target rules for targets named SDL2_CRT_Tests
@@ -182,9 +195,10 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... SDL_CRT_Filter"
 	@echo "... edit_cache"
+	@echo "... SDL_CRT_Filter"
+	@echo "... rebuild_cache"
+	@echo "... CRT_FILTERS"
 	@echo "... SDL2_CRT_Tests"
 	@echo "... CHAR_ROM_GEN"
 	@echo "... CRTmain.o"
