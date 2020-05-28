@@ -167,9 +167,6 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
 
             }
 
-
-            g_object_unref ( &io );
-            g_object_unref ( &in );
             SDL_FreeSurface(source);
 
         } catch (VError &e) {

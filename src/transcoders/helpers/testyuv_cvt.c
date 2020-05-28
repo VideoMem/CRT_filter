@@ -279,7 +279,7 @@ SDL_bool ConvertRGBtoYUV(Uint32 format, Uint8 *src, int pitch, Uint8 *out, int w
     }
 }
 
-int CalculateYUVPitch(Uint32 format, int width)
+int CalculateYCbCrPitch(Uint32 format, int width)
 {
     switch (format)
     {

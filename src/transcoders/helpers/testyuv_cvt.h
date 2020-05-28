@@ -14,4 +14,4 @@
 #include <SDL2/SDL.h>
 
 extern SDL_bool ConvertRGBtoYUV(Uint32 format, Uint8 *src, int pitch, Uint8 *out, int w, int h, SDL_YUV_CONVERSION_MODE mode, int monochrome, int luminance);
-extern int CalculateYUVPitch(Uint32 format, int width);
+extern int CalculateYCbCrPitch(Uint32 format, int width);

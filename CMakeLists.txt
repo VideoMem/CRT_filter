@@ -43,6 +43,7 @@ add_library(CRT_FILTERS STATIC
         src/Config.hpp
         src/prngs.h
         src/BaseApp.hpp
+        templates/Asset.h
         )
 
 set_target_properties(CRT_FILTERS PROPERTIES LINKER_LANGUAGE CXX)

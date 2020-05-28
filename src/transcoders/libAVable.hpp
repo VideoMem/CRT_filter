@@ -5,9 +5,7 @@
 #ifndef SDL_CRT_FILTER_LIBAVABLE_HPP
 #define SDL_CRT_FILTER_LIBAVABLE_HPP
 
-///#include <stdio.h>
 #include <cstdlib>
-//#include <string.h>
 
 extern "C" {
     #include <libavcodec/avcodec.h>
@@ -18,14 +16,23 @@ extern "C" {
 #include "transcoders/Magickable.hpp"
 
 /* 422 (YUY2, etc) formats are the largest */
-#define MAX_YUV_SURFACE_SIZE(W, H, P)  (H*4*(W+P+1)/2)
+#define MAX_YCBCR_SURFACE_SIZE(W, H, P)  (H*4*(W+P+1)/2)
 
 class LibAVable: public Magickable {
 public:
+    struct AVthings_t {
+        AVCodec *codec;
+        AVCodecContext *c;
+        AVFrame *frame;
+        AVPacket *pkt;
+    };
+
     static void encode(void* dst, void* src);
     static void decode(void* dst, void* src);
-    static void encode(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
-                       FILE *outfile) {
+    static LibAVable::AVthings_t *init_state(std::string codec_name, int x, int y, int framerate, int bitrate);
+    static void push_frame(SDL_Surface *source, FILE *fp, AVthings_t *AVstate);
+    static void writefile(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
+                          FILE *outfile) {
         int ret;
 
         /* send the frame to the encoder */
@@ -97,20 +104,22 @@ public:
 
 
 
-    static int test_yuv(int pattern_size, int extra_pitch);
+    static int test_ycbcr(int pattern_size, int extra_pitch);
     static SDL_Surface* generate_test_pattern(int pattern_size);
 
-    static SDL_bool verify_yuv_data(Uint32 format, const Uint8 *yuv, int yuv_pitch, SDL_Surface *surface);
+    static SDL_bool verify_ycbcr_data(Uint32 format, const Uint8 *yuv, int yuv_pitch, SDL_Surface *surface);
 
-    static SDL_bool is_packed_yuv_format(Uint32 format);
+    static SDL_bool is_packed_ycbcr_format(Uint32 format);
 
     //from RGB32 to YCrCb
-    static void toYCrBr(uint8_t *yuv, SDL_Surface *pattern, int format);
-    static void toFrame(AVFrame *frame, const Uint8 *ycrcb, size_t ycrcb_len);
+    static void toYCbCr(uint8_t *yuv, SDL_Surface *pattern, int format);
+    static void toFrame(AVFrame *frame, const Uint8 *ycrcb);
 
 };
 
-void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb, size_t ycrcb_pitch) {
+
+//two days to write this method due to inconsistent documentation
+void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb) {
     int fid = 0, cid = 0, yid = 0;
 
     //YVYU Luminance
@@ -135,27 +144,27 @@ void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb, size_t ycrcb_pitch) 
 void LibAVable::decode(void *dst, void *src) {
     auto source_frame = static_cast<SDL_Surface*>(src);
     auto dst_frame = static_cast<AVFrame*>(dst);
-    const int yuv_len = MAX_YUV_SURFACE_SIZE(source_frame->w, source_frame->h, 0);
+    const int yuv_len = MAX_YCBCR_SURFACE_SIZE(source_frame->w, source_frame->h, 0);
     auto yuv = new Uint8[yuv_len];
 
     auto format = SDL_PIXELFORMAT_YVYU;
 
-    auto yuv_pitch = CalculateYUVPitch(format, source_frame->w);
-    toYCrBr( yuv, source_frame, format );
-    toFrame( dst_frame, yuv, yuv_pitch );
+    auto yuv_pitch = CalculateYCbCrPitch(format, source_frame->w);
+    toYCbCr(yuv, source_frame, format);
+    toFrame(dst_frame, yuv);
 
     delete [] yuv;
 }
 
-void LibAVable::toYCrBr(uint8_t *yuv, SDL_Surface *pattern, int format) {
-    auto yuv_pitch = CalculateYUVPitch(format, pattern->w);
+void LibAVable::toYCbCr(uint8_t *yuv, SDL_Surface *pattern, int format) {
+    auto yuv_pitch = CalculateYCbCrPitch(format, pattern->w);
     if (SDL_ConvertPixels(pattern->w, pattern->h, pattern->format->format, pattern->pixels, pattern->pitch, format, yuv, yuv_pitch) < 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert %s to %s: %s\n", SDL_GetPixelFormatName(pattern->format->format), SDL_GetPixelFormatName(format), SDL_GetError());
         assert(false && "Error during format conversion");
     }
 }
 
-int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
+int LibAVable::test_ycbcr(int pattern_size, int extra_pitch) {
     const Uint32 formats[] = {
             SDL_PIXELFORMAT_YV12,
             SDL_PIXELFORMAT_IYUV,
@@ -167,7 +176,7 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
     };
     int i,j;
     SDL_Surface *pattern = generate_test_pattern(pattern_size);
-    const int yuv_len = MAX_YUV_SURFACE_SIZE(pattern->w, pattern->h, extra_pitch);
+    const int yuv_len = MAX_YCBCR_SURFACE_SIZE(pattern->w, pattern->h, extra_pitch);
 
     auto yuv1 = new Uint8[yuv_len];
     auto yuv2 = new Uint8[yuv_len];
@@ -186,23 +195,23 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
             result = -1;
             break;
         }
-        yuv1_pitch = CalculateYUVPitch(formats[i], pattern->w);
-        if (!verify_yuv_data(formats[i], yuv1, yuv1_pitch, pattern)) {
+        yuv1_pitch = CalculateYCbCrPitch(formats[i], pattern->w);
+        if (!verify_ycbcr_data(formats[i], yuv1, yuv1_pitch, pattern)) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed conversion from %s to RGB\n", SDL_GetPixelFormatName(formats[i]));
             result = -1;
             break;
         }
     }
 
-    /* Verify conversion to YUV formats */
+    /* Verify conversion to YUV (YCrBr) formats */
     for (i = 0; i < (int) SDL_arraysize(formats); ++i) {
-        yuv1_pitch = CalculateYUVPitch(formats[i], pattern->w) + extra_pitch;
+        yuv1_pitch = CalculateYCbCrPitch(formats[i], pattern->w) + extra_pitch;
         if (SDL_ConvertPixels(pattern->w, pattern->h, pattern->format->format, pattern->pixels, pattern->pitch, formats[i], yuv1, yuv1_pitch) < 0) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert %s to %s: %s\n", SDL_GetPixelFormatName(pattern->format->format), SDL_GetPixelFormatName(formats[i]), SDL_GetError());
             result = -1;
             break;
         }
-        if (!verify_yuv_data(formats[i], yuv1, yuv1_pitch, pattern)) {
+        if (!verify_ycbcr_data(formats[i], yuv1, yuv1_pitch, pattern)) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed conversion from RGB to %s\n", SDL_GetPixelFormatName(formats[i]));
             result = -1;
             break;
@@ -213,8 +222,8 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
     /* Verify conversion between YUV formats */
     for (i = 0; i < (int) SDL_arraysize(formats); ++i) {
         for (j = 0; j < (int) SDL_arraysize(formats); ++j) {
-            yuv1_pitch = CalculateYUVPitch(formats[i], pattern->w) + extra_pitch;
-            yuv2_pitch = CalculateYUVPitch(formats[j], pattern->w) + extra_pitch;
+            yuv1_pitch = CalculateYCbCrPitch(formats[i], pattern->w) + extra_pitch;
+            yuv2_pitch = CalculateYCbCrPitch(formats[j], pattern->w) + extra_pitch;
             if (SDL_ConvertPixels(pattern->w, pattern->h, pattern->format->format, pattern->pixels, pattern->pitch, formats[i], yuv1, yuv1_pitch) < 0) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert %s to %s: %s\n", SDL_GetPixelFormatName(pattern->format->format), SDL_GetPixelFormatName(formats[i]), SDL_GetError());
                 result = -1;
@@ -225,7 +234,7 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
                 result = -1;
                 break;
             }
-            if (!verify_yuv_data(formats[j], yuv2, yuv2_pitch, pattern)) {
+            if (!verify_ycbcr_data(formats[j], yuv2, yuv2_pitch, pattern)) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed conversion from %s to %s\n", SDL_GetPixelFormatName(formats[i]), SDL_GetPixelFormatName(formats[j]));
                 result = -1;
                 break;
@@ -236,13 +245,13 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
     /* Verify conversion between YUV formats in-place */
     for (i = 0; i < (int) SDL_arraysize(formats); ++i) {
         for (j = 0; j < (int) SDL_arraysize(formats); ++j) {
-            if (is_packed_yuv_format(formats[i]) != is_packed_yuv_format(formats[j])) {
+            if (is_packed_ycbcr_format(formats[i]) != is_packed_ycbcr_format(formats[j])) {
                 // Can't change plane vs packed pixel layout in-place
                 continue;
             }
 
-            yuv1_pitch = CalculateYUVPitch(formats[i], pattern->w) + extra_pitch;
-            yuv2_pitch = CalculateYUVPitch(formats[j], pattern->w) + extra_pitch;
+            yuv1_pitch = CalculateYCbCrPitch(formats[i], pattern->w) + extra_pitch;
+            yuv2_pitch = CalculateYCbCrPitch(formats[j], pattern->w) + extra_pitch;
             if (SDL_ConvertPixels(pattern->w, pattern->h, pattern->format->format, pattern->pixels, pattern->pitch, formats[i], yuv1, yuv1_pitch) < 0) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert %s to %s: %s\n", SDL_GetPixelFormatName(pattern->format->format), SDL_GetPixelFormatName(formats[i]), SDL_GetError());
                  result = -1;
@@ -253,7 +262,7 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
                 result = -1;
                 break;
             }
-            if (!verify_yuv_data(formats[j], yuv1, yuv2_pitch, pattern)) {
+            if (!verify_ycbcr_data(formats[j], yuv1, yuv2_pitch, pattern)) {
                 SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed conversion from %s to %s\n", SDL_GetPixelFormatName(formats[i]), SDL_GetPixelFormatName(formats[j]));
                 result = -1;
                 break;
@@ -274,7 +283,7 @@ int LibAVable::test_yuv(int pattern_size, int extra_pitch) {
 }
 
 /* Return true if the YUV format is packed pixels */
-SDL_bool LibAVable::is_packed_yuv_format(Uint32 format) {
+SDL_bool LibAVable::is_packed_ycbcr_format(Uint32 format) {
     return static_cast<SDL_bool>(format == SDL_PIXELFORMAT_YUY2 ||
                                  format == SDL_PIXELFORMAT_UYVY ||
                                  format == SDL_PIXELFORMAT_YVYU);
@@ -323,7 +332,7 @@ SDL_Surface *LibAVable::generate_test_pattern(int pattern_size) {
 
 }
 
-SDL_bool LibAVable::verify_yuv_data(Uint32 format, const Uint8 *yuv, int yuv_pitch, SDL_Surface *surface) {
+SDL_bool LibAVable::verify_ycbcr_data(Uint32 format, const Uint8 *yuv, int yuv_pitch, SDL_Surface *surface) {
     const int tolerance = 20;
     const int size = (surface->h * surface->pitch);
 
@@ -357,6 +366,61 @@ SDL_bool LibAVable::verify_yuv_data(Uint32 format, const Uint8 *yuv, int yuv_pit
     delete[] rgb;
 
     return result;
+}
+
+LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 640, int y = 480, int framerate = 25,
+                                              int bitrate = 400000) {
+    static auto state = new AVthings_t;
+    init_codec( state->codec, state->c, codec_name );
+    state->pkt = av_packet_alloc();
+    state->c->bit_rate = bitrate;
+    state->c->width = x;
+    state->c->height = y;
+    state->c->time_base = (AVRational){1, framerate};
+    state->c->framerate = (AVRational){framerate, 1};
+
+    /* emit one intra frame every ten frames
+    * check frame pict_type before passing frame
+    * to encoder, if frame->pict_type is AV_PICTURE_TYPE_I
+    * then gop_size is ignored and the output of encoder
+    * will always be I frame irrespective to gop_size
+    */
+    state->c->gop_size = 10;
+    state->c->max_b_frames = 1;
+    state->c->pix_fmt = AV_PIX_FMT_YUV420P;
+
+    if ( state->codec->id == AV_CODEC_ID_H264 )
+        av_opt_set( state->c->priv_data, "preset", "slow", 0 );
+
+    /* open it */
+    auto ret = avcodec_open2( state->c, state->codec, nullptr );
+    if ( ret < 0 ) {
+        //std::string err =  av_err2str(ret);
+        //fprintf( stderr, "Could not open codec: %s\n", err.c_str() );
+        assert( false && "Cannot open codec error" );
+    }
+
+    state->frame = av_frame_alloc();
+    if ( !state->frame ) {
+        fprintf( stderr, "Could not allocate video frame\n" );
+        assert( false && "Cannot allocate video frame" );
+    }
+
+    state->frame->format = state->c->pix_fmt;
+    state->frame->width  = state->c->width;
+    state->frame->height = state->c->height;
+
+    ret = av_frame_get_buffer(state->frame, 0);
+    if (ret < 0) {
+        fprintf(stderr, "Could not allocate the video frame data\n");
+        assert( false && "Cannot allocate video frame data" );
+    }
+
+}
+
+
+void LibAVable::push_frame(SDL_Surface *source, FILE *fp, AVthings_t *AVstate) {
+
 }
 
 

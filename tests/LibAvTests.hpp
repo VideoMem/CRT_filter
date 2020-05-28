@@ -24,8 +24,7 @@ int test_mpeg(const std::string file_name, const std::string codec_name ) {
     if (!pkt)
         exit(1);
 
-    SDL_Surface* still = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"), SDL_PIXELFORMAT_RGBA32, 0 );
-    //SDL_Surface* still = SDL_LoadBMP("resources/images/standby640.bmp");
+    SDL_Surface* still = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/standby640.bmp"), SDL_PIXELFORMAT_RGBA32, 0 );
 
     /* put sample parameters */
     c->bit_rate = 400000;
@@ -80,7 +79,7 @@ int test_mpeg(const std::string file_name, const std::string codec_name ) {
         exit(1);
     }
 
-    /* encode 1 second of video */
+    /* encode 10 seconds of video */
     /* make sure the frame data is writable */
     ret = av_frame_make_writable(frame);
     if (ret < 0)
@@ -95,11 +94,11 @@ int test_mpeg(const std::string file_name, const std::string codec_name ) {
         frame->pts = i;
 
         /* encode the image */
-        LibAVable::encode(c, frame, pkt, f);
+        LibAVable::writefile(c, frame, pkt, f);
     }
 
     /* flush the encoder */
-    LibAVable::encode(c, nullptr, pkt, f);
+    LibAVable::writefile(c, nullptr, pkt, f);
 
     /* add sequence end code to have a real MPEG file */
     if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
@@ -149,13 +148,14 @@ TEST_CASE("LibAV tests","[LibAV]") {
                         automated_test_param.pattern_size,
                         automated_test_param.extra_pitch,
                         automated_test_param.enable_intrinsics ? "enabled" : "disabled");
-            REQUIRE(LibAVable::test_yuv(automated_test_param.pattern_size, automated_test_param.extra_pitch) == 0);
+            REQUIRE(LibAVable::test_ycbcr(automated_test_param.pattern_size, automated_test_param.extra_pitch) == 0);
         }
     }
 
     SECTION("Encode to file") {
-       // LibAVable::test_yuv(2,0);
         test_mpeg( "test.mpg", "mpeg1video" );
+        test_mpeg( "test_mpg2.mpg", "mpeg2video" );
+        test_mpeg( "test.vc2", "vc2" );
     }
 }
 
