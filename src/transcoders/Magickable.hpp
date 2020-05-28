@@ -6,13 +6,14 @@
 #define SDL_CRT_FILTER_MAGICKABLE_HPP
 #include <transcoders/Surfaceable.hpp>
 #include <transcoders/Pixelable.hpp>
+#include <transcoders/Waveable.hpp>
 #include <Magick++.h>
 #include <vips/vips8>
 
 using namespace vips;
 using namespace Magick;
 
-class Magickable : public Pixelable,  Surfaceable {
+class Magickable : public Surfaceable {
 public:
     static void encode(void* dst, void* src);
     static void decode(void* dst, void* src);
@@ -49,8 +50,8 @@ void Magickable::image2surface( Magick::Image &src, SDL_Surface *surface ) {
     }
 
     Uint32 pixel = 0;
-    for ( size_t row = 0; row < surface->h; row++ ) {
-        for (size_t column = 0; column < surface->w; column++) {
+    for ( size_t row = 0; row < (size_t) surface->h; row++ ) {
+        for (size_t column = 0; column < (size_t) surface->w; column++) {
             ColorRGB px = image.pixelColor( column, row );
             Uint32 r = round(px.red()   * 0xFF);
             Uint32 g = round(px.green() * 0xFF);
@@ -81,7 +82,7 @@ void Magickable::surface2image(SDL_Surface *surface, Magick::Image &img) {
                         (double) b / 0xFF
                 ));
             } catch ( Magick::Exception& e ) {
-                SDL_Log("Cannot assign pixel at %d, %d : %s", x, y, e.what());
+                SDL_Log("Cannot assign pixel at %ld, %ld : %s", x, y, e.what());
                 assert(false && "Cannot assign pixel exception error");
             }
 
@@ -167,8 +168,8 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
             }
 
 
-            //g_object_unref ( &io );
-            //g_object_unref ( &in );
+            g_object_unref ( &io );
+            g_object_unref ( &in );
             SDL_FreeSurface(source);
 
         } catch (VError &e) {

@@ -38,7 +38,7 @@ TEST_CASE("Resource Map", "[Core]") {
             std::cout << x.first << ", " << x.second.GetName() << std::endl;
             ++count;
         }
-        REQUIRE(count == res.size());
+        REQUIRE(count == (int) res.size());
     }
 
 

@@ -148,20 +148,6 @@ public:
 size_t Loader::surface_to_wave( SDL_Surface *surface, uint8_t *wav ) {
     WaveLuma::decode( wav, surface );
     return ( surface->w * surface->h );
-    size_t area = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
-    Uint32 R, G, B;
-    double luma = 0;
-    for (int x = 0; x < Config::NKERNEL_WIDTH; ++x)
-        for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
-            Uint32 pixel = get_pixel32(surface, x, y);
-            comp(&pixel, &R, &G, &B);
-            int media = static_cast<int>(R + G + B) / 3;
-            int lumaInt = luma * MAX_WHITE_LEVEL;
-            toLuma(&luma, &R, &G, &B);
-            wav[( y * Config::NKERNEL_WIDTH ) + x] = media; //lumaInt;// + (0xFF - MAX_WHITE_LEVEL) / 2;
-            //wav[x * y] = lumaInt > 0xFF? 0xFF: lumaInt;
-        }
-    return area;
 }
 
 //deprecated
@@ -174,25 +160,7 @@ void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface, int flag ) {
 //deprecated
 void Loader::wave_to_surface(uint8_t *wav, SDL_Surface* surface ) {
     return WaveLuma::encode( surface, wav );
-    SDL_Surface* temporary_surface = AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT);
-    blank(temporary_surface);
-    Uint32 pixel = 0, R = 0, G = 0, B = 0;
-    double luma = 0;
-    for (int x = 0; x < Config::NKERNEL_WIDTH; ++x) {
-        for (int y = 0; y < Config::NKERNEL_HEIGHT; ++y) {
-            auto wsample = wav[( y * Config::NKERNEL_WIDTH ) + x];
-            Uint32 sample = wsample;
-            luma = (double) wsample / MAX_WHITE_LEVEL;
-            toRGB(&luma, &R, &G, &B);
-            toPixel(&pixel, &sample, &sample, &sample);
-            put_pixel32(temporary_surface, x, y, pixel);
-        }
-    }
-    SDL_SetSurfaceBlendMode(temporary_surface, SDL_BLENDMODE_NONE);
-    SDL_BlitSurface(temporary_surface, nullptr, surface, nullptr);
-    SDL_FreeSurface(temporary_surface);
 }
-
 
 SDL_Surface* Loader::AllocateSurface(int w, int h, SDL_PixelFormat& format) {
     return Surfaceable::AllocateSurface( w, h, format );

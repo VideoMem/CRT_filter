@@ -14,17 +14,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Transcodeable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ResourceMapTest.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/TranscoderTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TranscoderTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -104,7 +110,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
+  <component name="RunManager" selected="Catch.LibAV tests">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -112,6 +118,12 @@
       <method v="2" />
     </configuration>
     <configuration name="All Tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LibAV tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[LibAV]" TEST_METHOD="LibAV tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -177,11 +189,13 @@
       <item itemvalue="Catch.ZMQ API (1)" />
       <item itemvalue="Catch.Type Conversions" />
       <item itemvalue="Catch.ZMQ Loader" />
+      <item itemvalue="Catch.LibAV tests" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.LibAV tests" />
         <item itemvalue="Catch.ZMQ Loader" />
         <item itemvalue="Catch.Type Conversions" />
         <item itemvalue="Catch.Type Conversions" />
@@ -249,7 +263,8 @@
       <workItem from="1589811890008" duration="18475000" />
       <workItem from="1590099463151" duration="58686000" />
       <workItem from="1590240898629" duration="73928000" />
-      <workItem from="1590413094086" duration="557000" />
+      <workItem from="1590413094086" duration="52516000" />
+      <workItem from="1590592026985" duration="12612000" />
     </task>
     <servers />
   </component>
@@ -279,7 +294,7 @@
       <breakpoints>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>239</line>
+          <line>207</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -299,8 +314,13 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/Magickable.hpp</url>
-          <line>69</line>
+          <line>70</line>
           <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
+          <line>118</line>
+          <option name="timeStamp" value="66" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -310,7 +330,9 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="CMakeCatchTestRunConfigurationType">
-        <watch expression="img" />
+        <watch expression="pattern-&gt;w" language="ObjectiveC" />
+        <watch expression="x" />
+        <watch expression="y" />
       </configuration>
     </watches-manager>
   </component>

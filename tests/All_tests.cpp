@@ -2,6 +2,7 @@
 #define CATCH_CONFIG_MAIN
 
 #include <catch2/catch.hpp>
+#include "LibAvTests.hpp"
 #include "TranscoderTests.hpp"
 #include "filesystem_Tests.h"
 #include "Assets and resources.hpp"

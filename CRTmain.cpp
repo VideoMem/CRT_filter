@@ -46,8 +46,10 @@ void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
         zPipe->pushFrame();
         auto stop = high_resolution_clock::now();
         auto elapsed = duration_cast<milliseconds>(stop - start);
-        auto error = duration_cast<milliseconds>(frameTime - elapsed) * 0.8;
-        std::this_thread::sleep_for(error);
+        if(duration_cast<milliseconds>(frameTime) > elapsed) {
+            auto error = duration_cast<milliseconds>(frameTime - elapsed) * 0.8;
+            std::this_thread::sleep_for(error);
+        }
     }
     SDL_Log("Frame send thread done!");
 }

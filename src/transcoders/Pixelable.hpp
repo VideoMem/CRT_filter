@@ -43,15 +43,16 @@ public:
     inline static double  fromChar(Uint32* c)  { return (double) *c / 0xFF; }
     inline static Uint32 toChar (double* comp) { return *comp < 1? 0xFF * *comp: 0xFF; }
 
-    inline static double luma(Uint32 *R, Uint32 *G, Uint32 *B) {
-        return 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
-    }
-
     inline static void RGB(const double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
         const double DbDr = 0.0;
         RGB(luma, &DbDr, &DbDr, R, G, B);
     }
 
+    inline static double luma(Uint32 *R, Uint32 *G, Uint32 *B) {
+        return 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
+    }
+
+    //wolfram alpha: invert {{0.299, 0.587, 0.114},{-0.450, -0.883, 1.333},{-1.333,1.116,0.217}}
     inline static void RGB(const double *luma, const double *Db, const double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         double fR = *luma + 0.0000923037 * *Db - 0.525913          * *Dr;
         double fG = *luma - 0.129133     * *Db + 0.267899328207599 * *Dr;

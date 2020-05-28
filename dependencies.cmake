@@ -43,6 +43,11 @@ pkg_check_modules(GRRUNTIME REQUIRED gnuradio-runtime )
 #        PATHS ${PC_GrRuntime_LIBRARY_DIRS}
 #        )
 
+# To find and use ffmpeg avcodec library
+find_library( AVCODEC_LIBRARY avcodec )
+find_library( AVUTIL_LIBRARY avutil )
+#find_library( AVFORMAT_LIBRARY avformat )
+
 #pthread
 find_package (Threads)
 
@@ -60,4 +65,10 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${GRRUNTIME_LIBRARY})
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${VIPS_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${VIPS_LIBRARIES})
 
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${AVCODEC_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${AVCODEC_LIBRARY})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${AVUTIL_LIBRARY})
+#target_link_libraries(${CMAKE_PROJECT_NAME} ${AVFORMAT_LIBRARY})
+
 target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+

@@ -47,7 +47,7 @@ TEST_CASE( "Type Conversions", "[SDL2][Transcodeable]") {
         REQUIRE( copy != nullptr );
 
         size_t required_size = Waveable::conversion_size( img );
-        REQUIRE(required_size == img->w * img->h);
+        REQUIRE(required_size == (size_t) img->w * img->h);
         auto wave = new uint8_t[required_size];
         auto file = new uint8_t[required_size];
 
@@ -72,7 +72,7 @@ TEST_CASE( "Type Conversions", "[SDL2][Transcodeable]") {
         REQUIRE( copy != nullptr );
 
         size_t required_size = Waveable::conversion_size( img );
-        REQUIRE(required_size == img->w * img->h);
+        REQUIRE(required_size == (size_t) img->w * img->h);
         auto wave = new uint8_t[required_size];
         auto file = new uint8_t[required_size];
 
