@@ -6,113 +6,99 @@
 #define SDL_CRT_FILTER_LIBAVTESTS_HPP
 #include <transcoders/libAVable.hpp>
 
-int test_mpeg(const std::string file_name, const std::string codec_name ) {
-    const char *filename;
-    AVCodec *codec = nullptr;
-    AVCodecContext *c= nullptr;
-    AVFrame *frame;
-    AVPacket *pkt;
-
-    int i, ret;
-    FILE *f;
+void test_codec( const std::string file_name, const std::string codec_name ) {
+    SDL_Surface* still_image = SDL_ConvertSurfaceFormat(SDL_LoadBMP("resources/images/standby640.bmp" ), SDL_PIXELFORMAT_RGBA32, 0 );
+    auto state = LibAVable::init_state( still_image, codec_name );
     uint8_t endcode[] = { 0, 0, 1, 0xb7 };
 
-    filename = file_name.c_str();
-    LibAVable::init_codec( codec, c, codec_name );
-
-    pkt = av_packet_alloc();
-    if (!pkt)
-        exit(1);
-
-    SDL_Surface* still = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/standby640.bmp"), SDL_PIXELFORMAT_RGBA32, 0 );
-
-    /* put sample parameters */
-    c->bit_rate = 400000;
-    /* resolution must be a multiple of two */
-    c->width = still->w;
-    c->height = still->h;
-    /* frames per second */
-    c->time_base = (AVRational){1, 25};
-    c->framerate = (AVRational){25, 1};
-
-    /* emit one intra frame every ten frames
-     * check frame pict_type before passing frame
-     * to encoder, if frame->pict_type is AV_PICTURE_TYPE_I
-     * then gop_size is ignored and the output of encoder
-     * will always be I frame irrespective to gop_size
-     */
-    c->gop_size = 10;
-    c->max_b_frames = 1;
-    c->pix_fmt = AV_PIX_FMT_YUV420P;
-
-    if (codec->id == AV_CODEC_ID_H264)
-        av_opt_set(c->priv_data, "preset", "slow", 0);
-
-    /* open it */
-    ret = avcodec_open2(c, codec, nullptr );
-    if (ret < 0) {
-        std::string err("Commented error");
-        //std::string err(av_err2str(ret));
-        fprintf(stderr, "Could not open codec: %s\n", err.c_str() );
-        exit(1);
-    }
-
-    f = fopen(filename, "wb");
+    FILE* f = fopen( file_name.c_str() , "wb");
     if (!f) {
-        fprintf(stderr, "Could not open %s\n", filename);
-        exit(1);
-    }
-
-    frame = av_frame_alloc();
-    if (!frame) {
-        fprintf(stderr, "Could not allocate video frame\n");
-        exit(1);
-    }
-
-    frame->format = c->pix_fmt;
-    frame->width  = c->width;
-    frame->height = c->height;
-
-    ret = av_frame_get_buffer(frame, 0);
-    if (ret < 0) {
-        fprintf(stderr, "Could not allocate the video frame data\n");
+        fprintf(stderr, "Could not open %s\n", file_name.c_str() );
         exit(1);
     }
 
     /* encode 10 seconds of video */
-    /* make sure the frame data is writable */
-    ret = av_frame_make_writable(frame);
-    if (ret < 0)
-        exit(1);
-
-    LibAVable::decode(frame, still);
-
-    for (i = 0; i < 250; i++) {
+    for (int i = 0; i < 250; i++) {
         fflush(stdout);
 
-        //LibAVable::dummy_image( i, *frame, *c );
-        frame->pts = i;
+        if(i % 10  == 0 ) LibAVable::decode(state->frame, still_image );
+        else LibAVable::dummy_image( i, *state->frame );
 
+        state->frame->pts = i;
         /* encode the image */
-        LibAVable::writefile(c, frame, pkt, f);
+        LibAVable::writefile( state, f );
     }
 
     /* flush the encoder */
-    LibAVable::writefile(c, nullptr, pkt, f);
+    state->frame->pts++;
+    LibAVable::writefile( state, f );
 
     /* add sequence end code to have a real MPEG file */
-    if (codec->id == AV_CODEC_ID_MPEG1VIDEO || codec->id == AV_CODEC_ID_MPEG2VIDEO)
+    if (state->codec->id == AV_CODEC_ID_MPEG1VIDEO || state->codec->id == AV_CODEC_ID_MPEG2VIDEO)
         fwrite(endcode, 1, sizeof(endcode), f);
     fclose(f);
 
-    avcodec_free_context(&c);
-    av_frame_free(&frame);
-    av_packet_free(&pkt);
+    avcodec_free_context(&state->c);
+    av_frame_free(&state->frame);
+    av_packet_free(&state->pkt);
+    //delete state;
 
-    return 0;
 }
 
 TEST_CASE("LibAV tests","[LibAV]") {
+
+    SECTION("Basic encode/decode tests") {
+        auto surface = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                        SDL_PIXELFORMAT_RGBA32 , 0 );
+        REQUIRE( surface != nullptr );
+        auto copy = Surfaceable::AllocateSurface(surface);
+        auto avframe = av_frame_alloc();
+        avframe->format = AV_PIX_FMT_YUV420P;
+        avframe->width = surface->w;
+        avframe->height = surface->h;
+        REQUIRE( av_frame_get_buffer( avframe, 0 ) >= 0 );
+        LibAVable::decode( avframe, surface );
+        LibAVable::encode( copy, avframe );
+        auto ycbcr = SDL_ConvertSurfaceFormat( surface,
+                                              SDL_PIXELFORMAT_RGBA32 , 0 );
+        REQUIRE( ycbcr != nullptr );
+        auto recover = Surfaceable::AllocateSurface( ycbcr );
+        REQUIRE( recover != nullptr );
+
+        const int yuv_len = MAX_YCBCR_SURFACE_SIZE(ycbcr->w, ycbcr->h, 0 );
+        auto yuv = new Uint8[yuv_len];
+        LibAVable::toYCbCr( yuv, ycbcr, SDL_PIXELFORMAT_YVYU );
+        LibAVable::fromYCbCr( recover, yuv , SDL_PIXELFORMAT_YVYU );
+
+        SDL_SaveBMP( surface, "libav_basic_frameraw.bmp" );
+        SDL_SaveBMP( recover, "libav_basic_ycbcr.bmp" );
+        SDL_SaveBMP( copy, "libav_basic_frameconv.bmp" );
+        av_frame_free( &avframe );
+        SDL_FreeSurface( surface );
+        SDL_FreeSurface( copy );
+        SDL_FreeSurface( ycbcr );
+        SDL_FreeSurface( recover );
+        delete [] yuv;
+    }
+
+    SECTION ( "Color bleed test" ) {
+        auto rgb = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        REQUIRE( rgb != nullptr );
+
+        const int yuv_len = MAX_YCBCR_SURFACE_SIZE(rgb->w, rgb->h, 0 );
+        auto yuv = new Uint8[yuv_len];
+
+        for(int i = 30; i > 0; --i ) {
+            LibAVable::toYCbCr(yuv, rgb, SDL_PIXELFORMAT_YVYU);
+            LibAVable::fromYCbCr(rgb, yuv, SDL_PIXELFORMAT_YVYU);
+        }
+
+        SDL_SaveBMP(rgb, "libav_colorbleed.bmp");
+        SDL_FreeSurface( rgb );
+        delete[] yuv;
+    }
+
     SECTION("RGB <-> YUV conversions") {
         struct {
             SDL_bool enable_intrinsics;
@@ -153,9 +139,8 @@ TEST_CASE("LibAV tests","[LibAV]") {
     }
 
     SECTION("Encode to file") {
-        test_mpeg( "test.mpg", "mpeg1video" );
-        test_mpeg( "test_mpg2.mpg", "mpeg2video" );
-        test_mpeg( "test.vc2", "vc2" );
+        test_codec("test.mpg", "mpeg1video");
+        test_codec("test_mpg2.mpg", "mpeg2video");
     }
 }
 

@@ -2,6 +2,7 @@
 #include <CRTApp.hpp>
 #include <loaders/ZMQLoader.hpp>
 #include <loaders/ZMQVideoPipe.hpp>
+#include <transcoders/libAVable.hpp>
 #include <thread>
 
 #define FRONT_SAMPLERATE 200e3
@@ -56,14 +57,37 @@ void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
 
 void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
     SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    SDL_Surface* full = Loader::AllocateSurface( 320, 240 );
+
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
+
+    auto state = LibAVable::init_state( full, "mpeg1video" ); //ceil((double) FRONT_SAMPLERATE / (frame->w * frame->h)) );
+    uint8_t endcode[] = { 0, 0, 1, 0xb7 };
+
+    std::string filename = "outstream.mpg";
+    FILE* f = fopen( filename.c_str() , "wb");
+    if (!f) {
+        fprintf(stderr, "Could not open %s\n", filename.c_str() );
+        exit(1);
+    }
+
     SDL_Log("Frame receive thread initialized.");
+    state->frame->pts = 0;
+    int frame_diff = floor((double) 25 / ((double) FRONT_SAMPLERATE / (frame->w * frame->h) ));
     while(!*quit) {
         auto start = high_resolution_clock::now();
         zLoader->pullFrame();
         app->update();
         app->getCode(frame);
         zPipe->testSendFrame(frame);
+
+        app->getFrame(full);
+        for( int i=0; i < frame_diff; ++i ) {
+            LibAVable::decode(state->frame, full);
+            LibAVable::writefile(state, f);
+            state->frame->pts++;
+        }
+
         auto stop = high_resolution_clock::now();
         auto elapsed = duration_cast<milliseconds>(stop - start);
         if(duration_cast<milliseconds>(frameTime) > elapsed) {
@@ -73,6 +97,19 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
             std::this_thread::sleep_for(error);
         }
     }
+
+    //flush
+    state->frame->pts++;
+    LibAVable::writefile( state, f );
+    /* add sequence end code to have a real MPEG file */
+    if (state->codec->id == AV_CODEC_ID_MPEG1VIDEO || state->codec->id == AV_CODEC_ID_MPEG2VIDEO)
+        fwrite(endcode, 1, sizeof(endcode), f);
+    fclose(f);
+
+    avcodec_free_context(&state->c);
+    av_frame_free(&state->frame);
+    av_packet_free(&state->pkt);
+    SDL_FreeSurface(full);
     SDL_FreeSurface(frame);
     SDL_Log("Frame receive thread done!");
 }

@@ -29,24 +29,27 @@ public:
 
     static void encode(void* dst, void* src);
     static void decode(void* dst, void* src);
-    static LibAVable::AVthings_t *init_state(std::string codec_name, int x, int y, int framerate, int bitrate);
+
+    static LibAVable::AVthings_t *init_state(SDL_Surface* reference, std::string codec_name) {
+        return init_state( codec_name, reference->w, reference->h );
+    }
+    static LibAVable::AVthings_t *init_state(std::string codec_name, int x, int y, int framerate = 25, int bitrate = 600000 );
     static void push_frame(SDL_Surface *source, FILE *fp, AVthings_t *AVstate);
-    static void writefile(AVCodecContext *enc_ctx, AVFrame *frame, AVPacket *pkt,
-                          FILE *outfile) {
+    static void writefile(LibAVable::AVthings_t *state, FILE *outfile) {
         int ret;
 
         /* send the frame to the encoder */
-        if (frame)
-            printf("Send frame %3" PRId64"\n", frame->pts);
+        if ( state->frame )
+            printf("Send frame %3" PRId64"\n", state->frame->pts );
 
-        ret = avcodec_send_frame(enc_ctx, frame);
+        ret = avcodec_send_frame( state->c, state->frame );
         if (ret < 0) {
             fprintf(stderr, "Error sending a frame for encoding\n");
             exit(1);
         }
 
         while (ret >= 0) {
-            ret = avcodec_receive_packet(enc_ctx, pkt);
+            ret = avcodec_receive_packet( state->c, state->pkt );
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
                 return;
             else if (ret < 0) {
@@ -54,32 +57,30 @@ public:
                 exit(1);
             }
 
-            printf("Write packet %3" PRId64" (size=%5d)\n", pkt->pts, pkt->size);
-            fwrite(pkt->data, 1, pkt->size, outfile);
-            av_packet_unref(pkt);
+            printf("Write packet %3" PRId64" (size=%5d)\n", state->pkt->pts, state->pkt->size);
+            fwrite(state->pkt->data, 1, state->pkt->size, outfile);
+            av_packet_unref(state->pkt);
         }
     }
 
 public:
 
-    static void init_codec( AVCodec*& codec, AVCodecContext*& c,  const std::string codec_name ) {
+    static void init_codec( AVthings_t *state, const std::string codec_name ) {
         avcodec_register_all();
 
         /* find the encoder */
-        AVCodec* codecptr = avcodec_find_encoder_by_name( codec_name.c_str() );
-        if ( !codecptr ) {
+        state->codec = avcodec_find_encoder_by_name( codec_name.c_str() );
+        if ( !state->codec ) {
             fprintf(stderr, "Codec '%s' not found\n", codec_name.c_str());
             exit(1);
         }
 
-        AVCodecContext* cptr = avcodec_alloc_context3( codecptr );
-        if ( !cptr ) {
+        state->c = avcodec_alloc_context3( state->codec );
+        if ( !state->c ) {
             fprintf(stderr, "Could not allocate video codec context\n");
             exit(1);
         }
 
-        codec = codecptr;
-        c = cptr;
     }
 
     static void dummy_image(int idx, AVFrame& frame) {
@@ -102,8 +103,6 @@ public:
         frame.pts = idx;
     }
 
-
-
     static int test_ycbcr(int pattern_size, int extra_pitch);
     static SDL_Surface* generate_test_pattern(int pattern_size);
 
@@ -113,20 +112,56 @@ public:
 
     //from RGB32 to YCrCb
     static void toYCbCr(uint8_t *yuv, SDL_Surface *pattern, int format);
-    static void toFrame(AVFrame *frame, const Uint8 *ycrcb);
+    static void toFrame(AVFrame *frame, const Uint8 *ycbcr);
+    static void fromYCbCr(SDL_Surface *pattern, uint8_t *yuv, int format);
+    static void fromFrame(Uint8 *ycbcr, AVFrame *frame );
 
 };
 
-
-//two days to write this method due to inconsistent documentation
-void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb) {
-    int fid = 0, cid = 0, yid = 0;
+void LibAVable::fromFrame(Uint8 *ycbcr, AVFrame *frame ) {
+    int fid = 0, cid = 0, yid = 0, nyid = 0;
 
     //YVYU Luminance
     for (int y = 0; y < frame->height ; y++) {
         for (int x = 0; x < frame->width; x++) {
             fid = y * frame->linesize[0] + x;
-            frame->data[0][ fid ] = ycrcb[ fid * 2 ];
+            ycbcr[ fid * 2 ] = frame->data[0][ fid ];
+        }
+    }
+
+    /* Cb and Cr */
+    for (int y = 0; y < frame->height/2; y++) {
+        for (int x = 0; x < frame->width/2; x++) {
+            cid = y * frame->linesize[1] + x;
+            yid  = 4 * ( 2 * y * frame->linesize[1] + x );
+            nyid = round(4 * ( ( 2 * y - 1 ) * frame->linesize[1] + x ));
+            ycbcr[ yid + 3 ] = frame->data[1][ cid ]; // Cb <-> U;
+            ycbcr[ yid + 1 ] = frame->data[2][ cid ]; // Cr <-> V;
+            if( y > 0 ) {
+                ycbcr[nyid + 3] = frame->data[1][cid]; // Cb <-> U;
+                ycbcr[nyid + 1] = frame->data[2][cid]; // Cr <-> V;
+            }
+        }
+    }
+
+    //last line
+    int y = (frame->height/2) - 1;
+    for (int x = 0; x < frame->width/2; x++) {
+        nyid = round(4 * ( ( 2 * y + 1 ) * frame->linesize[1] + x ));
+        cid = y * frame->linesize[1] + x;
+        ycbcr[nyid + 3] = frame->data[1][cid]; // Cb <-> U;
+        ycbcr[nyid + 1] = frame->data[2][cid]; // Cr <-> V;
+    }
+}
+
+void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycbcr ) {
+    int fid = 0, cid = 0, yid = 0, nyid = 0;;
+
+    //YVYU Luminance
+    for (int y = 0; y < frame->height ; y++) {
+        for (int x = 0; x < frame->width; x++) {
+            fid = y * frame->linesize[0] + x;
+            frame->data[0][ fid ] = ycbcr[ fid * 2 ];
         }
     }
 
@@ -135,8 +170,9 @@ void LibAVable::toFrame(AVFrame *frame, const Uint8 *ycrcb) {
         for (int x = 0; x < frame->width/2; x++) {
             cid = y * frame->linesize[1] + x;
             yid = 4 * ( 2 * y * frame->linesize[1] + x );
-            frame->data[1][ cid ] = ycrcb[ yid + 3 ]; // Cb <-> U;
-            frame->data[2][ cid ] = ycrcb[ yid + 1 ]; // Cr <-> V;
+            nyid = round(4 * ( ( 2 * y - 1 ) * frame->linesize[1] + x ));
+            frame->data[1][ cid ] = y == 0? ycbcr[ yid + 3 ]: (ycbcr[ yid + 3 ] + ycbcr[ nyid + 3 ]) / 2 ; // Cb <-> U;
+            frame->data[2][ cid ] = y == 0? ycbcr[ yid + 1 ]: (ycbcr[ yid + 1 ] + ycbcr[ nyid + 1 ]) / 2 ; // Cr <-> V;
         }
     }
 }
@@ -149,12 +185,26 @@ void LibAVable::decode(void *dst, void *src) {
 
     auto format = SDL_PIXELFORMAT_YVYU;
 
-    auto yuv_pitch = CalculateYCbCrPitch(format, source_frame->w);
     toYCbCr(yuv, source_frame, format);
     toFrame(dst_frame, yuv);
 
     delete [] yuv;
 }
+
+void LibAVable::encode(void *dst, void *src) {
+    auto source_frame = static_cast<AVFrame*>(src);
+    auto dst_frame = static_cast<SDL_Surface*>(dst);
+    const int yuv_len = MAX_YCBCR_SURFACE_SIZE(dst_frame->w, dst_frame->h, 0);
+    auto yuv = new Uint8[yuv_len];
+
+    auto format = SDL_PIXELFORMAT_YVYU;
+
+    fromFrame( yuv, source_frame );
+    fromYCbCr(dst_frame, yuv, format);
+
+    delete [] yuv;
+}
+
 
 void LibAVable::toYCbCr(uint8_t *yuv, SDL_Surface *pattern, int format) {
     auto yuv_pitch = CalculateYCbCrPitch(format, pattern->w);
@@ -163,6 +213,15 @@ void LibAVable::toYCbCr(uint8_t *yuv, SDL_Surface *pattern, int format) {
         assert(false && "Error during format conversion");
     }
 }
+
+void LibAVable::fromYCbCr(SDL_Surface *pattern, uint8_t *yuv, int format) {
+    auto yuv_pitch = CalculateYCbCrPitch(format, pattern->w);
+    if (SDL_ConvertPixels(pattern->w, pattern->h, format, yuv, yuv_pitch, pattern->format->format, pattern->pixels, pattern->pitch ) < 0) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert %s to %s: %s\n", SDL_GetPixelFormatName(pattern->format->format), SDL_GetPixelFormatName(format), SDL_GetError());
+        assert(false && "Error during format conversion");
+    }
+}
+
 
 int LibAVable::test_ycbcr(int pattern_size, int extra_pitch) {
     const Uint32 formats[] = {
@@ -203,7 +262,7 @@ int LibAVable::test_ycbcr(int pattern_size, int extra_pitch) {
         }
     }
 
-    /* Verify conversion to YUV (YCrBr) formats */
+    /* Verify conversion to YUV (YCbCr) formats */
     for (i = 0; i < (int) SDL_arraysize(formats); ++i) {
         yuv1_pitch = CalculateYCbCrPitch(formats[i], pattern->w) + extra_pitch;
         if (SDL_ConvertPixels(pattern->w, pattern->h, pattern->format->format, pattern->pixels, pattern->pitch, formats[i], yuv1, yuv1_pitch) < 0) {
@@ -368,10 +427,10 @@ SDL_bool LibAVable::verify_ycbcr_data(Uint32 format, const Uint8 *yuv, int yuv_p
     return result;
 }
 
-LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 640, int y = 480, int framerate = 25,
-                                              int bitrate = 400000) {
+LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 640, int y = 480, int framerate,
+                                              int bitrate) {
     static auto state = new AVthings_t;
-    init_codec( state->codec, state->c, codec_name );
+    init_codec( state, codec_name );
     state->pkt = av_packet_alloc();
     state->c->bit_rate = bitrate;
     state->c->width = x;
@@ -393,10 +452,10 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 64
         av_opt_set( state->c->priv_data, "preset", "slow", 0 );
 
     /* open it */
-    auto ret = avcodec_open2( state->c, state->codec, nullptr );
+    int ret = avcodec_open2( state->c, state->codec, nullptr );
     if ( ret < 0 ) {
-        //std::string err =  av_err2str(ret);
-        //fprintf( stderr, "Could not open codec: %s\n", err.c_str() );
+        // std::string err =  av_err2str(ret);
+        // fprintf( stderr, "Could not open codec: %s\n", err.c_str() );
         assert( false && "Cannot open codec error" );
     }
 
@@ -416,6 +475,12 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 64
         assert( false && "Cannot allocate video frame data" );
     }
 
+    /* make sure the frame data is writable */
+    ret = av_frame_make_writable( state->frame );
+    if (ret < 0)
+        assert( false && "Frame not writable" );
+
+    return state;
 }
 
 

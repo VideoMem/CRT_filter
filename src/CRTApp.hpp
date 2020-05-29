@@ -80,6 +80,7 @@ class CRTApp : public BaseApp {
     void dwSpeed() { if(ripplesync > 1) --ripplesync; }
 
     void getCode(SDL_Surface *dst);
+    void getFrame(SDL_Surface *dst);
 
 protected:
     volatile bool hold;
@@ -146,6 +147,8 @@ protected:
 
 
     void updateScreen();
+
+
 };
 
 CRTApp::CRTApp(Loader &l) : BaseApp(l) {
@@ -527,6 +530,12 @@ void CRTApp::getCode(SDL_Surface *dst) {
     //updateScreen();
     Loader::blitFill(gBack, dst);
 }
+
+void CRTApp::getFrame(SDL_Surface *dst) {
+    while(!initialized);
+    Loader::blitFill(gBack, dst);
+}
+
 
 void CRTApp::updateScreen() {
     auto s0 = high_resolution_clock::now();

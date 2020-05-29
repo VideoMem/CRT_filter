@@ -16,10 +16,8 @@
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/helpers/testyuv_cvt.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/hwtypes.hpp" afterDir="false" />
@@ -74,7 +72,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -265,7 +263,8 @@
       <workItem from="1590240898629" duration="73928000" />
       <workItem from="1590413094086" duration="52516000" />
       <workItem from="1590592026985" duration="18956000" />
-      <workItem from="1590667791707" duration="5758000" />
+      <workItem from="1590667791707" duration="26124000" />
+      <workItem from="1590757047161" duration="543000" />
     </task>
     <servers />
   </component>
@@ -317,6 +316,11 @@
           <url>file://$PROJECT_DIR$/src/transcoders/Magickable.hpp</url>
           <line>70</line>
           <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/CRTmain.cpp</url>
+          <line>76</line>
+          <option name="timeStamp" value="67" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
