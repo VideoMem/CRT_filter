@@ -6,6 +6,8 @@
 #define SDL_CRT_FILTER_LIBAVTESTS_HPP
 #include <transcoders/libAVable.hpp>
 
+#define INBUF_SIZE 4096
+
 void test_codec( const std::string file_name, const std::string codec_name ) {
     SDL_Surface* still_image = SDL_ConvertSurfaceFormat(SDL_LoadBMP("resources/images/standby640.bmp" ), SDL_PIXELFORMAT_RGBA32, 0 );
     auto state = LibAVable::init_state( still_image, codec_name );
@@ -13,15 +15,15 @@ void test_codec( const std::string file_name, const std::string codec_name ) {
 
     FILE* f = fopen( file_name.c_str() , "wb");
     if (!f) {
-        fprintf(stderr, "Could not open %s\n", file_name.c_str() );
+        fprintf( stderr, "Could not open %s\n", file_name.c_str() );
         exit(1);
     }
 
     /* encode 10 seconds of video */
-    for (int i = 0; i < 250; i++) {
+    for ( int i = 0; i < 250; i++ ) {
         fflush(stdout);
 
-        if(i % 10  == 0 ) LibAVable::decode(state->frame, still_image );
+        if(i % 10  == 0 ) LibAVable::decode( state->frame, still_image );
         else LibAVable::dummy_image( i, *state->frame );
 
         state->frame->pts = i;
@@ -38,12 +40,80 @@ void test_codec( const std::string file_name, const std::string codec_name ) {
         fwrite(endcode, 1, sizeof(endcode), f);
     fclose(f);
 
-    avcodec_free_context(&state->c);
-    av_frame_free(&state->frame);
-    av_packet_free(&state->pkt);
+    avcodec_free_context( &state->c );
+    av_frame_free( &state->frame );
+    av_packet_free( &state->pkt );
     //delete state;
 
 }
+
+void test_decode( const std::string file_name, const std::string codec_name ) {
+    auto state = LibAVable::init_state( codec_name, 1, 640, 480 );
+    AVFrame *picture = av_frame_alloc();
+    uint8_t *data;
+    size_t   data_size;
+    AVCodecParserContext *parser;
+
+    parser = av_parser_init( state->codec->id );
+    if (!parser) {
+        fprintf(stderr, "parser not found\n");
+        exit(1);
+    }
+
+    FILE* f = fopen( file_name.c_str() , "rb");
+    if (!f) {
+        fprintf(stderr, "Could not open %s\n", file_name.c_str() );
+        exit(1);
+    }
+
+    uint8_t inbuf[INBUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE];
+    /* set end of buffer to 0 (this ensures that no overreading happens for damaged MPEG streams) */
+    memset(inbuf + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+
+    while (!feof(f)) {
+        fflush(stdout);
+        /* read raw data from the input file */
+        data_size = fread(inbuf, 1, INBUF_SIZE, f);
+        if (!data_size)
+            break;
+
+        /* use the parser to split the data into frames */
+        data = inbuf;
+        while (data_size > 0) {
+            int ret = av_parser_parse2(parser, state->c, &state->pkt->data, &state->pkt->size,
+                                   data, data_size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+            if (ret < 0) {
+                fprintf(stderr, "Error while parsing\n");
+                exit(1);
+            }
+            data      += ret;
+            data_size -= ret;
+
+            if ( state->pkt->size )
+                if ( LibAVable::readfile( state, f ) < 0 ) data_size = -1;
+        }
+    }
+
+    auto recovered_surface = Surfaceable::AllocateSurface( state->frame->width , state->frame->height );
+    LibAVable::encode( recovered_surface, state->frame );
+    SDL_SaveBMP(recovered_surface, "libav_recovered_from_video.bmp");
+
+    //flush
+    state->pkt = nullptr;
+    LibAVable::readfile( state, f );
+
+    av_parser_close(parser);
+    avcodec_free_context(&state->c);
+    av_frame_free(&picture);
+    av_packet_free(&state->pkt);
+    SDL_FreeSurface( recovered_surface );
+    //delete state;
+
+}
+
+
+
+
 
 TEST_CASE("LibAV tests","[LibAV]") {
 
@@ -138,9 +208,14 @@ TEST_CASE("LibAV tests","[LibAV]") {
         }
     }
 
-    SECTION("Encode to file") {
-        test_codec("test.mpg", "mpeg1video");
-        test_codec("test_mpg2.mpg", "mpeg2video");
+    //SECTION("Encode to file") {
+    //    test_codec("test.mpg", "mpeg1video");
+    //    test_codec("test_mpg2.mpg", "mpeg2video");
+    //}
+
+    SECTION("Read from file") {
+        test_decode("test.mpg", "mpeg1video");
+        test_decode("test_mpg2.mpg", "mpeg2video");
     }
 }
 

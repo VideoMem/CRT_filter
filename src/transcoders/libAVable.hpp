@@ -31,10 +31,11 @@ public:
     static void decode(void* dst, void* src);
 
     static LibAVable::AVthings_t *init_state(SDL_Surface* reference, std::string codec_name) {
-        return init_state( codec_name, reference->w, reference->h );
+        return init_state(codec_name, 0, reference->w, reference->h );
     }
-    static LibAVable::AVthings_t *init_state(std::string codec_name, int x, int y, int framerate = 25, int bitrate = 600000 );
-    static void push_frame(SDL_Surface *source, FILE *fp, AVthings_t *AVstate);
+    static AVthings_t *
+    init_state(std::string codec_name, int decode_flag = 0, int x = 320, int y = 240, int framerate = 25, int bitrate = 600000);
+    static size_t readfile(LibAVable::AVthings_t *state, FILE *infile);
     static void writefile(LibAVable::AVthings_t *state, FILE *outfile) {
         int ret;
 
@@ -50,16 +51,16 @@ public:
 
         while (ret >= 0) {
             ret = avcodec_receive_packet( state->c, state->pkt );
-            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            if ( ret == AVERROR(EAGAIN) || ret == AVERROR_EOF )
                 return;
-            else if (ret < 0) {
-                fprintf(stderr, "Error during encoding\n");
-                exit(1);
+            else if ( ret < 0 ) {
+                fprintf( stderr, "Error during encoding\n" );
+                exit(1 );
             }
 
-            printf("Write packet %3" PRId64" (size=%5d)\n", state->pkt->pts, state->pkt->size);
-            fwrite(state->pkt->data, 1, state->pkt->size, outfile);
-            av_packet_unref(state->pkt);
+            printf("Write packet %3" PRId64" (size=%5d)\n", state->pkt->pts, state->pkt->size );
+            fwrite( state->pkt->data, 1, state->pkt->size, outfile );
+            av_packet_unref( state->pkt );
         }
     }
 
@@ -83,18 +84,39 @@ public:
 
     }
 
+
+    static void init_decode( AVthings_t *state, const std::string codec_name ) {
+        avcodec_register_all();
+
+        /* find the encoder */
+        state->codec = avcodec_find_decoder_by_name( codec_name.c_str() );
+        if ( !state->codec ) {
+            fprintf(stderr, "Codec '%s' not found\n", codec_name.c_str());
+            exit(1);
+        }
+
+        state->c = avcodec_alloc_context3( state->codec );
+        if ( !state->c ) {
+            fprintf(stderr, "Could not allocate video codec context\n");
+            exit(1);
+        }
+
+    }
+
+
+
     static void dummy_image(int idx, AVFrame& frame) {
         /* prepare a dummy image */
         /* Y */
-        for (int y = 0; y < frame.height; y++) {
-            for (int x = 0; x < frame.width; x++) {
+        for ( int y = 0; y < frame.height; y++ ) {
+            for ( int x = 0; x < frame.width; x++ ) {
                 frame.data[0][y * frame.linesize[0] + x] = x + y + idx * 3;
             }
         }
 
         /* Cb and Cr */
-        for (int y = 0; y < frame.height/2; y++) {
-            for (int x = 0; x < frame.width/2; x++) {
+        for ( int y = 0; y < frame.height/2; y++ ) {
+            for ( int x = 0; x < frame.width/2; x++ ) {
                 frame.data[1][y * frame.linesize[1] + x] = 128 + y + idx * 2;
                 frame.data[2][y * frame.linesize[2] + x] = 64 + x + idx * 5;
             }
@@ -427,10 +449,14 @@ SDL_bool LibAVable::verify_ycbcr_data(Uint32 format, const Uint8 *yuv, int yuv_p
     return result;
 }
 
-LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 640, int y = 480, int framerate,
-                                              int bitrate) {
+LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode_flag, int x, int y, int framerate, int bitrate) {
     static auto state = new AVthings_t;
-    init_codec( state, codec_name );
+
+    if(decode_flag == 0)
+        init_codec( state, codec_name );
+    else
+        init_decode( state, codec_name );
+
     state->pkt = av_packet_alloc();
     state->c->bit_rate = bitrate;
     state->c->width = x;
@@ -483,11 +509,48 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int x = 64
     return state;
 }
 
+size_t LibAVable::readfile( LibAVable::AVthings_t *state, FILE *infile ) {
 
-void LibAVable::push_frame(SDL_Surface *source, FILE *fp, AVthings_t *AVstate) {
+    int ret = avcodec_send_packet( state->c, state->pkt );
 
+    if(ret < 0 ) {
+        switch (ret) {
+            case AVERROR(EAGAIN):
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                             "AVERROR(EAGAIN) input is not accepted in the current state - user must read output with avcodec_receive_frame() (once all output is read, the packet should be resent, and the call will not fail with EAGAIN).");
+                goto end_case;
+            case AVERROR_EOF:
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                             "AVERROR_EOF the decoder has been flushed, and no new packets can be sent to it (also returned if more than 1 flush packet is sent) ");
+                goto end_case;
+            case AVERROR(EINVAL):
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                             "AVERROR(EINVAL) codec not opened, it is an encoder, or requires flush");
+                goto end_case;
+            case AVERROR(ENOMEM):
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR,
+                             "AVERROR(ENOMEM) failed to add packet to internal queue, or similar");
+                goto end_case;
+            default:
+                SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Legitimate decoding errors");
+            end_case:
+                fprintf(stderr, "Error sending a packet for decoding, avcodec_send_packet returned %d\n", ret);
+                return -1;
+        }
+    }
+
+    ret = avcodec_receive_frame( state->c , state->frame );
+    if ( ret == AVERROR(EAGAIN) || ret == AVERROR_EOF )
+        return -1;
+    else if (ret < 0) {
+        fprintf(stderr, "Error during decoding\n");
+        assert( false && "Error decoding video" );
+    }
+
+    printf("decoded frame %3d\n", state->c->frame_number );
+    fflush(stdout);
+    return ret;
 }
-
 
 
 #endif //SDL_CRT_FILTER_LIBAVABLE_HPP
