@@ -25,6 +25,7 @@ public:
         AVCodecContext *c;
         AVFrame *frame;
         AVPacket *pkt;
+        AVCodecParserContext *parser;
     };
 
     static void encode(void* dst, void* src);
@@ -34,7 +35,7 @@ public:
         return init_state(codec_name, 0, reference->w, reference->h );
     }
     static AVthings_t *
-    init_state(std::string codec_name, int decode_flag = 0, int x = 320, int y = 240, int framerate = 25, int bitrate = 600000);
+    init_state(std::string codec_name, int decode_flag = 0, int x = 320, int y = 240, int framerate = 25, int bitrate = 800000);
     static size_t readfile(LibAVable::AVthings_t *state, FILE *infile);
     static void writefile(LibAVable::AVthings_t *state, FILE *outfile) {
         int ret;
@@ -470,8 +471,8 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     * then gop_size is ignored and the output of encoder
     * will always be I frame irrespective to gop_size
     */
-    state->c->gop_size = 10;
-    state->c->max_b_frames = 1;
+    state->c->gop_size = 100;
+    state->c->max_b_frames = 0;
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if ( state->codec->id == AV_CODEC_ID_H264 )
@@ -505,6 +506,14 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     ret = av_frame_make_writable( state->frame );
     if (ret < 0)
         assert( false && "Frame not writable" );
+
+    if(decode_flag == 1) {
+        state->parser = av_parser_init(state->codec->id);
+        if (!state->parser) {
+            fprintf(stderr, "parser not found\n");
+            assert(false && "Parser not found");
+        }
+    }
 
     return state;
 }

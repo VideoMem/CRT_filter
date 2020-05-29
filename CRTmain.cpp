@@ -55,16 +55,86 @@ void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
     SDL_Log("Frame send thread done!");
 }
 
+#define INBUF_SIZE 4096
+void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, int frame_skip ) {
+    SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    SDL_Surface* copy  = Surfaceable::AllocateSurface( frame );
+    auto state = LibAVable::init_state( codec_name, 1, Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
+    uint8_t *data;
+    size_t   data_size;
+
+    FILE* f = fopen( file_name.c_str() , "rb");
+    if (!f) {
+        fprintf(stderr, "Could not open %s\n", file_name.c_str() );
+        exit(1);
+    }
+
+    uint8_t inbuf[INBUF_SIZE + AV_INPUT_BUFFER_PADDING_SIZE];
+    /* set end of buffer to 0 (this ensures that no overreading happens for damaged MPEG streams) */
+    memset(inbuf + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
+    auto recovered_surface = Surfaceable::AllocateSurface( state->frame->width, state->frame->height );
+
+    while (!feof(f)) {
+        fflush(stdout);
+        /* read raw data from the input file */
+        data_size = fread(inbuf, 1, INBUF_SIZE, f);
+        if (!data_size)
+            break;
+
+        /* use the parser to split the data into frames */
+        data = inbuf;
+        while (data_size > 0) {
+            int ret = av_parser_parse2(state->parser, state->c, &state->pkt->data, &state->pkt->size,
+                                       data, data_size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+            if (ret < 0) {
+                fprintf(stderr, "Error while parsing\n");
+                exit(1);
+            }
+            data      += ret;
+            data_size -= ret;
+
+            if ( state->pkt->size ) {
+                if (LibAVable::readfile(state, f) >= 0) {
+                    LibAVable::encode( recovered_surface, state->frame );
+                    Loader::SurfacePixelsCopy( frame, copy );
+                    Loader::blitFill( recovered_surface, frame );
+                    double error = Pixelable::surface_diff( frame, copy );
+                    SDL_Log("Framediff: %02lf", error );
+                    if( abs(error) * 1000 > 0.27 )
+                        zPipe->testSendFrame( copy );
+                } else { break; }
+            }
+        }
+    }
+    
+    //flush
+    state->pkt = nullptr;
+    LibAVable::readfile( state, f );
+
+    av_parser_close(state->parser);
+    avcodec_free_context(&state->c);
+    av_packet_free(&state->pkt);
+    SDL_FreeSurface( recovered_surface );
+    SDL_FreeSurface( frame );
+    SDL_FreeSurface( copy );
+    //delete state;
+
+}
+
+
 void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
-    SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
-    SDL_Surface* full = Loader::AllocateSurface( 320, 240 );
+    SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+
+    SDL_Surface* full = Surfaceable::AllocateSurface( Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
 
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
 
-    auto state = LibAVable::init_state( full, "mpeg1video" ); //ceil((double) FRONT_SAMPLERATE / (frame->w * frame->h)) );
+    std::string filename = "outstream.mpg";
+    std::string codec_name = "libx264";
+    auto state = LibAVable::init_state( full, codec_name ); //ceil((double) FRONT_SAMPLERATE / (frame->w * frame->h)) );
     uint8_t endcode[] = { 0, 0, 1, 0xb7 };
 
-    std::string filename = "outstream.mpg";
+
     FILE* f = fopen( filename.c_str() , "wb");
     if (!f) {
         fprintf(stderr, "Could not open %s\n", filename.c_str() );
@@ -112,6 +182,9 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
     SDL_FreeSurface(full);
     SDL_FreeSurface(frame);
     SDL_Log("Frame receive thread done!");
+    SDL_Log("Resending video frames");
+    resend_stream("h264" , filename, zPipe, frame_diff);
+    SDL_Log("End of video");
 }
 
 int main(  ) {

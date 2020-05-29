@@ -67,6 +67,30 @@ public:
         *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
     }
 
+    static double surface_diff( SDL_Surface *sample, SDL_Surface* copy ) {
+        double diff = 0;
+        double integrated_error = 0;
+        int pixels = 0;
+        Uint32 R[2] = { 0 }, G[2] = { 0 }, B[2] = { 0 };
+        Uint32 pixel[2] = { 0 };
+        double luminance[2] = { 0 };
+        for ( int y = 0; y < sample->h; ++y ) {
+            for( int x= 0; x < sample->w; ++x ) {
+                pixel[0] = get32( sample, x, y );
+                pixel[1] = get32( copy  , x, y );
+                toComponents( &pixel[0], &R[0], &G[0], &B[0] );
+                toComponents( &pixel[1], &R[1], &G[1], &B[1] );
+                luminance[0] = luma( &R[0], &G[0], &B[0] );
+                luminance[1] = luma( &R[1], &G[1], &B[1] );
+                integrated_error += luminance[0] - luminance[1];
+                pixels++;
+            }
+        }
+        diff = integrated_error / pixels;
+
+        return diff;
+    }
+
 };
 
 #endif //SDL_CRT_FILTER_PIXELABLE_HPP

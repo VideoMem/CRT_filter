@@ -13,6 +13,8 @@ public:
 
     static const int NKERNEL_WIDTH  = 160;
     static const int NKERNEL_HEIGHT = 120;
+    static const int VIDEOFRAME_WIDTH  = 320;
+    static const int VIDEOFRAME_HEIGHT = 240;
     //static const int NKERNEL_WIDTH  = 640;
     //static const int NKERNEL_HEIGHT = 480;
     static const int SCREEN_WIDTH  = 800;

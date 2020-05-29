@@ -49,16 +49,8 @@ void test_codec( const std::string file_name, const std::string codec_name ) {
 
 void test_decode( const std::string file_name, const std::string codec_name ) {
     auto state = LibAVable::init_state( codec_name, 1, 640, 480 );
-    AVFrame *picture = av_frame_alloc();
     uint8_t *data;
     size_t   data_size;
-    AVCodecParserContext *parser;
-
-    parser = av_parser_init( state->codec->id );
-    if (!parser) {
-        fprintf(stderr, "parser not found\n");
-        exit(1);
-    }
 
     FILE* f = fopen( file_name.c_str() , "rb");
     if (!f) {
@@ -80,7 +72,7 @@ void test_decode( const std::string file_name, const std::string codec_name ) {
         /* use the parser to split the data into frames */
         data = inbuf;
         while (data_size > 0) {
-            int ret = av_parser_parse2(parser, state->c, &state->pkt->data, &state->pkt->size,
+            int ret = av_parser_parse2(state->parser, state->c, &state->pkt->data, &state->pkt->size,
                                    data, data_size, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
             if (ret < 0) {
                 fprintf(stderr, "Error while parsing\n");
@@ -102,9 +94,8 @@ void test_decode( const std::string file_name, const std::string codec_name ) {
     state->pkt = nullptr;
     LibAVable::readfile( state, f );
 
-    av_parser_close(parser);
+    av_parser_close(state->parser);
     avcodec_free_context(&state->c);
-    av_frame_free(&picture);
     av_packet_free(&state->pkt);
     SDL_FreeSurface( recovered_surface );
     //delete state;
@@ -208,10 +199,10 @@ TEST_CASE("LibAV tests","[LibAV]") {
         }
     }
 
-    //SECTION("Encode to file") {
-    //    test_codec("test.mpg", "mpeg1video");
-    //    test_codec("test_mpg2.mpg", "mpeg2video");
-    //}
+    SECTION("Encode to file") {
+        test_codec("test.mpg", "mpeg1video");
+        test_codec("test_mpg2.mpg", "mpeg2video");
+    }
 
     SECTION("Read from file") {
         test_decode("test.mpg", "mpeg1video");
