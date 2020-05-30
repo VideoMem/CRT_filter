@@ -138,7 +138,7 @@ protected:
     BCSFilter<SDL_Surface> bcsFilter;
     SyncFilter<SDL_Surface> syncFilter;
     bool loop;
-    volatile bool updateLock;
+   // volatile bool updateLock;
     DeflectionFilter<SDL_Surface>* deflectionFilter;
     MagickOSD osdFilter;
 
@@ -461,7 +461,7 @@ void CRTApp::resetFrameStats() {
 
 void CRTApp::init() {
     hold=false;
-    updateLock = false;
+    //updateLock = false;
     srand(time(0));
     channel = 0;
     worldTime = 0;
@@ -539,6 +539,9 @@ void CRTApp::getFrame(SDL_Surface *dst) {
 
 void CRTApp::updateScreen() {
     auto s0 = high_resolution_clock::now();
+    Loader::SurfacePixelsCopy(gFrame, gBack);
+    //publish(gFrame);
+    return;
     // getCode();
     //Uint8 power = 0, delay = 0;
     //if(addGhost) plane(&delay, &power);
@@ -577,7 +580,7 @@ void CRTApp::updateScreen() {
 void CRTApp::update()  {
 
     if(!initialized) postInit();
-    while(updateLock);
+    //while(updateLock);
     updateScreen();
 
 }

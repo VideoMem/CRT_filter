@@ -5,7 +5,7 @@
 #include <transcoders/libAVable.hpp>
 #include <thread>
 
-#define FRONT_SAMPLERATE 200e3
+#define FRONT_SAMPLERATE 480e3
 
 static void powerOff(CRTApp& crt) {
     //crt.setBlend(true);
@@ -98,10 +98,10 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, int
                     LibAVable::encode( recovered_surface, state->frame );
                     Loader::SurfacePixelsCopy( frame, copy );
                     Loader::blitFill( recovered_surface, frame );
-                    double error = Pixelable::surface_diff( frame, copy );
-                    SDL_Log("Framediff: %02lf", error );
-                    if( abs(error) * 1000 > 0.27 )
-                        zPipe->testSendFrame( copy );
+                    //double error = Pixelable::surface_diff( frame, copy );
+                   // SDL_Log("Framediff: %02lf", error );
+                   // if( abs(error) * 1000 > 0.27 )
+                    zPipe->testSendFrame( copy );
                 } else { break; }
             }
         }
@@ -129,7 +129,7 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
 
-    std::string filename = "outstream.mpg";
+    std::string filename = "outstream.mp4";
     std::string codec_name = "libx264";
     auto state = LibAVable::init_state( full, codec_name ); //ceil((double) FRONT_SAMPLERATE / (frame->w * frame->h)) );
     uint8_t endcode[] = { 0, 0, 1, 0xb7 };
@@ -152,19 +152,20 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
         zPipe->testSendFrame(frame);
 
         app->getFrame(full);
-        for( int i=0; i < frame_diff; ++i ) {
-            LibAVable::decode(state->frame, full);
-            LibAVable::writefile(state, f);
-            state->frame->pts++;
-        }
+       // for( int i=0; i < frame_diff; ++i ) {
+
+        LibAVable::decode(state->frame, full);
+        LibAVable::writefile(state, f);
+        state->frame->pts++;
+        //}
 
         auto stop = high_resolution_clock::now();
         auto elapsed = duration_cast<milliseconds>(stop - start);
         if(duration_cast<milliseconds>(frameTime) > elapsed) {
-            auto error = (duration_cast<milliseconds>(frameTime) - elapsed) * 0.8;
-            //SDL_Log("Elapsed %ld ms, waiting %02f ms: total %02f ms, frame %ld ms", elapsed.count(), error.count(),
-            //        (elapsed + error).count(), duration_cast<milliseconds>(frameTime).count() );
-            std::this_thread::sleep_for(error);
+             auto error = (duration_cast<milliseconds>(frameTime) - elapsed) * 0.8;
+             //SDL_Log("Elapsed %ld ms, waiting %02f ms: total %02f ms, frame %ld ms", elapsed.count(), error.count(),
+             //         (elapsed + error).count(), duration_cast<milliseconds>(frameTime).count() );
+             std::this_thread::sleep_for(error);
         }
     }
 

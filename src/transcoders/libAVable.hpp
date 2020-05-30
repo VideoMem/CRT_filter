@@ -41,8 +41,8 @@ public:
         int ret;
 
         /* send the frame to the encoder */
-        if ( state->frame )
-            printf("Send frame %3" PRId64"\n", state->frame->pts );
+        //if ( state->frame )
+          //  printf("Send frame %3" PRId64"\n", state->frame->pts );
 
         ret = avcodec_send_frame( state->c, state->frame );
         if (ret < 0) {
@@ -59,7 +59,7 @@ public:
                 exit(1 );
             }
 
-            printf("Write packet %3" PRId64" (size=%5d)\n", state->pkt->pts, state->pkt->size );
+            //printf("Write packet %3" PRId64" (size=%5d)\n", state->pkt->pts, state->pkt->size );
             fwrite( state->pkt->data, 1, state->pkt->size, outfile );
             av_packet_unref( state->pkt );
         }
@@ -476,7 +476,8 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if ( state->codec->id == AV_CODEC_ID_H264 )
-        av_opt_set( state->c->priv_data, "preset", "slow", 0 );
+        av_opt_set( state->c->priv_data, "preset", "medium", 0 );
+       av_opt_set( state->c->priv_data, "tune", "animation", 0 );
 
     /* open it */
     int ret = avcodec_open2( state->c, state->codec, nullptr );
