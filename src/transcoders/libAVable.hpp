@@ -139,6 +139,19 @@ public:
     static void fromYCbCr(SDL_Surface *pattern, uint8_t *yuv, int format);
     static void fromFrame(Uint8 *ycbcr, AVFrame *frame );
 
+    static void pack_interlace(SDL_Surface *dst, SDL_Surface *src);
+    static void pack_deinterlace(SDL_Surface *dst, SDL_Surface *src);
+
+    static double log3_2(double x);
+    static double log_conv(double x);
+    static double pack_logluma(double luma_diff);
+    static double log_unconv(double x);
+    static double pack_unlogluma(double luma_diff);
+    static void FlipSurfaceVertical(SDL_Surface *flip, SDL_Surface *src);
+    static void pack_doubleinterlace(SDL_Surface* dst, SDL_Surface* src);
+    static void pack_doubledeinterlace(SDL_Surface* dst, SDL_Surface* src);
+
+    static AVFrame *AllocateFrame(int w, int h, int format);
 };
 
 void LibAVable::fromFrame(Uint8 *ycbcr, AVFrame *frame ) {
@@ -450,6 +463,31 @@ SDL_bool LibAVable::verify_ycbcr_data(Uint32 format, const Uint8 *yuv, int yuv_p
     return result;
 }
 
+AVFrame* LibAVable::AllocateFrame( int w, int h, int format ) {
+    auto frame = av_frame_alloc();
+    if ( !frame ) {
+        fprintf( stderr, "Could not allocate video frame\n" );
+        assert( false && "Cannot allocate video frame" );
+    }
+
+    frame->format = format;
+    frame->width  = w;
+    frame->height = h;
+
+    int ret = av_frame_get_buffer(frame, 0);
+    if (ret < 0) {
+        fprintf(stderr, "Could not allocate the video frame data\n");
+        assert( false && "Cannot allocate video frame data" );
+    }
+
+    /* make sure the frame data is writable */
+    ret = av_frame_make_writable( frame );
+    if (ret < 0)
+        assert( false && "Frame not writable" );
+
+    return frame;
+}
+
 LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode_flag, int x, int y, int framerate, int bitrate) {
     static auto state = new AVthings_t;
 
@@ -471,14 +509,16 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     * then gop_size is ignored and the output of encoder
     * will always be I frame irrespective to gop_size
     */
-    state->c->gop_size = 100;
-    state->c->max_b_frames = 0;
+    state->c->gop_size = 1;
+    state->c->max_b_frames = 1;
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
-    if ( state->codec->id == AV_CODEC_ID_H264 )
-        av_opt_set( state->c->priv_data, "preset", "medium", 0 );
-       av_opt_set( state->c->priv_data, "tune", "animation", 0 );
-
+    if ( state->codec->id == AV_CODEC_ID_H264 ) {
+        av_opt_set(state->c->priv_data, "preset", "medium", 0);
+        av_opt_set(state->c->priv_data, "tune", "animation", 0);
+        av_opt_set(state->c->priv_data, "crf", "15", 0);
+        av_opt_set(state->c->priv_data, "crf_max", "43", 0);
+    }
     /* open it */
     int ret = avcodec_open2( state->c, state->codec, nullptr );
     if ( ret < 0 ) {
@@ -486,7 +526,8 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
         // fprintf( stderr, "Could not open codec: %s\n", err.c_str() );
         assert( false && "Cannot open codec error" );
     }
-
+    state->frame = AllocateFrame( state->c->width, state->c->height, state->c->pix_fmt );
+    /*
     state->frame = av_frame_alloc();
     if ( !state->frame ) {
         fprintf( stderr, "Could not allocate video frame\n" );
@@ -503,11 +544,12 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
         assert( false && "Cannot allocate video frame data" );
     }
 
-    /* make sure the frame data is writable */
+    // make sure the frame data is writable
     ret = av_frame_make_writable( state->frame );
     if (ret < 0)
         assert( false && "Frame not writable" );
 
+ */
     if(decode_flag == 1) {
         state->parser = av_parser_init(state->codec->id);
         if (!state->parser) {
@@ -562,5 +604,94 @@ size_t LibAVable::readfile( LibAVable::AVthings_t *state, FILE *infile ) {
     return ret;
 }
 
+double LibAVable::log3_2( double x ) {
+    return log(x) / log ( 1.5 );
+}
+
+double LibAVable::log_conv( double x ) {
+    return log3_2((x + 2) / 2 );
+}
+
+double LibAVable::log_unconv( double x ) {
+    return (- pow(2, (1 - x) ) * ( pow( 2, x ) - pow( 3, x ) ));
+}
+
+double LibAVable::pack_logluma( double luma_diff ) {
+    double log_diff = log_conv( abs( luma_diff ) );
+    if ( luma_diff >= 0 ) {
+        return 0.5 + log_diff / 2;
+    } else {
+        return 0.5 - log_diff / 2;
+    }
+}
+
+double LibAVable::pack_unlogluma( double luma_diff ) {
+    double real_luma_diff = (luma_diff - 0.5) * 2;
+    if ( luma_diff >= 0.5 ) {
+        return ( log_unconv( abs(real_luma_diff) ) ) ;
+    } else {
+        return ( -log_unconv( abs(real_luma_diff) ) ) ;;
+    }
+}
+
+void LibAVable::pack_interlace(SDL_Surface *dst, SDL_Surface *src) {
+    auto line_pair = new double[src->w][2];
+    for( int y = 0; y < src->h; y+=2 ) {
+        for ( int x = 0; x < src->w; ++x ) {
+            line_pair[x][0] = Pixelable::direct_to_luma(src, x, y) + Pixelable::direct_to_luma(src, x, y + 1) - 1;
+            line_pair[x][1] = Pixelable::direct_to_luma(src, x, y) - Pixelable::direct_to_luma(src, x, y + 1);
+            Uint32 pixel[2] = {
+                    Pixelable::direct_from_luma( pack_logluma(line_pair[x][0]) ),
+                    Pixelable::direct_from_luma( pack_logluma(line_pair[x][1]) )
+            };
+            Pixelable::put32(dst, x, y, pixel[0]);
+            Pixelable::put32(dst, x, y+1, pixel[1]);
+        }
+    }
+    delete[] line_pair;
+}
+
+void LibAVable::pack_deinterlace(SDL_Surface *dst, SDL_Surface *src) {
+    auto line_pair = new double[src->w][2];
+    for( int y = 0; y < src->h ; y+=2 ) {
+        for ( int x = 0; x < src->w; ++x ) {
+            double gQ0 = pack_unlogluma( Pixelable::direct_to_luma(src, x, y) );
+            double gQ1 = pack_unlogluma( Pixelable::direct_to_luma(src, x, y + 1) );
+            line_pair[x][0] = ( gQ1 + gQ0 + 1 ) / 2;
+            line_pair[x][1] = ( gQ0 - gQ1 + 1 ) / 2;
+            Uint32 pixel[2] = {
+                    Pixelable::direct_from_luma( line_pair[x][0] ),
+                    Pixelable::direct_from_luma( line_pair[x][1] )
+            };
+            Pixelable::put32(dst, x, y, pixel[0]);
+            Pixelable::put32(dst, x, y+1, pixel[1]);
+        }
+    }
+    delete[] line_pair;
+}
+
+void LibAVable::FlipSurfaceVertical(SDL_Surface* flip, SDL_Surface* src ) {
+    for(int x = 0; x < src->w; x++ )
+        for(int y = 0; y < src->h; y++ ) {
+            Uint32 pixel = Pixelable::get32( src, x, y );
+            Pixelable::put32( flip, x, src->h - y - 1, pixel );
+        }
+}
+
+void LibAVable::pack_doubleinterlace( SDL_Surface* dst, SDL_Surface* src ) {
+    auto swap = AllocateSurface( src );
+    pack_interlace( dst, src );
+    FlipSurfaceVertical( swap, dst );
+    pack_interlace( dst, swap );
+    SDL_FreeSurface( swap );
+}
+
+void LibAVable::pack_doubledeinterlace( SDL_Surface *dst, SDL_Surface *src ) {
+    auto swap = AllocateSurface( src );
+    pack_deinterlace( dst, src );
+    FlipSurfaceVertical( swap, dst );
+    pack_deinterlace( dst, swap );
+    SDL_FreeSurface( swap );
+}
 
 #endif //SDL_CRT_FILTER_LIBAVABLE_HPP

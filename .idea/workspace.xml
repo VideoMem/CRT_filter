@@ -2,10 +2,10 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
-      <config projectName="SDL_CRT_Filter" targetName="CRT_FILTERS" />
       <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
+      <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
+      <config projectName="SDL_CRT_Filter" targetName="CRT_FILTERS" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -15,13 +15,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/FMAdecode.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/BaseApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/BaseApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQLoader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/LibAvTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -68,25 +78,25 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/bin" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/bin" />
+      <recent name="$PROJECT_DIR$/tests" />
+      <recent name="$PROJECT_DIR$/tests/emscripten" />
+      <recent name="$PROJECT_DIR$/utils" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tests/cmake-build-debug" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/deprecated" />
       <recent name="$PROJECT_DIR$/cmake-build-debug" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/bin" />
-      <recent name="$PROJECT_DIR$/tests" />
-      <recent name="$PROJECT_DIR$/tests/emscripten" />
-      <recent name="$PROJECT_DIR$/utils" />
-      <recent name="$PROJECT_DIR$/src/filters" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -101,7 +111,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.CRT_FILTERS">
+  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -266,7 +276,11 @@
       <workItem from="1590757047161" duration="3088000" />
       <workItem from="1590762311815" duration="9606000" />
       <workItem from="1590774093173" duration="13372000" />
-      <workItem from="1590789782261" duration="5746000" />
+      <workItem from="1590789782261" duration="6378000" />
+      <workItem from="1590850138284" duration="65363000" />
+      <workItem from="1591046779888" duration="6000" />
+      <workItem from="1591046976530" duration="300000" />
+      <workItem from="1591069763549" duration="1613000" />
     </task>
     <servers />
   </component>
@@ -296,7 +310,7 @@
       <breakpoints>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/loaders/Loader.hpp</url>
-          <line>207</line>
+          <line>192</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -311,28 +325,43 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/Config.hpp</url>
-          <line>25</line>
+          <line>23</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/Magickable.hpp</url>
-          <line>70</line>
+          <line>71</line>
           <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
+          <line>568</line>
+          <option name="timeStamp" value="69" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/Pixelable.hpp</url>
+          <line>98</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/CRTApp.hpp</url>
+          <line>530</line>
+          <option name="timeStamp" value="72" />
+        </line-breakpoint>
+        <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/loaders/ZMQLoader.hpp</url>
+          <line>36</line>
+          <option name="timeStamp" value="73" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
-          <line>526</line>
-          <option name="timeStamp" value="69" />
+          <line>517</line>
+          <option name="timeStamp" value="76" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/transcoders/Pixelable.hpp</url>
-          <line>77</line>
-          <option name="timeStamp" value="70" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/Config.hpp</url>
-          <line>19</line>
-          <option name="timeStamp" value="71" />
+          <url>file://$PROJECT_DIR$/FMAdecode.cpp</url>
+          <line>12</line>
+          <option name="timeStamp" value="77" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -345,6 +374,12 @@
         <watch expression="pattern-&gt;w" language="ObjectiveC" />
         <watch expression="x" />
         <watch expression="y" />
+      </configuration>
+      <configuration name="CMakeRunConfiguration">
+        <watch expression="dst" />
+        <watch expression="src" />
+        <watch expression="src-&gt;w" />
+        <watch expression="dst-&gt;w" />
       </configuration>
     </watches-manager>
   </component>

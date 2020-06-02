@@ -60,7 +60,7 @@ public:
     }
 
     void publish(SDL_Surface *surface) {
-        Loader::blitFill(surface, gScreenSurface);
+        Magickable::blitScaled( gScreenSurface, surface );
         redraw();
     }
 

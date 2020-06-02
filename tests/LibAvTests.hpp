@@ -208,6 +208,52 @@ TEST_CASE("LibAV tests","[LibAV]") {
         test_decode("test.mpg", "mpeg1video");
         test_decode("test_mpg2.mpg", "mpeg2video");
     }
+
+    SECTION("Log_conv idempotency ") {
+        for(int i=100; i > 0; --i) {
+            double luma = (double) 1/i;
+            double log_luma = LibAVable::log_conv( luma );
+            double rluma = LibAVable::log_unconv( log_luma );
+            printf("luma: %lf, log_luma: %lf, rluma: %lf\n", luma, log_luma, rluma );
+            REQUIRE ( abs(luma - rluma) < 0.01 );
+        }
+
+        for(int i=10; i >= -10; --i) {
+            double luma = i != 0?  (double) 1/i : 0;
+            double log_luma = LibAVable::log_conv( abs(luma) );
+            double pack_logluma = LibAVable::pack_logluma( luma );
+            Uint32 pixel = Pixelable::direct_from_luma( pack_logluma ) ;
+            double pixel_luma = Pixelable::direct_to_luma( pixel );
+            double unlog_luma = LibAVable::pack_unlogluma( pixel_luma );
+            printf("pixel: %d px_luma: %lf\n", pixel & 0xFF, pixel_luma );
+            printf("luma: %lf, unlog_luma: %lf, log_conv %lf, pack_logluma: %lf\n", luma, unlog_luma, log_luma, pack_logluma );
+            REQUIRE ( abs(luma - unlog_luma) < 0.01 );
+        }
+
+    }
+
+    SECTION("Pack interlace") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto interlaced = Surfaceable::AllocateSurface( frame );
+        auto deinterlaced = Surfaceable::AllocateSurface( frame );
+
+        REQUIRE( frame != nullptr );
+        REQUIRE( interlaced != nullptr );
+        REQUIRE( deinterlaced != nullptr );
+
+
+        LibAVable::pack_doubleinterlace( interlaced, frame );
+        LibAVable::pack_doubledeinterlace( deinterlaced, interlaced );
+
+        SDL_SaveBMP( interlaced, "libav_pack_interlaced_test.bmp");
+        SDL_SaveBMP( deinterlaced, "libav_pack_deinterlaced_test.bmp");
+
+        SDL_FreeSurface( deinterlaced );
+        SDL_FreeSurface( interlaced );
+        SDL_FreeSurface( frame );
+    }
+
 }
 
 #endif //SDL_CRT_FILTER_LIBAVTESTS_HPP

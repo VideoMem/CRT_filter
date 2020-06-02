@@ -90,5 +90,4 @@ SDL_Surface *Surfaceable::AllocateSurface( SDL_Surface *mock, double scale ) {
     //return AllocateSurface( mock_size.w, mock_size.h, *mock->format );
 }
 
-
 #endif //SDL_CRT_FILTER_SURFACEABLE_HPP

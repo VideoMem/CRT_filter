@@ -5,6 +5,8 @@
 #ifndef SDL_CRT_FILTER_PIXELABLE_HPP
 #define SDL_CRT_FILTER_PIXELABLE_HPP
 
+#include "Surfaceable.hpp"
+
 class Pixelable: public Surfaceable {
 public:
     //TODO: bit endianess
@@ -62,6 +64,25 @@ public:
         *B = toChar(&fB);
     }
 
+    inline static double direct_to_luma( Uint32 pixel ){
+        Uint32 R = 0, G = 0, B = 0;
+        toComponents( &pixel, &R, &G, &B);
+        return luma( &R, &G, &B );
+    }
+
+    inline static double direct_to_luma( SDL_Surface* src, int x, int y ){
+        Uint32 pixel = get32(src, x, y);
+        return direct_to_luma( pixel );
+    }
+
+    inline static Uint32 direct_from_luma( double luma ){
+        Uint32 pixel = 0, R = 0, G = 0, B = 0;
+        RGB( &luma, &R, &G, &B );
+        fromComponents( &pixel, &R, &G, &B);
+        return pixel;
+    }
+
+
     inline static void chroma(double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
         *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
@@ -90,6 +111,7 @@ public:
 
         return diff;
     }
+
 
 };
 

@@ -81,6 +81,7 @@ class CRTApp : public BaseApp {
 
     void getCode(SDL_Surface *dst);
     void getFrame(SDL_Surface *dst);
+    void pushCode(SDL_Surface *src);
 
 protected:
     volatile bool hold;
@@ -147,6 +148,7 @@ protected:
 
 
     void updateScreen();
+
 
 
 };
@@ -527,20 +529,23 @@ void CRTApp::logStats() {
 void CRTApp::getCode(SDL_Surface *dst) {
     while(!initialized);
     loader->GetSurface(gFrame);
-    //updateScreen();
-    Loader::blitFill(gBack, dst);
+    Magickable::blitScaled( dst, gFrame );
+}
+
+void CRTApp::pushCode(SDL_Surface *src) {
+    Magickable::blitScaled( gFrame, src );
+    updateScreen();
 }
 
 void CRTApp::getFrame(SDL_Surface *dst) {
     while(!initialized);
-    Loader::blitFill(gBack, dst);
+    Magickable::blitScaled( dst, gBack );
 }
-
 
 void CRTApp::updateScreen() {
     auto s0 = high_resolution_clock::now();
     Loader::SurfacePixelsCopy(gFrame, gBack);
-    //publish(gFrame);
+    publish(gFrame);
     return;
     // getCode();
     //Uint8 power = 0, delay = 0;

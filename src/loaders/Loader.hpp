@@ -14,6 +14,8 @@
 #include <transcoders/Magickable.hpp>
 
 #define MAX_WHITE_LEVEL 200
+using namespace vips;
+using namespace Magick;
 
 class Loader: public ResourceRoller {
 public:
@@ -72,19 +74,13 @@ public:
     inline static double  fromChar(int32_t* c) { return (double) *c / 0xFF; }
     inline static double  fromChar(Uint32* c)  { return (double) *c / 0xFF; }
     inline static Uint32 toChar (double* comp) { return *comp < 1? 0xFF * *comp: 0xFF; }
-    inline static double  hardSaturate(double c) {
-        return c;
-    }
 
     inline static void toLuma(double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
         *luma = Pixelable::luma(R, G, B);
-        //*luma = 0.299 * fromChar(R) + 0.587 * fromChar(G) + 0.114 * fromChar(B);
     }
 
     inline static void toChroma(double *Db, double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         return Pixelable::chroma(Db, Dr, R, G, B);
-        *Db = -0.450 * fromChar(R) - 0.883 * fromChar(G) + 1.333 * fromChar(B);
-        *Dr = -1.333 * fromChar(R) + 1.116 * fromChar(G) + 0.217 * fromChar(B);
     }
 
     inline static void toRGB(const double *luma, Uint32 *R, Uint32 *G, Uint32 *B) {
@@ -94,12 +90,6 @@ public:
 
     inline static void toRGB(const double *luma, const double *Db, const double *Dr, Uint32 *R, Uint32 *G, Uint32 *B) {
         return Pixelable::RGB(luma, Db, Dr, R, G, B);
-        double fR = *luma + 0.0000923037 * *Db - 0.525913          * *Dr;
-        double fG = *luma - 0.129133     * *Db + 0.267899328207599 * *Dr;
-        double fB = *luma + 0.664679     * *Db - 0.0000792025      * *Dr;
-        *R = toChar(&fR);
-        *G = toChar(&fG);
-        *B = toChar(&fB);
     }
 
     inline static void blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int& line, double& scale);
@@ -115,11 +105,6 @@ public:
         dstrect.h = 1;
         SDL_BlitSurface(src, &srcrect, dst, &dstrect);
     }
-
-    static void blitFill(SDL_Surface* src, SDL_Surface* dst) {
-        return Magickable::blitScaled(dst, src);
-    }
-
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     static const Uint32 rmask = 0xff000000;

@@ -34,7 +34,7 @@ public:
     bool GetSurface(SDL_Surface* surface) {
         while(readLock);
         writeLock = true;
-        blitFill(current_frame, surface);
+        Magickable::blitScaled( surface, current_frame );
         writeLock = false;
         return true;
     }

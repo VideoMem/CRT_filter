@@ -9,6 +9,7 @@
 #include <transcoders/Waveable.hpp>
 #include <Magick++.h>
 #include <vips/vips8>
+#include <loaders/Loader.hpp>
 
 using namespace vips;
 using namespace Magick;
@@ -132,7 +133,7 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
     size_t src_size = Waveable::conversion_size(src);
     size_t dst_size = Waveable::conversion_size(dst);
     if( memcmp(&src->clip_rect, &dst->clip_rect, sizeof(SDL_Rect)) == 0 ) {
-
+        memcpy( dst->pixels , src->pixels, src_size * sizeof(Uint32) );
     } else {
         try {
             assert( dst->w > 0 && dst->h > 0 && src->w > 0 && src->h >0 );
@@ -140,12 +141,11 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
             auto source = SDL_ConvertSurfaceFormat(src, SDL_PIXELFORMAT_RGBA32, 0);
             int bands = 4;
             VImage in = VImage::new_from_memory(source->pixels, src_size * bands, src->w, src->h, bands, VIPS_FORMAT_UCHAR);
-            VImage io(in);
             if ( src->w > dst->w ) {
                 //shrink
                 double scale = (double) src->w / dst->w;
                 //SDL_Log("Scaling down ...");
-                io = in.reduce(scale, scale, VImage::option()->set("kernel", VIPS_KERNEL_NEAREST ) );
+                VImage io = in.reduce(scale, scale, VImage::option()->set("kernel", VIPS_KERNEL_NEAREST ) );
                 //SDL_Log("Image info: %d, %d", io.width(), io.height() );
                 //SDL_Log("Source info: %d, %d", source->w, source->h );
                 //SDL_Log("Band format %d", io.format() );
@@ -161,7 +161,7 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
                     memcpy(dst->pixels, src->pixels, dst_size * bands );
                 } else {
                    // SDL_Log("Scaling up ...");
-                    io = in.resize(scale, VImage::option()->set("kernel", VIPS_KERNEL_NEAREST ));
+                    VImage io = in.resize(scale, VImage::option()->set("kernel", VIPS_KERNEL_NEAREST ));
                     memcpy( dst->pixels, io.data(), dst_size * bands );
                 }
 

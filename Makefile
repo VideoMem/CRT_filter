@@ -162,32 +162,32 @@ CHAR_ROM_GEN/fast:
 	$(MAKE) -f utils/CMakeFiles/CHAR_ROM_GEN.dir/build.make utils/CMakeFiles/CHAR_ROM_GEN.dir/build
 .PHONY : CHAR_ROM_GEN/fast
 
-CRTmain.o: CRTmain.cpp.o
+FMAdecode.o: FMAdecode.cpp.o
 
-.PHONY : CRTmain.o
+.PHONY : FMAdecode.o
 
 # target to build an object file
-CRTmain.cpp.o:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.o
-.PHONY : CRTmain.cpp.o
+FMAdecode.cpp.o:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.o
+.PHONY : FMAdecode.cpp.o
 
-CRTmain.i: CRTmain.cpp.i
+FMAdecode.i: FMAdecode.cpp.i
 
-.PHONY : CRTmain.i
+.PHONY : FMAdecode.i
 
 # target to preprocess a source file
-CRTmain.cpp.i:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.i
-.PHONY : CRTmain.cpp.i
+FMAdecode.cpp.i:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.i
+.PHONY : FMAdecode.cpp.i
 
-CRTmain.s: CRTmain.cpp.s
+FMAdecode.s: FMAdecode.cpp.s
 
-.PHONY : CRTmain.s
+.PHONY : FMAdecode.s
 
 # target to generate assembly for a file
-CRTmain.cpp.s:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.s
-.PHONY : CRTmain.cpp.s
+FMAdecode.cpp.s:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.s
+.PHONY : FMAdecode.cpp.s
 
 # Help Target
 help:
@@ -201,9 +201,9 @@ help:
 	@echo "... CRT_FILTERS"
 	@echo "... SDL2_CRT_Tests"
 	@echo "... CHAR_ROM_GEN"
-	@echo "... CRTmain.o"
-	@echo "... CRTmain.i"
-	@echo "... CRTmain.s"
+	@echo "... FMAdecode.o"
+	@echo "... FMAdecode.i"
+	@echo "... FMAdecode.s"
 .PHONY : help
 
 

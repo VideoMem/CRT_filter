@@ -56,9 +56,11 @@ void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
 }
 
 #define INBUF_SIZE 4096
-void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, int frame_skip ) {
+void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRTApp *app) {
     SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     SDL_Surface* copy  = Surfaceable::AllocateSurface( frame );
+    SDL_Surface* interlaced = Surfaceable::AllocateSurface( Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
+    SDL_Surface* deinterlaced  = Surfaceable::AllocateSurface( interlaced );
     auto state = LibAVable::init_state( codec_name, 1, Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
     uint8_t *data;
     size_t   data_size;
@@ -96,12 +98,13 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, int
             if ( state->pkt->size ) {
                 if (LibAVable::readfile(state, f) >= 0) {
                     LibAVable::encode( recovered_surface, state->frame );
-                    Loader::SurfacePixelsCopy( frame, copy );
-                    Loader::blitFill( recovered_surface, frame );
+                    app->pushCode( recovered_surface );
+                    //LibAVable::pack_deinterlace( deinterlaced, recovered_surface );
+                    Magickable::blitScaled( frame, recovered_surface );
                     //double error = Pixelable::surface_diff( frame, copy );
                    // SDL_Log("Framediff: %02lf", error );
                    // if( abs(error) * 1000 > 0.27 )
-                    zPipe->testSendFrame( copy );
+                    zPipe->testSendFrame( frame );
                 } else { break; }
             }
         }
@@ -115,17 +118,19 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, int
     avcodec_free_context(&state->c);
     av_packet_free(&state->pkt);
     SDL_FreeSurface( recovered_surface );
+    SDL_FreeSurface( interlaced );
+    SDL_FreeSurface( deinterlaced );
     SDL_FreeSurface( frame );
     SDL_FreeSurface( copy );
     //delete state;
 
 }
 
-
 void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
     SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
 
     SDL_Surface* full = Surfaceable::AllocateSurface( Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
+    SDL_Surface* full_interlaced = Surfaceable::AllocateSurface( full );
 
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
 
@@ -143,19 +148,29 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 
     SDL_Log("Frame receive thread initialized.");
     state->frame->pts = 0;
-    int frame_diff = floor((double) 25 / ((double) FRONT_SAMPLERATE / (frame->w * frame->h) ));
+    //int frame_diff = floor((double) 25 / ((double) FRONT_SAMPLERATE / (frame->w * frame->h) ));
+    auto encoded_frame = LibAVable::AllocateFrame( state->frame->width, state->frame->height, state->frame->format );
     while(!*quit) {
         auto start = high_resolution_clock::now();
         zLoader->pullFrame();
         app->update();
         app->getCode(frame);
-        zPipe->testSendFrame(frame);
 
         app->getFrame(full);
        // for( int i=0; i < frame_diff; ++i ) {
 
-        LibAVable::decode(state->frame, full);
+        //LibAVable::pack_interlace(full_interlaced, full);
+        LibAVable::decode( state->frame, full );
         LibAVable::writefile(state, f);
+        /*
+        int ret = avcodec_receive_frame( state->c , encoded_frame );
+        if (ret < 0) {
+            fprintf(stderr, "Error during decoding\n");
+        }
+         */
+        //LibAVable::encode( full, encoded_frame );
+        //Magickable::blitScaled( frame, full );
+        zPipe->testSendFrame(frame);
         state->frame->pts++;
         //}
 
@@ -181,10 +196,11 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
     av_frame_free(&state->frame);
     av_packet_free(&state->pkt);
     SDL_FreeSurface(full);
+    SDL_FreeSurface(full_interlaced);
     SDL_FreeSurface(frame);
     SDL_Log("Frame receive thread done!");
     SDL_Log("Resending video frames");
-    resend_stream("h264" , filename, zPipe, frame_diff);
+    resend_stream("h264", filename, zPipe, app);
     SDL_Log("End of video");
 }
 
@@ -192,7 +208,7 @@ int main(  ) {
     if (VIPS_INIT ("namefile"))
         vips_error_exit (nullptr);
 
-    SDL_Surface* frame = Loader::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    SDL_Surface* frame = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     static ZMQLoader zLoader;
     static ZMQVideoPipe zPipe;
     static bool quit = false;
