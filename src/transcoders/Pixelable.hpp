@@ -42,6 +42,16 @@ public:
         pixels[ ( y * surface->w ) + x ] = pixel;
     }
 
+    inline static void copy32( SDL_Surface *dst, SDL_Surface *src, int x, int y ) {
+        copy32( dst, src, x, y, x, y );
+    }
+
+    inline static void copy32( SDL_Surface *dst, SDL_Surface *src, int x, int y, int x0, int y0 ) {
+        Uint32 pixel;
+        pixel = get32( src , x, y );
+        put32( dst, x0, y0, pixel );
+    }
+
     inline static double  fromChar(Uint32* c)  { return (double) *c / 0xFF; }
     inline static Uint32 toChar (double* comp) { return *comp < 1? 0xFF * *comp: 0xFF; }
 
@@ -112,6 +122,42 @@ public:
         return diff;
     }
 
+    static double psnr(SDL_Surface *original, SDL_Surface *copy) {
+        double sum = 0;
+        for( int y = 0; y < copy->h; ++y )
+            for( int x = 0; x < copy->w; ++x ) {
+                sum += pow( ( direct_to_luma( original , x, y ) - direct_to_luma( copy , x, y ) ), 2 );
+            }
+        double media = sum / ( copy->w * copy->h );
+        if (media <= 0.001) return 100;
+        double PIXEL_MAX = 255.0;
+        return 20 * log( PIXEL_MAX / sqrt(media) ) / log(10);
+    }
+
+    static void psnr(SDL_Surface *original, SDL_Surface *copy, SDL_Surface *error) {
+        double err = 0;
+        double max = 0;
+        double min = 1e6;
+        for( int y = 0; y < copy->h; ++y )
+            for( int x = 0; x < copy->w; ++x ) {
+                err = pow( ( direct_to_luma( original , x, y ) - direct_to_luma( copy , x, y ) ), 2 );
+                if ( err > max ) max = err;
+                if ( err < min ) min = err;
+            }
+
+        double PIXEL_MAX = 255.0;
+        for( int y = 0; y < copy->h; ++y )
+            for( int x = 0; x < copy->w; ++x ) {
+                err = pow( ( direct_to_luma( original , x, y ) - direct_to_luma( copy , x, y ) ), 2 );
+                Uint32 pixel = mask_t::a + mask_t::c;
+                if (err > 0.001) {
+                    double err_normal = (err - min) / (max - min);
+                    double snr = 20 * log( PIXEL_MAX / sqrt(err_normal) ) / log(10);
+                    pixel = direct_from_luma( snr / 100 );
+                }
+                put32(error, x, y, pixel);
+            }
+    }
 
 };
 

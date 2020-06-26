@@ -254,6 +254,88 @@ TEST_CASE("LibAV tests","[LibAV]") {
         SDL_FreeSurface( frame );
     }
 
+    SECTION("Spiral scan pattern test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/standby640.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        LibAVable::pack_spiral( copy, frame, 40 );
+        LibAVable::pack_despiral( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_pack_spiral.bmp" );
+        SDL_SaveBMP( recover,  "libav_pack_despiral.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+    SECTION("Miniraster scan pattern test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        LibAVable::pack_miniraster( copy, frame, 40 );
+        LibAVable::unpack_miniraster( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_pack_miniraster.bmp" );
+        SDL_SaveBMP( recover,  "libav_unpack_miniraster.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+    SECTION("Minizigzag scan pattern test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        LibAVable::pack_minizigzag( copy, frame, 40 );
+        LibAVable::unpack_minizigzag( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_pack_minizigzag.bmp" );
+        SDL_SaveBMP( recover,  "libav_unpack_minizigzag.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+    SECTION("All scan patterns test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        LibAVable::pack_all( copy, frame, 40 );
+        LibAVable::unpack_all( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_pack_all.bmp" );
+        SDL_SaveBMP( recover,  "libav_unpack_all.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+    SECTION("All recursive scan patterns test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        LibAVable::pack_all_recursive( copy, frame, 40 );
+        LibAVable::unpack_all_recursive( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_pack_all_recursive.bmp" );
+        SDL_SaveBMP( recover,  "libav_unpack_all_recursive.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+
+
 }
 
 #endif //SDL_CRT_FILTER_LIBAVTESTS_HPP

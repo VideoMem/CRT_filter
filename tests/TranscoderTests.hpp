@@ -161,6 +161,22 @@ TEST_CASE( "Type Conversions", "[SDL2][Transcodeable]") {
         SDL_FreeSurface( img );
     }
 
+    SECTION("Basic PSNR verification") {
+        auto original = SDL_ConvertSurfaceFormat( SDL_LoadBMP( "resources/images/testCardRGB.bmp" ), SDL_PIXELFORMAT_RGBA32, 0);
+        auto another = SDL_ConvertSurfaceFormat( SDL_LoadBMP( "resources/images/standby640.bmp" ), SDL_PIXELFORMAT_RGBA32, 0);
+        auto error = Surfaceable::AllocateSurface( another );
+        SDL_Log("Same image PSNR: %f ", Pixelable::psnr( original, original ) );
+        SDL_Log("Different image PSNR: %f ", Pixelable::psnr( original, another ) );
+        REQUIRE ( Pixelable::psnr( original, original ) == 100.0 );
+        REQUIRE ( Pixelable::psnr( original, another ) != 100.0 );
+        Pixelable::psnr( original, another , error );
+        SDL_SaveBMP(error, "transcode_psnr_error.bmp");
+        SDL_FreeSurface( original );
+        SDL_FreeSurface( another );
+        SDL_FreeSurface( error );
+    }
+
+
 
 }
 

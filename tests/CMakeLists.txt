@@ -14,3 +14,5 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(${CMAKE_PROJECT_NAME} ../templates)
 include_directories(${CMAKE_PROJECT_NAME} ../src)
 include("../dependencies.cmake")
+
+add_subdirectory(decoder)

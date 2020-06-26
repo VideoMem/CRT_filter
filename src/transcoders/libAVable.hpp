@@ -152,6 +152,21 @@ public:
     static void pack_doubledeinterlace(SDL_Surface* dst, SDL_Surface* src);
 
     static AVFrame *AllocateFrame(int w, int h, int format);
+
+    static void pack_spiral( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void pack_despiral( SDL_Surface *dst, SDL_Surface *src, int step );
+
+    static void pack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void unpack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void pack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void pack_all( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void unpack_all( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void pack_all_recursive( SDL_Surface *dst, SDL_Surface *src, int step );
+    static void unpack_all_recursive( SDL_Surface *dst, SDL_Surface *src, int step );
+    static SDL_Rect* diagonal_index( int step );
+
+    static void swirl_pattern(SDL_Rect *pattern, int step);
 };
 
 void LibAVable::fromFrame(Uint8 *ycbcr, AVFrame *frame ) {
@@ -516,8 +531,8 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     if ( state->codec->id == AV_CODEC_ID_H264 ) {
         av_opt_set(state->c->priv_data, "preset", "medium", 0);
         av_opt_set(state->c->priv_data, "tune", "animation", 0);
-        av_opt_set(state->c->priv_data, "crf", "15", 0);
-        av_opt_set(state->c->priv_data, "crf_max", "43", 0);
+        av_opt_set(state->c->priv_data, "crf", "0", 0);
+        av_opt_set(state->c->priv_data, "crf_max", "0", 0);
     }
     /* open it */
     int ret = avcodec_open2( state->c, state->codec, nullptr );
@@ -693,5 +708,212 @@ void LibAVable::pack_doubledeinterlace( SDL_Surface *dst, SDL_Surface *src ) {
     pack_deinterlace( dst, swap );
     SDL_FreeSurface( swap );
 }
+
+void LibAVable::swirl_pattern( SDL_Rect pattern[], int step ) {
+    int y0 = 0, x0 = 0, pos = 0;
+
+    while ( pos < (int) pow(step,2) ) {
+
+        for (int x = x0; x < step - x0; ++x) {
+            pattern[pos] = { x, y0, step, step };
+            ++pos;
+        }
+
+        for (int y = y0 + 1; y < step - y0; ++y) {
+            pattern[pos] = {step - x0 - 1, y, step, step };
+            ++pos;
+        }
+
+        for (int x = step - x0 - 2; x >= x0; --x) {
+            pattern[pos] = { x, step - y0 - 1, step, step };
+            ++pos;
+        }
+
+        for (int y = step - y0 - 2; y > y0; --y) {
+            pattern[pos] = { x0, y, step, step };
+            ++pos;
+        }
+
+        x0++;
+        y0++;
+    }
+}
+
+void LibAVable::pack_spiral( SDL_Surface *dst, SDL_Surface *src, int step ) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    auto pattern = new SDL_Rect[ (int) pow( step, 2 ) ];
+    swirl_pattern( pattern, step );
+    int srcpos = 0;
+    for ( int y = 0; y < src->h; y+=step ) {
+        for ( int x = 0; x < src->w; x+=step ) {
+            for ( int pos = 0; pos < step * step; ++pos ) {
+                int sx = srcpos % src->w;
+                int sy = srcpos / src->w;
+                Pixelable::copy32( dst, src, sx, sy, x + pattern[pos].x, y + pattern[pos].y );
+                srcpos++;
+            }
+        }
+    }
+
+    delete[] pattern;
+}
+
+void LibAVable::pack_despiral(SDL_Surface *dst, SDL_Surface *src, int step) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    auto pattern = new SDL_Rect[ (int) pow( step, 2 ) ];
+    swirl_pattern( pattern, step );
+    int srcpos = 0;
+    for ( int y = 0; y < src->h; y+=step ) {
+        for ( int x = 0; x < src->w; x+=step ) {
+            for ( int pos = 0; pos < step * step; ++pos ) {
+                int sx = srcpos % src->w;
+                int sy = srcpos / src->w;
+                Pixelable::copy32( dst, src,x + pattern[pos].x, y + pattern[pos].y, sx, sy );
+                srcpos++;
+            }
+        }
+    }
+    delete[] pattern;
+}
+
+void LibAVable::pack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step ) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    int pos = 0, dby = -step, dbx = 1, dbz;
+    for (int y = 0; y < src->h; ++y) {
+        for (int x = 0; x < src->w; ++x) {
+            int block = pos % (int) pow(step, 2);
+            int db = pos / (int) pow(step, 2);
+            dbz = dbx;
+            dbx = db * step % src->w;
+            if (dbx == 0 && dbz != dbx) dby += step;
+            int dy = dby + block / step;
+            int dx = dbx + block % step;
+            Pixelable::copy32( dst, src, x, y, dx, dy );
+            ++pos;
+        }
+    }
+}
+
+void LibAVable::unpack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step ) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    int pos = 0, dby = -step, dbx = 1, dbz;
+    for (int y = 0; y < src->h; ++y) {
+        for (int x = 0; x < src->w; ++x) {
+            int block = pos % (int) pow(step, 2);
+            int db = pos / (int) pow(step, 2);
+            dbz = dbx;
+            dbx = db * step % src->w;
+            if (dbx == 0 && dbz != dbx) dby += step;
+            int dy = dby + block / step;
+            int dx = dbx + block % step;
+            Pixelable::copy32( dst, src, dx, dy, x, y );
+            ++pos;
+        }
+    }
+}
+
+void LibAVable::pack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step ) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    int pos = 0, dby = -step, dbx = 1, dbz;
+    for (int y = 0; y < src->h; ++y) {
+        for (int x = 0; x < src->w; ++x) {
+            int block = pos % (int) pow(step, 2);
+            int db = pos / (int) pow(step, 2);
+            dbz = dbx;
+            dbx = db * step % src->w;
+            if (dbx == 0 && dbz != dbx) dby += step;
+            int dy = dby + block / step;
+            int dx = dy % 2 == 0? dbx - 1 + step - block % step: dbx + block % step;
+            Pixelable::copy32( dst, src, x, y, dx, dy );
+            ++pos;
+        }
+    }
+}
+
+void LibAVable::unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step ) {
+    assert(src->w % step == 0 && "Incompatible step");
+    assert(src->h % step == 0 && "Incompatible step");
+    int pos = 0, dby = -step, dbx = 1, dbz;
+    for (int y = 0; y < src->h; ++y) {
+        for (int x = 0; x < src->w; ++x) {
+            int block = pos % (int) pow(step, 2);
+            int db = pos / (int) pow(step, 2);
+            dbz = dbx;
+            dbx = db * step % src->w;
+            if (dbx == 0 && dbz != dbx) dby += step;
+            int dy = dby + block / step;
+            int dx = dy % 2 == 0? dbx -1 + step - block % step: dbx + block % step;
+            Pixelable::copy32( dst, src, dx, dy, x, y );
+            ++pos;
+        }
+    }
+}
+
+void LibAVable::pack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    pack_miniraster( dst, src, step );
+    unpack_minizigzag( frame, dst, step );
+    pack_miniraster( dst, frame, step );
+    unpack_minizigzag( frame, dst, step );
+    pack_miniraster( dst, frame, step );
+    SDL_FreeSurface( frame );
+}
+
+void LibAVable::unpack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    unpack_miniraster( dst, src, step );
+    pack_minizigzag( frame, dst, step );
+    unpack_miniraster( dst, frame, step );
+    pack_minizigzag( frame, dst, step );
+    unpack_miniraster( dst, frame, step );
+    SDL_FreeSurface( frame );
+}
+
+void LibAVable::pack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    auto copy = Surfaceable::AllocateSurface( src );
+    Loader::SurfacePixelsCopy( src, copy );
+    int ustep = step;
+    while( ustep % 2 == 0 && ustep > 4 ) {
+        ustep /= 2;
+    }
+
+    while( ustep <= step ) {
+        pack_all( frame, copy, ustep );
+        Loader::SurfacePixelsCopy( frame, copy );
+        printf( "ustep: %d\n", ustep );
+        ustep *= 2;
+    }
+    Loader::SurfacePixelsCopy( frame, dst );
+    SDL_FreeSurface( frame );
+}
+
+void LibAVable::unpack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    auto copy = Surfaceable::AllocateSurface( src );
+    Loader::SurfacePixelsCopy( src, copy );
+
+    while( step % 2 == 0 && step > 4 ) {
+        unpack_all(frame, copy, step);
+        Loader::SurfacePixelsCopy(frame, copy);
+        printf( "pstep: %d\n", step );
+        step /= 2;
+    }
+    printf( "pstep: %d\n", step );
+    unpack_all( frame, copy, step );
+
+    Loader::SurfacePixelsCopy( frame, dst );
+    SDL_FreeSurface( frame );
+}
+
+SDL_Rect *LibAVable::diagonal_index( int m ) {
+    SDL_Rect* idx = new SDL_Rect[ (int) pow(m, 2) ];
+}
+
 
 #endif //SDL_CRT_FILTER_LIBAVABLE_HPP

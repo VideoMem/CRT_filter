@@ -38,6 +38,8 @@ public:
     static inline float translate( float &a ) { float r = (a + 1) / 2; return r > 0? r: 0.0;  }
     static inline float untranslate( float &a ) { return (a * 2) - 1;  }
 
+    static inline uint8_t quantize_am( float &a, float &b );
+    static inline void unquantize_am( uint8_t &c, float &a, float &b );
     static inline uint8_t quantize( float &a, float &b );
     static inline void unquantize( uint8_t &c, float &a, float &b );
 
@@ -190,6 +192,17 @@ double ZMQVideoPipe::angle(float real, float imaginary) {
         assert(false);
     }
     return angle;
+}
+
+uint8_t ZMQVideoPipe::quantize_am( float &real, float &imaginary ) {
+    auto shift = (real + 1) / 2;
+    return (uint8_t) round(shift * 0xFF);
+}
+
+void ZMQVideoPipe::unquantize_am( uint8_t &quant, float &real, float &imaginary ) {
+    float dequant = (float) quant / 0xFF;
+    real = (dequant * 2) - 1;
+    imaginary = 0;
 }
 
 uint8_t ZMQVideoPipe::quantize(float &real, float &imaginary) {
@@ -375,7 +388,7 @@ void ZMQVideoPipe::frame_to_float(SDL_Surface *surface, float *arr) {
             uint8_t quant = (uint8_t) media;
 
             float a, b;
-            unquantize(quant, a, b);
+            unquantize_am(quant, a, b);
             arr[ pos ] = a;
             arr[ pos + 1 ] = b;
             pos +=2;
@@ -387,7 +400,7 @@ void ZMQVideoPipe::float_to_frame(float *arr, SDL_Surface *surface ) {
     int pos = 0;
     for( int  y = 0; y < Config::NKERNEL_HEIGHT; ++y ) {
         for( int x = 0; x < Config::NKERNEL_WIDTH; ++x ) {
-            Uint32 value = quantize(arr[pos], arr[pos + 1]);
+            Uint32 value = quantize_am(arr[pos], arr[pos + 1]);
             toPixel(&pixel, &value, &value, &value);
             put_pixel32(surface, x, y, pixel);
             pos+=2;

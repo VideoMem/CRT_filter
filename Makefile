@@ -150,6 +150,19 @@ SDL2_CRT_Tests/fast:
 .PHONY : SDL2_CRT_Tests/fast
 
 #=============================================================================
+# Target rules for targets named SDL2_CRT_Decoder
+
+# Build rule for target.
+SDL2_CRT_Decoder: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 SDL2_CRT_Decoder
+.PHONY : SDL2_CRT_Decoder
+
+# fast build rule for target.
+SDL2_CRT_Decoder/fast:
+	$(MAKE) -f tests/decoder/CMakeFiles/SDL2_CRT_Decoder.dir/build.make tests/decoder/CMakeFiles/SDL2_CRT_Decoder.dir/build
+.PHONY : SDL2_CRT_Decoder/fast
+
+#=============================================================================
 # Target rules for targets named CHAR_ROM_GEN
 
 # Build rule for target.
@@ -162,32 +175,32 @@ CHAR_ROM_GEN/fast:
 	$(MAKE) -f utils/CMakeFiles/CHAR_ROM_GEN.dir/build.make utils/CMakeFiles/CHAR_ROM_GEN.dir/build
 .PHONY : CHAR_ROM_GEN/fast
 
-FMAdecode.o: FMAdecode.cpp.o
+CRTmain.o: CRTmain.cpp.o
 
-.PHONY : FMAdecode.o
+.PHONY : CRTmain.o
 
 # target to build an object file
-FMAdecode.cpp.o:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.o
-.PHONY : FMAdecode.cpp.o
+CRTmain.cpp.o:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.o
+.PHONY : CRTmain.cpp.o
 
-FMAdecode.i: FMAdecode.cpp.i
+CRTmain.i: CRTmain.cpp.i
 
-.PHONY : FMAdecode.i
+.PHONY : CRTmain.i
 
 # target to preprocess a source file
-FMAdecode.cpp.i:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.i
-.PHONY : FMAdecode.cpp.i
+CRTmain.cpp.i:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.i
+.PHONY : CRTmain.cpp.i
 
-FMAdecode.s: FMAdecode.cpp.s
+CRTmain.s: CRTmain.cpp.s
 
-.PHONY : FMAdecode.s
+.PHONY : CRTmain.s
 
 # target to generate assembly for a file
-FMAdecode.cpp.s:
-	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/FMAdecode.cpp.s
-.PHONY : FMAdecode.cpp.s
+CRTmain.cpp.s:
+	$(MAKE) -f CMakeFiles/SDL_CRT_Filter.dir/build.make CMakeFiles/SDL_CRT_Filter.dir/CRTmain.cpp.s
+.PHONY : CRTmain.cpp.s
 
 # Help Target
 help:
@@ -200,10 +213,11 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... CRT_FILTERS"
 	@echo "... SDL2_CRT_Tests"
+	@echo "... SDL2_CRT_Decoder"
 	@echo "... CHAR_ROM_GEN"
-	@echo "... FMAdecode.o"
-	@echo "... FMAdecode.i"
-	@echo "... FMAdecode.s"
+	@echo "... CRTmain.o"
+	@echo "... CRTmain.i"
+	@echo "... CRTmain.s"
 .PHONY : help
 
 

@@ -21,6 +21,20 @@ double quadrant_test(ZMQVideoPipe& zPipe, float a, float b) {
     return zPipe.angle(c, d);
 }
 
+bool quantize_am_test() {
+    float one = 1;
+    float uq = 0;
+    for( float x = 1; x >=-1 ; x-=0.01 ) {
+        uint8_t quant = ZMQVideoPipe::quantize_am(x, one);
+        ZMQVideoPipe::unquantize_am(quant, uq, one );
+        if( abs(uq - x ) > 0.01 ) {
+            printf( "[%d] %f != %f\n", quant, x, uq);
+            return false;
+        }
+    }
+    return true;
+}
+
 TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
 
     SECTION( "Wav File handler" ) {
@@ -31,6 +45,10 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
         zPipe.wave.setFM();
         zPipe.wave.write("test.wav", data, size);
         SDL_Log("head:\n%s", zPipe.wave.getInfo().c_str());
+    }
+
+    SECTION( "VideoPipe AM quantization" ) {
+        REQUIRE(quantize_am_test());
     }
 
     SECTION( "VideoPipe FM phase quantization" ) {
