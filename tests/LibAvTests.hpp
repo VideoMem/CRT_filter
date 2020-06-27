@@ -302,6 +302,27 @@ TEST_CASE("LibAV tests","[LibAV]") {
         SDL_FreeSurface(recover);
     }
 
+    SECTION("Diagonal scan pattern test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        auto diag = LibAVable::diagonal_sort( 16 );
+        delete [] diag;
+        auto sort = LibAVable::box_raster( frame, 16 );
+        delete [] sort;
+        LibAVable::macroblock_pixelsort( copy, frame, 40 );
+        //LibAVable::unpack_minizigzag( recover, copy, 40 );
+        SDL_SaveBMP( copy,  "libav_macroblock_pixelsort.bmp" );
+        //SDL_SaveBMP( recover,  "libav_unpack_diagonal.bmp" );
+
+        //REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
+
+
     SECTION("All scan patterns test ") {
         auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
                                                SDL_PIXELFORMAT_RGBA32 , 0 );

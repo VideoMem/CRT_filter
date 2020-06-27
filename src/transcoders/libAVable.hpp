@@ -164,17 +164,19 @@ public:
     static void unpack_all( SDL_Surface *dst, SDL_Surface *src, int step );
     static void pack_all_recursive( SDL_Surface *dst, SDL_Surface *src, int step );
     static void unpack_all_recursive( SDL_Surface *dst, SDL_Surface *src, int step );
-    static SDL_Rect* diagonal_index( int step );
+    static SDL_Rect* diagonal_sort( int step );
+    static SDL_Rect* box_raster( SDL_Surface* ref, int step );
+    static void macroblock_pixelsort( SDL_Surface* dst, SDL_Surface* src, int step );
 
-    static void swirl_pattern(SDL_Rect *pattern, int step);
+    static void swirl_pattern( SDL_Rect *pattern, int step );
 };
 
-void LibAVable::fromFrame(Uint8 *ycbcr, AVFrame *frame ) {
+void LibAVable::fromFrame( Uint8 *ycbcr, AVFrame *frame ) {
     int fid = 0, cid = 0, yid = 0, nyid = 0;
 
     //YVYU Luminance
-    for (int y = 0; y < frame->height ; y++) {
-        for (int x = 0; x < frame->width; x++) {
+    for ( int y = 0; y < frame->height ; y++ ) {
+        for ( int x = 0; x < frame->width; x++ ) {
             fid = y * frame->linesize[0] + x;
             ycbcr[ fid * 2 ] = frame->data[0][ fid ];
         }
@@ -286,7 +288,7 @@ int LibAVable::test_ycbcr(int pattern_size, int extra_pitch) {
     };
     int i,j;
     SDL_Surface *pattern = generate_test_pattern(pattern_size);
-    const int yuv_len = MAX_YCBCR_SURFACE_SIZE(pattern->w, pattern->h, extra_pitch);
+    const int yuv_len = MAX_YCBCR_SURFACE_SIZE(pattern->w, pattern->h, extra_pitch );
 
     auto yuv1 = new Uint8[yuv_len];
     auto yuv2 = new Uint8[yuv_len];
@@ -709,6 +711,8 @@ void LibAVable::pack_doubledeinterlace( SDL_Surface *dst, SDL_Surface *src ) {
     SDL_FreeSurface( swap );
 }
 
+
+//It generates a swirl pattern macroblock pixel index LUT
 void LibAVable::swirl_pattern( SDL_Rect pattern[], int step ) {
     int y0 = 0, x0 = 0, pos = 0;
 
@@ -911,8 +915,72 @@ void LibAVable::unpack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int ste
     SDL_FreeSurface( frame );
 }
 
-SDL_Rect *LibAVable::diagonal_index( int m ) {
-    SDL_Rect* idx = new SDL_Rect[ (int) pow(m, 2) ];
+//It generates diagonal sort macroblock pixel order LUT
+SDL_Rect *LibAVable::diagonal_sort( int m ) {
+    int square_size = (int) pow(m, 2);
+    SDL_Rect* idx_rel = new SDL_Rect[ square_size ];
+
+    int pos = 0;
+    for ( int box = 1; box < m ; ++box ) {
+        for ( int x = 0; x < box; ++x ) {
+            idx_rel[pos].x = x;
+            idx_rel[pos].y = box - x - 1;
+            printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
+            ++pos;
+        }
+    }
+    printf( "midway ---- here --- \n" );
+    for ( int box = m; box > 0; --box ) {
+        int y = m - 1;
+        for ( int x = m - box; x < m; ++x ) {
+            idx_rel[pos].x = x;
+            idx_rel[pos].y = y--;
+            printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
+            assert( pos < square_size && "Pattern overflow" );
+            ++pos;
+        }
+    }
+
+    return idx_rel;
+}
+
+//It generates box macroblock raster origin offsets LUT to use with the inner macroblock pixel index LUT on the final sorting algorithm
+SDL_Rect *LibAVable::box_raster( SDL_Surface* ref, int m ) {
+    int square_size = (int) pow( m, 2 );
+    int area_size = ref->w * ref->h;
+    assert ( area_size % square_size == 0 && "Incompatible Step" );
+    SDL_Rect* idx_rel = new SDL_Rect[ area_size ];
+
+    int pos = 0;
+    for ( int y = 0; y < ref->h; y++ )
+        for ( int x = 0; x < ref->w; x++ ) {
+            int dx = m * pos / square_size % ref->w / m ;
+            int dy = m * ( (int) pos / ( square_size * ref->w / m ) );
+            idx_rel[pos] = { m * dx, dy, m, m };
+            if( pos % square_size == 0 )
+                printf( "box pos %d: %d, %d\n", pos, m * dx, dy );
+            ++pos;
+        }
+
+    return idx_rel;
+}
+
+void LibAVable::macroblock_pixelsort( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    int square_size = (int) pow( step, 2 );
+    auto block = LibAVable::diagonal_sort( step );
+    auto offset = LibAVable::box_raster( src, step );
+
+    int pos = 0;
+    for ( int y = 0; y < src->h; y++ )
+        for ( int x = 0; x < src->w; x++ ) {
+            int dx = offset[pos].x + block[ pos % square_size ].x;
+            int dy = offset[pos].y + block[ pos % square_size ].y;
+            Pixelable::copy32( dst, src, x, y, dx, dy );
+            ++pos;
+        }
+
+    delete [] block;
+    delete [] offset;
 }
 
 
