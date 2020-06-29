@@ -88,7 +88,7 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
        // for( int i=0; i < frame_diff; ++i ) {
 
 
-        LibAVable::pack_all( frame_spiral, frame, KERNING_SIZE );
+        LibAVable::pack_miniraster ( frame_spiral, frame, KERNING_SIZE );
         Magickable::blitScaled( full, frame_spiral );
         LibAVable::decode( state->frame, full );
         LibAVable::writefile(state, f);

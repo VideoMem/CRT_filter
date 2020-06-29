@@ -89,6 +89,21 @@ TEST_CASE( "SDL2 Magick++ API", "[App][SDL2][Magick++]") {
         SDL_FreeSurface( sample );
     }
 
+    SECTION("Verticalize raster") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto copy = Surfaceable::AllocateSurface( frame );
+        auto recover = Surfaceable::AllocateSurface( frame );
+        Magickable::verticalize( copy, frame );
+        Magickable::deverticalize( recover, copy );
+        SDL_SaveBMP( copy,  "magick_verticalize.bmp" );
+        SDL_SaveBMP( recover,  "magick_deverticalize.bmp" );
+
+        REQUIRE(Loader::CompareSurface(frame, recover));
+        SDL_FreeSurface(frame);
+        SDL_FreeSurface(copy);
+        SDL_FreeSurface(recover);
+    }
 
 }
 

@@ -5,7 +5,7 @@
 #ifndef SDL_CRT_FILTER_TRANSCODE_H
 #define SDL_CRT_FILTER_TRANSCODE_H
 
-#define FRONT_SAMPLERATE 691200
+#define FRONT_SAMPLERATE 2304000
 #define INBUF_SIZE 4096
 #define KERNING_SIZE 16
 
@@ -99,7 +99,7 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
                     LibAVable::encode( recovered_surface, state->frame );
                     app->pushCode( recovered_surface );
                     Magickable::blitScaled( full_spiral, recovered_surface );
-                    LibAVable::unpack_all( frame, full_spiral, KERNING_SIZE );
+                    LibAVable::unpack_miniraster ( frame, full_spiral, KERNING_SIZE );
                     zPipe->testSendFrame( frame );
                     auto stop = high_resolution_clock::now();
                     auto elapsed = duration_cast<milliseconds>(stop - start);

@@ -18,6 +18,12 @@ extern "C" {
 /* 422 (YUY2, etc) formats are the largest */
 #define MAX_YCBCR_SURFACE_SIZE(W, H, P)  (H*4*(W+P+1)/2)
 
+struct LibAVable_hypersurface_t {
+    std::vector<SDL_Surface*> surfaces;
+    int depth;
+    int step;
+};
+
 class LibAVable: public Magickable {
 public:
     struct AVthings_t {
@@ -35,7 +41,7 @@ public:
         return init_state(codec_name, 0, reference->w, reference->h );
     }
     static AVthings_t *
-    init_state(std::string codec_name, int decode_flag = 0, int x = 320, int y = 240, int framerate = 25, int bitrate = 800000);
+    init_state(std::string codec_name, int decode_flag = 0, int x = 320, int y = 240, int framerate = 30, int bitrate = 800000);
     static size_t readfile(LibAVable::AVthings_t *state, FILE *infile);
     static void writefile(LibAVable::AVthings_t *state, FILE *outfile) {
         int ret;
@@ -166,9 +172,20 @@ public:
     static void unpack_all_recursive( SDL_Surface *dst, SDL_Surface *src, int step );
     static SDL_Rect* diagonal_sort( int step );
     static SDL_Rect* box_raster( SDL_Surface* ref, int step );
-    static void macroblock_pixelsort( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void pack_diagonal( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void unpack_diagonal( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void pack_diagonal_mirror( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void unpack_diagonal_mirror( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void pack_diagonal_flip( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void unpack_diagonal_flip( SDL_Surface* dst, SDL_Surface* src, int step );
+    static void pixelsort( SDL_Surface* dst, SDL_Surface*  src, SDL_Rect* macro_id, SDL_Rect* block_id);
+    static void pixelunsort( SDL_Surface* dst, SDL_Surface*  src, SDL_Rect* macro_id, SDL_Rect* block_id);
+    static SDL_Rect* mirror_sort( SDL_Rect* macro_id );
+    static SDL_Rect* flip_sort( SDL_Rect* macro_id );
 
     static void swirl_pattern( SDL_Rect *pattern, int step );
+
+    static LibAVable_hypersurface_t* hs_add( LibAVable_hypersurface_t* hs, SDL_Surface* src );
 };
 
 void LibAVable::fromFrame( Uint8 *ycbcr, AVFrame *frame ) {
@@ -532,7 +549,7 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
 
     if ( state->codec->id == AV_CODEC_ID_H264 ) {
         av_opt_set(state->c->priv_data, "preset", "medium", 0);
-        av_opt_set(state->c->priv_data, "tune", "animation", 0);
+        av_opt_set(state->c->priv_data, "tune", "grain", 0);
         av_opt_set(state->c->priv_data, "crf", "0", 0);
         av_opt_set(state->c->priv_data, "crf_max", "0", 0);
     }
@@ -860,21 +877,25 @@ void LibAVable::unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step 
 
 void LibAVable::pack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
-    pack_miniraster( dst, src, step );
-    unpack_minizigzag( frame, dst, step );
-    pack_miniraster( dst, frame, step );
-    unpack_minizigzag( frame, dst, step );
-    pack_miniraster( dst, frame, step );
+    //pack_interlace ( dst, src );
+    //pack_miniraster ( frame, src, step );
+    //unpack_minizigzag ( dst, frame, step );
+    Magickable::verticalize( frame, src );
+    pack_miniraster ( dst, frame, step );
+    //unpack_diagonal_mirror( frame, dst, step );
+    //pack_minizigzag ( dst, frame, step );
     SDL_FreeSurface( frame );
 }
 
 void LibAVable::unpack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
-    unpack_miniraster( dst, src, step );
-    pack_minizigzag( frame, dst, step );
-    unpack_miniraster( dst, frame, step );
-    pack_minizigzag( frame, dst, step );
-    unpack_miniraster( dst, frame, step );
+    //pack_miniraster( frame, src, step );
+    //unpack_minizigzag ( dst, frame, step );
+    //unpack_minizigzag ( dst, src, step );
+    //pack_diagonal_mirror ( frame, dst, step );
+    unpack_miniraster ( frame, src, step );
+    Magickable::deverticalize( dst, frame );
+    //pack_deinterlace( dst, frame );
     SDL_FreeSurface( frame );
 }
 
@@ -890,7 +911,7 @@ void LibAVable::pack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step)
     while( ustep <= step ) {
         pack_all( frame, copy, ustep );
         Loader::SurfacePixelsCopy( frame, copy );
-        printf( "ustep: %d\n", ustep );
+        //printf( "ustep: %d\n", ustep );
         ustep *= 2;
     }
     Loader::SurfacePixelsCopy( frame, dst );
@@ -905,10 +926,10 @@ void LibAVable::unpack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int ste
     while( step % 2 == 0 && step > 4 ) {
         unpack_all(frame, copy, step);
         Loader::SurfacePixelsCopy(frame, copy);
-        printf( "pstep: %d\n", step );
+        //printf( "pstep: %d\n", step );
         step /= 2;
     }
-    printf( "pstep: %d\n", step );
+    //printf( "pstep: %d\n", step );
     unpack_all( frame, copy, step );
 
     Loader::SurfacePixelsCopy( frame, dst );
@@ -923,19 +944,17 @@ SDL_Rect *LibAVable::diagonal_sort( int m ) {
     int pos = 0;
     for ( int box = 1; box < m ; ++box ) {
         for ( int x = 0; x < box; ++x ) {
-            idx_rel[pos].x = x;
-            idx_rel[pos].y = box - x - 1;
-            printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
+            idx_rel[pos] = { x, box - x - 1, m, m };
+            //printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
             ++pos;
         }
     }
-    printf( "midway ---- here --- \n" );
+    //printf( "midway ---- here --- \n" );
     for ( int box = m; box > 0; --box ) {
         int y = m - 1;
         for ( int x = m - box; x < m; ++x ) {
-            idx_rel[pos].x = x;
-            idx_rel[pos].y = y--;
-            printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
+            idx_rel[pos] = { x, y--, m, m };
+            //printf( "pos %d: %d, %d\n", pos, x, idx_rel[pos].y );
             assert( pos < square_size && "Pattern overflow" );
             ++pos;
         }
@@ -949,39 +968,114 @@ SDL_Rect *LibAVable::box_raster( SDL_Surface* ref, int m ) {
     int square_size = (int) pow( m, 2 );
     int area_size = ref->w * ref->h;
     assert ( area_size % square_size == 0 && "Incompatible Step" );
-    SDL_Rect* idx_rel = new SDL_Rect[ area_size ];
+    auto idx_rel = new SDL_Rect[ area_size / square_size ];
 
     int pos = 0;
-    for ( int y = 0; y < ref->h; y++ )
-        for ( int x = 0; x < ref->w; x++ ) {
-            int dx = m * pos / square_size % ref->w / m ;
-            int dy = m * ( (int) pos / ( square_size * ref->w / m ) );
-            idx_rel[pos] = { m * dx, dy, m, m };
-            if( pos % square_size == 0 )
-                printf( "box pos %d: %d, %d\n", pos, m * dx, dy );
-            ++pos;
-        }
+    while ( pos < area_size ) {
+        int dx = m * pos / square_size % ref->w / m ;
+        int dy = m * ( (int) pos / ( square_size * ref->w / m ) );
+        idx_rel[ pos / square_size ] = { m * dx, dy, m, m };
+        //printf( "box pos %d: %d, %d\n", pos, m * dx, dy );
+        pos+=square_size;
+    }
 
     return idx_rel;
 }
 
-void LibAVable::macroblock_pixelsort( SDL_Surface* dst, SDL_Surface* src, int step ) {
-    int square_size = (int) pow( step, 2 );
-    auto block = LibAVable::diagonal_sort( step );
-    auto offset = LibAVable::box_raster( src, step );
-
+void LibAVable::pixelsort( SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_id, SDL_Rect *block_id) {
+    int square_size = (int) pow( macro_id[0].w, 2 );
     int pos = 0;
     for ( int y = 0; y < src->h; y++ )
         for ( int x = 0; x < src->w; x++ ) {
-            int dx = offset[pos].x + block[ pos % square_size ].x;
-            int dy = offset[pos].y + block[ pos % square_size ].y;
+            int dx = macro_id[ pos / square_size ].x + block_id[ pos % square_size ].x;
+            int dy = macro_id[ pos / square_size ].y + block_id[ pos % square_size ].y;
             Pixelable::copy32( dst, src, x, y, dx, dy );
             ++pos;
         }
-
-    delete [] block;
-    delete [] offset;
 }
 
+void LibAVable::pixelunsort(SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_id, SDL_Rect *block_id) {
+    int square_size = (int) pow( macro_id[0].w, 2 );
+    int pos = 0;
+    for ( int y = 0; y < src->h; y++ )
+        for ( int x = 0; x < src->w; x++ ) {
+            int dx = macro_id[ pos / square_size ].x + block_id[ pos % square_size ].x;
+            int dy = macro_id[ pos / square_size ].y + block_id[ pos % square_size ].y;
+            Pixelable::copy32( dst, src, dx, dy, x, y );
+            ++pos;
+        }
+}
+
+SDL_Rect* LibAVable::mirror_sort( SDL_Rect* macro_id ) {
+    int square_size = (int) pow( macro_id[0].w , 2);
+
+    for ( int pos = 0; pos < square_size; ++pos )
+        macro_id[ pos ].x = macro_id[ pos ].w - macro_id[ pos ].x;
+
+    return macro_id;
+}
+
+SDL_Rect *LibAVable::flip_sort(SDL_Rect *macro_id) {
+    int square_size = (int) pow( macro_id[0].w , 2);
+
+    for ( int pos = 0; pos < square_size; ++pos )
+        macro_id[ pos ].y = macro_id[ pos ].h - macro_id[ pos ].y;
+
+    return macro_id;
+}
+
+void LibAVable::pack_diagonal( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = diagonal_sort( step );
+    auto macro_id = box_raster( src, step );
+
+    pixelsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
+
+void LibAVable::unpack_diagonal( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = diagonal_sort( step );
+    auto macro_id = box_raster( src, step );
+
+    pixelunsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
+
+void LibAVable::pack_diagonal_mirror( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = mirror_sort( diagonal_sort( step ) );
+    auto macro_id = box_raster( src, step );
+
+    pixelsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
+
+void LibAVable::unpack_diagonal_mirror( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = mirror_sort( diagonal_sort( step ) );
+    auto macro_id = box_raster( src, step );
+
+    pixelunsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
+
+void LibAVable::pack_diagonal_flip( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = flip_sort( diagonal_sort( step ) );
+    auto macro_id = box_raster( src, step );
+
+    pixelsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
+
+void LibAVable::unpack_diagonal_flip( SDL_Surface* dst, SDL_Surface* src, int step ) {
+    auto block_id = flip_sort( diagonal_sort( step ) );
+    auto macro_id = box_raster( src, step );
+
+    pixelunsort( dst, src, macro_id, block_id );
+    delete [] macro_id;
+    delete [] block_id;
+}
 
 #endif //SDL_CRT_FILTER_LIBAVABLE_HPP

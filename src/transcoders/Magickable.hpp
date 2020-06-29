@@ -22,6 +22,8 @@ public:
     static Image* Allocate(SDL_Surface* reference, double scale);
     static Image* Allocate(SDL_Surface* reference) { return Allocate( reference, 1.0 ); };
     static void blitScaledMagick(SDL_Surface *dst, SDL_Surface *src);
+    static void verticalize( SDL_Surface *dst, SDL_Surface *src );
+    static void deverticalize( SDL_Surface *dst, SDL_Surface *src );
 
 protected:
     static void magick2surface( Magick::Image& image, SDL_Surface* surface );
@@ -177,5 +179,29 @@ void Magickable::blitScaled(SDL_Surface *dst, SDL_Surface *src) {
 
 }
 
+
+void Magickable::verticalize( SDL_Surface *dst, SDL_Surface *src ) {
+    int pos = 0;
+
+    for (int x = 0; x < src->w; x++)
+        for (int y = 0; y < src->h; y++) {
+            int dx = pos % src->w;
+            int dy = pos / src->w;
+            Pixelable::copy32( dst, src, x, y, dx, dy );
+            ++pos;
+        }
+}
+
+void Magickable::deverticalize(SDL_Surface *dst, SDL_Surface *src) {
+    int pos = 0;
+
+    for ( int x = 0; x < src->w; x++ )
+        for ( int y = 0; y < src->h; y++ ) {
+            int dx = pos % src->w;
+            int dy = pos / src->w;
+            Pixelable::copy32( dst, src, dx, dy, x, y );
+            ++pos;
+        }
+}
 
 #endif //SDL_CRT_FILTER_MAGICKABLE_HPP

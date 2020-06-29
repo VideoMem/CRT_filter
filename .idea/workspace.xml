@@ -17,10 +17,15 @@
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcode.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcode.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/LibAvTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/MagickImageAPITest.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/MagickImageAPITest.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +72,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bullet3/examples" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
@@ -100,7 +105,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.LibAV tests">
+  <component name="RunManager" selected="CMake Application.CRT_FILTERS">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -125,6 +130,12 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="SDL2 Magick++ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="SDL2 Magick++ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Magick++][App]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -132,12 +143,6 @@
       </method>
     </configuration>
     <configuration name="Type Conversions (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Transcodeable]" TEST_METHOD="Type Conversions" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Type Conversions" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[Transcodeable]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -186,7 +191,6 @@
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.SDL2 Magick++ API" />
       <item itemvalue="Catch.ZMQ API (1)" />
-      <item itemvalue="Catch.Type Conversions" />
       <item itemvalue="Catch.ZMQ Loader" />
       <item itemvalue="Catch.LibAV tests" />
       <item itemvalue="Catch.Type Conversions (1)" />
@@ -194,14 +198,15 @@
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Decoder" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
+      <item itemvalue="Catch.SDL2 Magick++ API (1)" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Catch.LibAV tests" />
+        <item itemvalue="Catch.SDL2 Magick++ API (1)" />
         <item itemvalue="Catch.Type Conversions (1)" />
         <item itemvalue="Catch.ZMQ API (1)" />
         <item itemvalue="Catch.ZMQ Loader" />
-        <item itemvalue="Catch.Type Conversions" />
       </list>
     </recent_temporary>
   </component>
@@ -288,7 +293,7 @@
       <workItem from="1592167785613" duration="38252000" />
       <workItem from="1593058503197" duration="11897000" />
       <workItem from="1593072817211" duration="40725000" />
-      <workItem from="1593170991717" duration="17194000" />
+      <workItem from="1593170991717" duration="47723000" />
     </task>
     <servers />
   </component>
@@ -338,12 +343,12 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/Magickable.hpp</url>
-          <line>71</line>
+          <line>73</line>
           <option name="timeStamp" value="65" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
-          <line>585</line>
+          <line>594</line>
           <option name="timeStamp" value="69" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -363,7 +368,7 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
-          <line>754</line>
+          <line>763</line>
           <option name="timeStamp" value="81" />
         </line-breakpoint>
       </breakpoints>
