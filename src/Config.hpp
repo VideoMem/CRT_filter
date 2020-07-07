@@ -11,8 +11,8 @@ public:
     static constexpr auto sampleBitmapsFolder = "resources/images";
     static std::string magick_default_format() { return "BMP"; };
 
-    static const int NKERNEL_WIDTH  = 320;
-    static const int NKERNEL_HEIGHT = 240;
+    static const int NKERNEL_WIDTH  = 640;
+    static const int NKERNEL_HEIGHT = 480;
     static const int VIDEOFRAME_WIDTH  = 640;
     static const int VIDEOFRAME_HEIGHT = 480;
     static const int SCREEN_WIDTH  = 640;

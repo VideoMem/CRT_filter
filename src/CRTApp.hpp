@@ -593,8 +593,8 @@ void CRTApp::update()  {
 void CRTApp::initOSD() {
     Loader::SurfacePixelsCopy(gFrame, gBuffer);
     //SDL_BlitSurface( gFrame, nullptr , gBuffer, nullptr );
-
-    osdFilter.centerXtxt(Config::SCREEN_HEIGHT /2, "> INITIALIZING <");
+    SDL_Rect position = { 0, Config::SCREEN_HEIGHT / 2, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT };
+    osdFilter.centerXtxt( &position , "> INITIALIZING <");
     SDL_SetSurfaceAlphaMod( gAux, 0xFF );
     osdFilter.getSurface(gAux);
     SDL_Surface* osdOverlay = SDL_ConvertSurface(gAux, gScreenSurface->format, 0 );

@@ -334,7 +334,7 @@ TEST_CASE("LibAV tests","[LibAV]") {
         SDL_FreeSurface(recover);
     }
 
-    SECTION("Flipped diagonal scan pattern test ") {
+ /*   SECTION("Flipped diagonal scan pattern test ") {
         auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
                                                SDL_PIXELFORMAT_RGBA32 , 0 );
         auto copy = Surfaceable::AllocateSurface( frame );
@@ -349,7 +349,7 @@ TEST_CASE("LibAV tests","[LibAV]") {
         SDL_FreeSurface(copy);
         SDL_FreeSurface(recover);
     }
-
+*/
     SECTION("All scan patterns test ") {
         auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
                                                SDL_PIXELFORMAT_RGBA32 , 0 );
@@ -382,6 +382,104 @@ TEST_CASE("LibAV tests","[LibAV]") {
         SDL_FreeSurface(recover);
     }
 
+    SECTION("Hypersurface stack test ") {
+        auto frame = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto step = 40;
+        int depth = frame->w / step;
+        auto blank = Surfaceable::AllocateSurface( frame );
+        Loader::blank( blank );
+        auto hs = new LibAVable_hypersurface_t();
+        auto hc = new LibAVable_hypersurface_t();
+        SDL_Surface* copy = nullptr;
+        hs->step = step;
+        hs->depth = depth;
+        for ( int i=0; i <= depth + 1; ++i ) {
+            copy = LibAVable::hs_stack( hs, hc, frame );
+            if ( i <= depth )
+                REQUIRE( Loader::CompareSurface( copy, blank ) );
+            else {
+                SDL_SaveBMP( copy,  "libav_hs_stack_out.bmp" );
+                REQUIRE( Loader::CompareSurface( copy, frame ) );
+            }
+            SDL_FreeSurface(copy);
+        }
+
+        SDL_FreeSurface( frame );
+        SDL_FreeSurface( blank );
+        LibAVable::hs_free( hs );
+        LibAVable::hs_free( hc );
+        delete hs;
+        delete hc;
+    }
+
+    SECTION("Hypersurface transpose test ") {
+        auto frame = Surfaceable::AllocateSurface( Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT );
+        auto image = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                               SDL_PIXELFORMAT_RGBA32 , 0 );
+        auto step = 40;
+        LibAVable::macroblock_test( frame, 0, step );
+        SDL_SaveBMP( frame,  "libav_macrotest.bmp" );
+        size_t depth = frame->w / step;
+        auto blank = Surfaceable::AllocateSurface( frame );
+        Loader::blank( blank );
+        auto hs = new LibAVable_hypersurface_t();
+        auto hc = new LibAVable_hypersurface_t();
+        auto his = new LibAVable_hypersurface_t();
+        auto hic = new LibAVable_hypersurface_t();
+        SDL_Surface* copy = nullptr;
+        hs->step = step;
+        hs->depth = depth;
+        his->step = step;
+        his->depth = depth;
+        while ( hc->surfaces.size() == 0 ) {
+            copy = LibAVable::hs_stack( hs, hc, frame );
+            SDL_FreeSurface(copy);
+            copy = LibAVable::hs_stack( his, hic, image );
+            SDL_FreeSurface(copy);
+        }
+        REQUIRE( hc->surfaces.size() == depth );
+        LibAVable::hs_free( hs );
+        LibAVable::hs_transpose(hc, hs, 0);
+
+        int i = 0;
+        for ( auto & surface: hs->surfaces ) {
+            char buff[100] = { 0 };
+            snprintf(buff, sizeof(buff), "libav_hs_stack_out-%02d.bmp", i);
+            SDL_SaveBMP( surface, buff );
+            ++i;
+        }
+
+        LibAVable::hs_free( his );
+        LibAVable::hs_transpose( hic, his );
+        for ( auto & surface: his->surfaces ) {
+            char buff[100] = { 0 };
+            snprintf(buff, sizeof(buff), "libav_hs_stack_image_out-%02d.bmp", i);
+            SDL_SaveBMP( surface, buff );
+            ++i;
+        }
+
+        LibAVable::hs_free( hic );
+        LibAVable::hs_untranspose( his, hic );
+
+        for ( auto & surface: hic->surfaces ) {
+            char buff[100] = { 0 };
+            snprintf(buff, sizeof(buff), "libav_hs_unstack_image_out-%02d.bmp", i);
+            SDL_SaveBMP( surface, buff );
+            ++i;
+        }
+
+        SDL_FreeSurface( frame );
+        SDL_FreeSurface( blank );
+        LibAVable::hs_free( hs );
+        LibAVable::hs_free( hc );
+        LibAVable::hs_free( his );
+        LibAVable::hs_free( hic );
+        delete hs;
+        delete hc;
+        delete hic;
+        delete his;
+    }
 
 }
 

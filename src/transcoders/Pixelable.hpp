@@ -134,6 +134,18 @@ public:
         return 20 * log( PIXEL_MAX / sqrt(media) ) / log(10);
     }
 
+    /*
+     *  3.1. Overall PSNR
+        PSNR is a traditional signal quality metric, measured in decibels. It is directly drived from mean square error (MSE), or its square root (RMSE). The formula used is:
+        20 * log10 ( MAX / RMSE )
+        or, equivalently:
+        10 * log10 ( MAX^2 / MSE )
+        where the error is computed over all the pixels in the video, which is the method used in the dump_psnr.c reference implementation.
+        This metric may be applied to both the luma and chroma planes, with all planes reported separately.
+
+     *  https://tools.ietf.org/id/draft-ietf-netvc-testing-06.html
+    */
+
     static void psnr(SDL_Surface *original, SDL_Surface *copy, SDL_Surface *error) {
         double err = 0;
         double max = 0;
@@ -159,6 +171,58 @@ public:
             }
     }
 
+    static void DrawLine(SDL_Surface* dst, float x1, float y1, float x2, float y2, Uint32 color) {
+        // Bresenham's line algorithm
+        const bool steep = (fabs(y2 - y1) > fabs(x2 - x1));
+        if(steep) {
+            std::swap(x1, y1);
+            std::swap(x2, y2);
+        }
+
+        if(x1 > x2) {
+            std::swap(x1, x2);
+            std::swap(y1, y2);
+        }
+
+        const float dx = x2 - x1;
+        const float dy = fabs(y2 - y1);
+
+        float error = dx / 2.0f;
+        const int ystep = (y1 < y2) ? 1 : -1;
+        int y = (int)y1;
+
+        const int maxX = (int)x2;
+
+        for(int x=(int)x1; x<maxX; x++) {
+            if(steep) {
+                put32( dst, y, x, color);
+            }
+            else {
+                put32( dst, x, y, color);
+            }
+
+            error -= dy;
+            if(error < 0) {
+                y += ystep;
+                error += dx;
+            }
+        }
+    }
+
+    static void DrawRect(SDL_Surface* dst, SDL_Rect* box, Uint32 color) {
+        float x0 = box->x;
+        float y0 = box->y;
+        float x1 = box->x + box->w - 1;
+        float y1 = y0;
+        float x2 = x1;
+        float y2 = box->y + box->h - 1;
+        float x3 = x0;
+        float y3 = y2;
+        DrawLine( dst, x0, y0, x1, y1, color );
+        DrawLine( dst, x1, y1, x2, y2, color );
+        DrawLine( dst, x2 + 1, y2, x3, y3, color );
+        DrawLine( dst, x3, y3, x0, y0, color );
+    }
 };
 
 #endif //SDL_CRT_FILTER_PIXELABLE_HPP

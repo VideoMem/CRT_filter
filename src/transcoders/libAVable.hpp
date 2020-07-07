@@ -14,14 +14,15 @@ extern "C" {
     #include "transcoders/helpers/testyuv_cvt.c"
 }
 #include "transcoders/Magickable.hpp"
+#include "generators/MagickOSD.hpp"
 
 /* 422 (YUY2, etc) formats are the largest */
 #define MAX_YCBCR_SURFACE_SIZE(W, H, P)  (H*4*(W+P+1)/2)
 
 struct LibAVable_hypersurface_t {
     std::vector<SDL_Surface*> surfaces;
-    int depth;
-    int step;
+    size_t depth;
+    size_t step;
 };
 
 class LibAVable: public Magickable {
@@ -186,6 +187,42 @@ public:
     static void swirl_pattern( SDL_Rect *pattern, int step );
 
     static LibAVable_hypersurface_t* hs_add( LibAVable_hypersurface_t* hs, SDL_Surface* src );
+    static void hs_copy( LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc );
+    static void hs_transpose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, int direction);
+    static void hs_transpose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc) {
+        hs_transpose( hs, hc, 0 );
+    }
+    static void hs_untranspose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc) {
+        hs_transpose( hs, hc, 1 );
+    }
+
+    static void hs_itranspose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, int times ) {
+        auto hst = new LibAVable_hypersurface_t();
+        hs_copy(hs, hc);
+        for (int i = 0; i < times; i++ ) {
+            hs_transpose(hc, hst, 0);
+            hs_free(hc);
+            hs_copy( hst, hc );
+            hs_free( hst );
+        }
+        delete hst;
+    }
+
+    static void hs_iuntranspose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, int times ) {
+        auto hst = new LibAVable_hypersurface_t();
+        hs_copy(hs, hc);
+        for (int i = 0; i < times; i++ ) {
+            hs_transpose(hc, hst, 1);
+            hs_free(hc);
+            hs_copy( hst, hc );
+            hs_free( hst );
+        }
+        delete hst;
+    }
+
+    static void hs_free( LibAVable_hypersurface_t* src );
+    static SDL_Surface* hs_stack( LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, SDL_Surface* src );
+    static void macroblock_test( SDL_Surface* dst, int start, int step );
 };
 
 void LibAVable::fromFrame( Uint8 *ycbcr, AVFrame *frame ) {
@@ -543,13 +580,13 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     * then gop_size is ignored and the output of encoder
     * will always be I frame irrespective to gop_size
     */
-    state->c->gop_size = 1;
-    state->c->max_b_frames = 1;
+    state->c->gop_size = 10;
+    state->c->max_b_frames = 10;
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if ( state->codec->id == AV_CODEC_ID_H264 ) {
         av_opt_set(state->c->priv_data, "preset", "medium", 0);
-        av_opt_set(state->c->priv_data, "tune", "grain", 0);
+        av_opt_set(state->c->priv_data, "tune", "animation", 0);
         av_opt_set(state->c->priv_data, "crf", "0", 0);
         av_opt_set(state->c->priv_data, "crf_max", "0", 0);
     }
@@ -760,6 +797,7 @@ void LibAVable::swirl_pattern( SDL_Rect pattern[], int step ) {
     }
 }
 
+//same as spiral pattern
 void LibAVable::pack_spiral( SDL_Surface *dst, SDL_Surface *src, int step ) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -780,6 +818,7 @@ void LibAVable::pack_spiral( SDL_Surface *dst, SDL_Surface *src, int step ) {
     delete[] pattern;
 }
 
+//inverse of spiral one
 void LibAVable::pack_despiral(SDL_Surface *dst, SDL_Surface *src, int step) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -799,6 +838,7 @@ void LibAVable::pack_despiral(SDL_Surface *dst, SDL_Surface *src, int step) {
     delete[] pattern;
 }
 
+// mini macroblock left to right raster
 void LibAVable::pack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step ) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -818,6 +858,7 @@ void LibAVable::pack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step ) 
     }
 }
 
+//inverse of the above
 void LibAVable::unpack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step ) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -837,6 +878,7 @@ void LibAVable::unpack_miniraster( SDL_Surface *dst, SDL_Surface *src, int step 
     }
 }
 
+// same as miniraster but with zig zag line ordering
 void LibAVable::pack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step ) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -856,6 +898,7 @@ void LibAVable::pack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step ) 
     }
 }
 
+//inverse of pack_zigzag
 void LibAVable::unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step ) {
     assert(src->w % step == 0 && "Incompatible step");
     assert(src->h % step == 0 && "Incompatible step");
@@ -875,6 +918,7 @@ void LibAVable::unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step 
     }
 }
 
+//it stacks various transforms
 void LibAVable::pack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
     //pack_interlace ( dst, src );
@@ -887,6 +931,7 @@ void LibAVable::pack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     SDL_FreeSurface( frame );
 }
 
+//inverse of te all transforms
 void LibAVable::unpack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
     //pack_miniraster( frame, src, step );
@@ -899,6 +944,7 @@ void LibAVable::unpack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     SDL_FreeSurface( frame );
 }
 
+//it does the transform on the sub macroblocks from 4 to step
 void LibAVable::pack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
     auto copy = Surfaceable::AllocateSurface( src );
@@ -918,6 +964,7 @@ void LibAVable::pack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step)
     SDL_FreeSurface( frame );
 }
 
+//inverse of the above
 void LibAVable::unpack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
     auto copy = Surfaceable::AllocateSurface( src );
@@ -982,7 +1029,9 @@ SDL_Rect *LibAVable::box_raster( SDL_Surface* ref, int m ) {
     return idx_rel;
 }
 
-void LibAVable::pixelsort( SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_id, SDL_Rect *block_id) {
+
+//it applies the transform from src to dst with macro_id as the source LUT and block_id as dst LUT
+void LibAVable::pixelsort( SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_id, SDL_Rect *block_id ) {
     int square_size = (int) pow( macro_id[0].w, 2 );
     int pos = 0;
     for ( int y = 0; y < src->h; y++ )
@@ -994,6 +1043,7 @@ void LibAVable::pixelsort( SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_i
         }
 }
 
+//inverse of the pixelsort
 void LibAVable::pixelunsort(SDL_Surface *dst, SDL_Surface *src, SDL_Rect *macro_id, SDL_Rect *block_id) {
     int square_size = (int) pow( macro_id[0].w, 2 );
     int pos = 0;
@@ -1076,6 +1126,111 @@ void LibAVable::unpack_diagonal_flip( SDL_Surface* dst, SDL_Surface* src, int st
     pixelunsort( dst, src, macro_id, block_id );
     delete [] macro_id;
     delete [] block_id;
+}
+
+LibAVable_hypersurface_t *LibAVable::hs_add( LibAVable_hypersurface_t *hs, SDL_Surface *src ) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    Loader::SurfacePixelsCopy( src, frame );
+    hs->surfaces.push_back( frame );
+    return hs;
+}
+
+void LibAVable::hs_copy( LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc ) {
+    hc->step = hs->step;
+    hc->depth = hs->depth;
+    for (auto & surface : hs->surfaces) {
+        hs_add( hc, surface );
+    }
+}
+
+void LibAVable::hs_free( LibAVable_hypersurface_t *src ) {
+    for ( auto & surface : src->surfaces )
+        SDL_FreeSurface(surface);
+    src->surfaces.clear();
+}
+
+SDL_Surface *LibAVable::hs_stack(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, SDL_Surface* src ) {
+    auto frame = Surfaceable::AllocateSurface( src );
+    Loader::blank( frame );
+
+    if( hc != nullptr && hc->surfaces.size() > 0 ) { //there are remaining frames to publish
+        auto surface = hc->surfaces.back();
+        Loader::SurfacePixelsCopy( surface , frame );
+        SDL_FreeSurface( surface );
+        hc->surfaces.pop_back();
+    }
+
+    if ( hs->surfaces.size() >= hs->depth ) { //hypersurface filled
+        if( hc != nullptr ) {
+            hs_free( hc );
+        }
+        hs_copy( hs, hc );
+        hs_free( hs );
+    }
+
+    hs_add( hs, src );
+    return frame;
+
+}
+
+void LibAVable::hs_transpose(LibAVable_hypersurface_t *hs, LibAVable_hypersurface_t *hc, int direction) {
+    auto macro_id = box_raster( hs->surfaces.back(), hs->step );
+    hs_copy( hs, hc );
+    auto depth = hs->depth;
+    auto count = hs->surfaces.back()->w * hs->surfaces.back()->h / (hs->step * hs->step);
+    size_t pos = 0, bi = 0;
+
+    if ( direction == 0 ) {
+        for (auto &surface : hs->surfaces) {
+            bi = 0;
+            while (bi < count) {
+                for (auto &dst: hc->surfaces) {
+                    auto dz = (pos / depth) % count;
+                    SDL_BlitSurface(surface, &macro_id[bi], dst, &macro_id[dz]);
+                    ++bi;
+                    ++pos;
+                }
+            }
+        }
+    } else {
+        for (auto &dst : hc->surfaces) {
+            bi = 0;
+            while (bi < count) {
+                for (auto &surface: hs->surfaces) {
+                    auto dz = (pos / depth) % count;
+                    SDL_BlitSurface(surface, &macro_id[dz], dst, &macro_id[bi]);
+                    ++bi;
+                    ++pos;
+                }
+            }
+        }
+    }
+}
+
+void LibAVable::macroblock_test(SDL_Surface* dst, int start, int step ) {
+    auto osd = new MagickOSD();
+    auto black = Surfaceable::AllocateSurface( dst );
+    auto frame = Surfaceable::AllocateSurface( dst );
+    Loader::blank(black);
+    osd->setFontSize( osd->getFontSize() / 2 );
+    auto macroblocks = box_raster( dst, step );
+    auto count = dst->w * dst->h / ( step * step );
+    for( int i = 0; i < count; i++ ) {
+        char buff[100] = { 0 };
+        snprintf(buff, sizeof(buff), "%03d", i + start );
+        osd->centerXtxt( &macroblocks[i], buff );
+
+        Pixelable::DrawRect( black,
+                &macroblocks[i],
+                0xFFFFFFFF
+                );
+    }
+    osd->getSurface( frame );
+    SDL_BlitSurface ( frame, nullptr, black, nullptr );
+    Loader::SurfacePixelsCopy( black, dst );
+    SDL_FreeSurface( black );
+    SDL_FreeSurface( frame );
+    delete osd;
 }
 
 #endif //SDL_CRT_FILTER_LIBAVABLE_HPP

@@ -16,13 +16,21 @@ public:
     MagickOSD();
     void text( double x, double y, const std::string& txt );
     void shadowText( size_t x, double y, const std::string& txt );
-    void centerXtxt( double y, const std::string& txt );
+    void centerXtxt(SDL_Rect *box, const std::string& txt );
     void getSurface( SDL_Surface* surface );
     void test();
     double getTextWidth( Magick::Image& img, const std::string& txt );
     double getTextHeight( Magick::Image& img, const std::string& txt );
     double getFontSize() { return fontsize; }
-    void   setFontSize( double f ) { fontsize = f; }
+    void   setFontSize( double f ) {
+        fontsize = f;
+        img.fontPointsize( fontsize );
+        blank.fontPointsize( fontsize );
+    }
+    void setFont( const std::string& name ) {
+        img.font( name );
+        blank.font( name );
+    }
     static SDL_Rect textSafeArea( Magick::Image& img );
     void clear() { blankMe(); }
 
@@ -58,8 +66,7 @@ MagickOSD::MagickOSD() {
     setFontSize( Config::SCREEN_HEIGHT * txs.p );
     img.fontPointsize( fontsize );
     blank.fontPointsize( fontsize );
-    img.font(font);
-    blank.font(font);
+    setFont( font );
 
 }
 
@@ -74,12 +81,12 @@ void MagickOSD::text( double x, double y, const std::string &txt ) {
 }
 
 
-void MagickOSD::centerXtxt( double y, const std::string &txt ) {
-    double w = Config::SCREEN_WIDTH;
+void MagickOSD::centerXtxt(SDL_Rect *box, const std::string &txt ) {
+    double w = box->w;
     double t = getTextWidth( img, txt );
     double x = ( w - t ) / 2;
-    y += getTextHeight( img, txt ) / 2.0;
-    shadowText( x, y , txt );
+    double y = ( box->h - getTextHeight(img, txt ) ) / 2.0;
+    shadowText(box->x + x , box->y + y, txt );
 }
 
 
@@ -106,7 +113,8 @@ void MagickOSD::test() {
     text( xpos, ypos, txt );
     SDL_Log("MagickOSD() test: text" );
     blankMe();
-    centerXtxt( ypos, txt );
+    SDL_Rect box = { 0, (int) ypos, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT };
+    centerXtxt( &box , txt );
     SDL_Log("MagickOSD() test: centerXtxt" );
 }
 

@@ -56,10 +56,17 @@ void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
 
 void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* app ) {
     SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
+    size_t depth = frame->w / KERNING_SIZE;
+    auto hs = new LibAVable_hypersurface_t();
+    auto hc = new LibAVable_hypersurface_t();
+    auto hct = new LibAVable_hypersurface_t();
+    hs->step = KERNING_SIZE;
+    hs->depth = depth * DEPTH_MULTIPLIER;
+
     SDL_Surface* frame_spiral = Surfaceable::AllocateSurface( frame );
 
     SDL_Surface* full = Surfaceable::AllocateSurface( Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
-
+    auto aux_surface = Surfaceable::AllocateSurface( frame );
     duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
 
     std::string filename = "outstream.mp4";
@@ -85,13 +92,28 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
         app->getCode(frame);
 
         app->getFrame(full);
-       // for( int i=0; i < frame_diff; ++i ) {
 
 
-        LibAVable::pack_miniraster ( frame_spiral, frame, KERNING_SIZE );
-        Magickable::blitScaled( full, frame_spiral );
-        LibAVable::decode( state->frame, full );
-        LibAVable::writefile(state, f);
+        if( !hct->surfaces.empty() ) {
+            LibAVable::blitScaled( full, hct->surfaces.front() );
+            LibAVable::decode( state->frame, full );
+            LibAVable::writefile(state, f);
+            hct->surfaces.erase(hct->surfaces.begin());
+        }
+
+        if( !hc->surfaces.empty() && hct->surfaces.empty() ) {
+            //for (auto &img: hc->surfaces ) {
+            //    LibAVable::pack_miniraster ( full_copy, img, PACK_SIZE );
+            //    Loader::SurfacePixelsCopy( full_copy, img );
+            //}
+            LibAVable::hs_itranspose( hc, hct, TRANSPOSE_TIMES );
+            //LibAVable::hs_transpose( hc, hct );
+
+            LibAVable::hs_free( hc );
+        }
+        LibAVable::pack_miniraster( aux_surface, frame, PACK_SIZE );
+        auto full_copy = LibAVable::hs_stack( hs, hc, aux_surface );
+        SDL_FreeSurface( full_copy );
         /*
         int ret = avcodec_receive_frame( state->c , encoded_frame );
         if (ret < 0) {
@@ -122,6 +144,12 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
         fwrite(endcode, 1, sizeof(endcode), f);
     fclose(f);
 
+    LibAVable::hs_free(hct);
+    LibAVable::hs_free(hc);
+    LibAVable::hs_free(hs);
+    delete hct;
+    delete hc;
+    delete hs;
     avcodec_free_context(&state->c);
     av_frame_free(&state->frame);
     av_packet_free(&state->pkt);

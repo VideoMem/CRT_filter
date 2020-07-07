@@ -5,9 +5,12 @@
 #ifndef SDL_CRT_FILTER_TRANSCODE_H
 #define SDL_CRT_FILTER_TRANSCODE_H
 
-#define FRONT_SAMPLERATE 2304000
+#define FRONT_SAMPLERATE 9216000
 #define INBUF_SIZE 4096
 #define KERNING_SIZE 16
+#define PACK_SIZE 16
+#define TRANSPOSE_TIMES 1
+#define DEPTH_MULTIPLIER 1
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -47,6 +50,14 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
     SDL_Surface* frame = Surfaceable::AllocateSurface(Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     auto state = LibAVable::init_state( codec_name, 1, Config::VIDEOFRAME_WIDTH, Config::VIDEOFRAME_HEIGHT );
     SDL_Surface* full_spiral = Surfaceable::AllocateSurface( frame );
+    auto aux_surface = Surfaceable::AllocateSurface( frame );
+
+    size_t depth = frame->w / KERNING_SIZE;
+    auto hs = new LibAVable_hypersurface_t();
+    auto hc = new LibAVable_hypersurface_t();
+    auto hct = new LibAVable_hypersurface_t();
+    hs->step = KERNING_SIZE;
+    hs->depth = depth * DEPTH_MULTIPLIER;
 
     uint8_t *data;
     size_t   data_size;
@@ -62,6 +73,7 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
     /* set end of buffer to 0 (this ensures that no overreading happens for damaged MPEG streams) */
     memset(inbuf + INBUF_SIZE, 0, AV_INPUT_BUFFER_PADDING_SIZE);
     auto recovered_surface = Surfaceable::AllocateSurface( state->frame->width, state->frame->height );
+
     bool quit = false;
     SDL_Event e;
 
@@ -98,9 +110,24 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
                 if (LibAVable::readfile(state, f) >= 0) {
                     LibAVable::encode( recovered_surface, state->frame );
                     app->pushCode( recovered_surface );
-                    Magickable::blitScaled( full_spiral, recovered_surface );
-                    LibAVable::unpack_miniraster ( frame, full_spiral, KERNING_SIZE );
-                    zPipe->testSendFrame( frame );
+
+                    if( !hct->surfaces.empty() ) {
+                        LibAVable::unpack_miniraster ( aux_surface, hct->surfaces.front() , PACK_SIZE );
+                        zPipe->testSendFrame( aux_surface );
+                        hct->surfaces.erase(hct->surfaces.begin());
+                    }
+
+                    if( !hc->surfaces.empty() && hct->surfaces.empty() ) {
+                        LibAVable::hs_iuntranspose( hc, hct, TRANSPOSE_TIMES );
+                        //LibAVable::hs_untranspose( hc, hct );
+                        LibAVable::hs_free( hc );
+                    }
+
+                    LibAVable::blitScaled( aux_surface, recovered_surface );
+                    //LibAVable::unpack_miniraster( aux_surface, full_spiral, PACK_SIZE );
+                    auto full_copy = LibAVable::hs_stack( hs, hc, aux_surface );
+                    SDL_FreeSurface( full_copy );
+
                     auto stop = high_resolution_clock::now();
                     auto elapsed = duration_cast<milliseconds>(stop - start);
                     if(duration_cast<milliseconds>(frameTime) > elapsed) {
@@ -127,6 +154,10 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
     SDL_FreeSurface( frame );
     SDL_FreeSurface( full_spiral );
     //delete state;
+    LibAVable::hs_free(hc);
+    LibAVable::hs_free(hs);
+    LibAVable::hs_free(hct);
+    delete hs; delete hc; delete hct;
 
 }
 

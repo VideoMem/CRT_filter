@@ -91,17 +91,7 @@ SDL_Surface *Surfaceable::AllocateSurface( SDL_Surface *mock, double scale ) {
     //return AllocateSurface( mock_size.w, mock_size.h, *mock->format );
 }
 
-/*
- *  3.1. Overall PSNR
-    PSNR is a traditional signal quality metric, measured in decibels. It is directly drived from mean square error (MSE), or its square root (RMSE). The formula used is:
-    20 * log10 ( MAX / RMSE )
-    or, equivalently:
-    10 * log10 ( MAX^2 / MSE )
-    where the error is computed over all the pixels in the video, which is the method used in the dump_psnr.c reference implementation.
-    This metric may be applied to both the luma and chroma planes, with all planes reported separately.
 
- *  https://tools.ietf.org/id/draft-ietf-netvc-testing-06.html
- */
 
 
 
