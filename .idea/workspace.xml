@@ -2,11 +2,11 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
+      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
       <config projectName="SDL_CRT_Filter" targetName="CHAR_ROM_GEN" />
+      <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
       <config projectName="SDL_CRT_Filter" targetName="CRT_FILTERS" />
       <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Decoder" />
-      <config projectName="SDL_CRT_Filter" targetName="SDL_CRT_Filter" />
-      <config projectName="SDL_CRT_Filter" targetName="SDL2_CRT_Tests" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -16,19 +16,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/TurboTests.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/generators/MagickOSD.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcode.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcode.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dependencies.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/dependencies.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Surfaceable.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/All_tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/All_tests.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/LibAvTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -75,7 +73,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bullet3/examples" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../turbofec" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
@@ -108,7 +106,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.CRT_FILTERS">
+  <component name="RunManager" selected="Catch.TurboFEC tests (1)">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -121,7 +119,7 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LibAV tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[LibAV]" TEST_METHOD="LibAV tests" TEST_MODE="SUITE_TEST">
+    <configuration name="Pixel data converter tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="Pixel data converter tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -133,31 +131,31 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="SDL2 Magick++ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Magick++][App]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SDL2 Magick++ OSD" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[OSD][SDL2][Magick++]" TEST_METHOD="SDL2 Magick++ OSD" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC error test (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC error test" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Type Conversions (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Transcodeable]" TEST_METHOD="Type Conversions" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC error test" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ZMQ API (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[ZMQ][SDL2][GNURadio]" TEST_METHOD="ZMQ API" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC tests (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC tests" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TurboFEC tobits, frombits" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC tobits, frombits" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -187,23 +185,23 @@
       <item itemvalue="Catch.All Tests" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.SDL2 Magick++ API" />
-      <item itemvalue="Catch.ZMQ API (1)" />
-      <item itemvalue="Catch.LibAV tests" />
-      <item itemvalue="Catch.Type Conversions (1)" />
-      <item itemvalue="Catch.SDL2 Magick++ API (1)" />
-      <item itemvalue="Catch.SDL2 Magick++ OSD" />
+      <item itemvalue="Catch.Pixel data converter tests" />
+      <item itemvalue="Catch.TurboFEC error test" />
       <item itemvalue="CMake Application.CRT_FILTERS" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Decoder" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
+      <item itemvalue="Catch.TurboFEC tobits, frombits" />
+      <item itemvalue="Catch.TurboFEC tests (1)" />
+      <item itemvalue="Catch.TurboFEC error test (1)" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Catch.LibAV tests" />
-        <item itemvalue="Catch.SDL2 Magick++ OSD" />
-        <item itemvalue="Catch.SDL2 Magick++ API (1)" />
-        <item itemvalue="Catch.Type Conversions (1)" />
-        <item itemvalue="Catch.ZMQ API (1)" />
+        <item itemvalue="Catch.TurboFEC tests (1)" />
+        <item itemvalue="Catch.TurboFEC error test (1)" />
+        <item itemvalue="Catch.TurboFEC error test" />
+        <item itemvalue="Catch.TurboFEC tobits, frombits" />
+        <item itemvalue="Catch.Pixel data converter tests" />
       </list>
     </recent_temporary>
   </component>
@@ -293,7 +291,7 @@
       <workItem from="1593170991717" duration="56400000" />
       <workItem from="1593615689001" duration="17115000" />
       <workItem from="1593786592299" duration="20794000" />
-      <workItem from="1594016571709" duration="30576000" />
+      <workItem from="1594016571709" duration="111622000" />
     </task>
     <servers />
   </component>
@@ -371,6 +369,16 @@
           <line>809</line>
           <option name="timeStamp" value="81" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/tests/TurboTests.hpp</url>
+          <line>171</line>
+          <option name="timeStamp" value="106" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/Surfaceable.hpp</url>
+          <line>79</line>
+          <option name="timeStamp" value="107" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint enabled="true" type="CidrExceptionBreakpoint" />
@@ -379,9 +387,10 @@
     </breakpoint-manager>
     <watches-manager>
       <configuration name="CMakeCatchTestRunConfigurationType">
-        <watch expression="pattern-&gt;w" language="ObjectiveC" />
-        <watch expression="x" />
-        <watch expression="y" />
+        <watch expression="scale" />
+        <watch expression="bits" />
+        <watch expression="padding" />
+        <watch expression="ret_size" />
       </configuration>
       <configuration name="CMakeRunConfiguration">
         <watch expression="dst" />

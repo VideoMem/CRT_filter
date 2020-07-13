@@ -17,6 +17,7 @@ pkg_check_modules(PC_ZeroMQ REQUIRED libzmq)
 
 pkg_check_modules(VIPS REQUIRED vips-cpp)
 
+pkg_check_modules(TURBOFEC REQUIRED turbofec)
 ## use the hint from above to find where 'zmq.hpp' is located
 #find_path(ZeroMQ_INCLUDE_DIR
 #        NAMES zmq.hpp
@@ -51,6 +52,7 @@ find_library( AVFORMAT_LIBRARY avformat )
 #pthread
 find_package (Threads)
 
+find_package (TurboFEC)
 
 ##executable / link section
 add_executable(${CMAKE_PROJECT_NAME} ${BUILD_TARGET})
@@ -65,6 +67,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${GRRUNTIME_LIBRARY})
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${VIPS_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${VIPS_LIBRARIES})
+
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${TURBOFEC_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} ${TURBOFEC_LIBRARIES})
 
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${AVCODEC_INCLUDE_DIRS})
 target_link_libraries(${CMAKE_PROJECT_NAME} ${AVCODEC_LIBRARY})

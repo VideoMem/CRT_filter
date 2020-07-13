@@ -103,9 +103,6 @@ void test_decode( const std::string file_name, const std::string codec_name ) {
 }
 
 
-
-
-
 TEST_CASE("LibAV tests","[LibAV]") {
 
     SECTION("Basic encode/decode tests") {

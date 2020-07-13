@@ -223,6 +223,65 @@ public:
         DrawLine( dst, x2 + 1, y2, x3, y3, color );
         DrawLine( dst, x3, y3, x0, y0, color );
     }
+
+    static Uint8* AllocateChannelMatrix ( SDL_Surface* ref ) {
+        size_t buflen = ref->w * ref->h;
+        return (uint8_t *) malloc(sizeof(uint8_t) * buflen);
+    }
+
+    static float* AllocateFloatMatrix ( SDL_Surface* ref ) {
+        size_t buflen = ref->w * ref->h;
+        return new float[buflen];
+    }
+
+    static float* AsLumaFloatMatrix ( SDL_Surface* ref ) {
+        auto fm = AllocateFloatMatrix( ref );
+        size_t pos = 0;
+        for( int y = 0; y < ref->h; ++y )
+            for( int x = 0; x < ref->w; ++x ) {
+                fm[pos] = (float) direct_to_luma( get32( ref, x, y ) );
+                pos++;
+            }
+
+        return fm;
+    }
+
+    static inline uint8_t float_to_uint8( float &real ) {
+        auto shift = (real + 1) / 2;
+        return (uint8_t) round(shift * 0xFF);
+    }
+
+    static inline float uint8_to_float( uint8_t &quant ) {
+        float dequant = (float) quant / 0xFF;
+        return (dequant * 2) - 1;
+    }
+
+    static uint8_t* AsLumaChannelMatrix ( SDL_Surface* ref ) {
+        size_t buflen = ref->w * ref->h;
+        auto cm = new Uint8[buflen];
+        auto fm = AsLumaFloatMatrix( ref );
+        size_t pos = 0;
+        for( int y = 0; y < ref->h; ++y )
+            for( int x = 0; x < ref->w; ++x ) {
+                cm[pos] = float_to_uint8( fm[pos] );
+                pos++;
+            }
+
+        delete [] fm;
+        return cm;
+    }
+
+    static void ApplyLumaChannelMatrix ( SDL_Surface* ref, Uint8* cm ) {
+        size_t buflen = ref->w * ref->h;
+        size_t pos = 0;
+        for( int y = 0; y < ref->h; ++y )
+            for( int x = 0; x < ref->w; ++x ) {
+                put32( ref, x, y, direct_from_luma( uint8_to_float( cm[pos] )) );
+                pos++;
+            }
+
+    }
+
 };
 
 #endif //SDL_CRT_FILTER_PIXELABLE_HPP

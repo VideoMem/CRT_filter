@@ -3,6 +3,7 @@
 
 #include <catch2/catch.hpp>
 #include "LibAvTests.hpp"
+#include "TurboTests.hpp"
 #include "TranscoderTests.hpp"
 #include "filesystem_Tests.h"
 #include "Assets and resources.hpp"

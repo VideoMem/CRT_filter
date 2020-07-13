@@ -195,14 +195,16 @@ double ZMQVideoPipe::angle(float real, float imaginary) {
 }
 
 uint8_t ZMQVideoPipe::quantize_am( float &real, float &imaginary ) {
-    auto shift = (real + 1) / 2;
-    return (uint8_t) round(shift * 0xFF);
+    //auto shift = (real + 1) / 2;
+    //return (uint8_t) round(shift * 0xFF);
+    return Pixelable::float_to_uint8( real );
 }
 
 void ZMQVideoPipe::unquantize_am( uint8_t &quant, float &real, float &imaginary ) {
-    float dequant = (float) quant / 0xFF;
-    real = (dequant * 2) - 1;
-    imaginary = 0;
+    //float dequant = (float) quant / 0xFF;
+    //real = (dequant * 2) - 1;
+    //imaginary = 0;
+    real = Pixelable::uint8_to_float( quant );
 }
 
 uint8_t ZMQVideoPipe::quantize(float &real, float &imaginary) {

@@ -77,6 +77,10 @@ SDL_Surface* Surfaceable::AllocateSurface( int w, int h, SDL_PixelFormat& format
 }
 
 SDL_Surface* Surfaceable::AllocateSurface( int w, int h ) {
+    if( (w <= 0 || h <= 0) ) {
+        printf("Dimensions cannot be zero w: %d, h: %d", w, h);
+        assert( false && "Surface dimension check" );
+    }
     return SDL_CreateRGBSurface(0, w, h, 32,
                                 mask_t::r, mask_t::g, mask_t::b, mask_t::a );
 }
