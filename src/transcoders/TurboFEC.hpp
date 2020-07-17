@@ -23,8 +23,12 @@ public:
     static inline int term_size() { return 4; };
     static inline size_t bits ( size_t bytes ) { return bytes * 8 * sizeof(uint8_t); }
     static inline size_t bytes( size_t bits ) { return bits / 8 * sizeof(uint8_t); }
+    //changes from uint8_t bit representation to n bit length rearrange
+    static size_t bitdownquant(uint8_t **dst, uint8_t **src, int bitlen, size_t read_size );
+    static size_t int_count(int bitlen, size_t read_size ) { return read_size / bitlen; };
+    static void bitupquant(uint8_t **dst, uint8_t **src, int bitlen, size_t int_count);
 
-    //nearest surface size from input frame size
+    //nearest surface size in bytes from input rect size
     static inline int conv_size( SDL_Rect* ref ) {
 
         auto scale = bits(1);
@@ -86,6 +90,8 @@ public:
                 .gen = 015
         };
     }
+
+
 };
 
 
@@ -191,6 +197,40 @@ void TurboFEC::frombits( uint8_t *dst, uint8_t *b, int n ) {
     }
 
 }
+
+size_t TurboFEC::bitdownquant(uint8_t **dst, uint8_t **src, int bitlen, size_t read_size) {
+    size_t int_slots = int_count(bitlen, bits(read_size));
+    auto shift = bits(1) - bitlen;
+    for(int q=0; q < 3; ++q ) {
+        for (int i = 0; i < bits(read_size); i += bitlen) {
+            auto block = i / bitlen;
+            auto bi = block * bits(1);
+            for (int b = 0; b < bitlen; b++) {
+                auto bit = src[q][i + b] & 0x01;
+                dst[q][shift + bi + b] = bit;
+            }
+        }
+    }
+    return int_slots;
+}
+
+void TurboFEC::bitupquant(uint8_t **dst, uint8_t **src, int bitlen, size_t int_count) {
+    size_t write_size = int_count * bitlen;
+    auto shift = bits(1) - bitlen;
+
+    for(int q=0; q < 3; ++q ) {
+        for(int i=0; i < write_size; i+=bitlen ) {
+            auto block = i / bitlen;
+            auto bi = block * 8;
+            for (int b = 0; b < bitlen; b++) {
+                auto bit = src[q][shift + bi + b] & 0x01;
+                dst[q][i + b] = bit;
+            }
+        }
+    }
+
+}
+
 
 
 #endif //SDL_CRT_FILTER_TURBOFEC_HPP
