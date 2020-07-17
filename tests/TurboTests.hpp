@@ -371,7 +371,7 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
 
         //start of recovery from dumped images
         SDL_Surface* buff_faces[3] = {
-                SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_pix_channel_buff0.bmp"),
+                SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_pix_channel_arbuff0.bmp"),
                                           SDL_PIXELFORMAT_RGBA32 , 0 ),
                 SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_pix_channel_buff1.bmp"),
                                           SDL_PIXELFORMAT_RGBA32 , 0 ),
@@ -387,9 +387,9 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         dump_partition(lbuff[1]);
         dump_partition(lbuff[2]);
 
-        uint8_t* rbuff_min = std::min_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
-        uint8_t* rbuff_max = std::max_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
-        SDL_Log( "recovered buff min / max: %d/%d ", *rbuff_min, *rbuff_max );
+        //uint8_t* rbuff_min = std::min_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
+        //uint8_t* rbuff_max = std::max_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
+        //SDL_Log( "recovered buff min / max: %d/%d ", *rbuff_min, *rbuff_max );
 
         auto recover_rect = TurboFEC::conv_rect( surface );
         auto recover = Surfaceable::AllocateSurface( recover_rect.w, recover_rect.h );
@@ -397,10 +397,10 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         dump( lbuff[1], recover, "turbo_pix_channel_rbuff1.bmp" );
         dump( lbuff[2], recover, "turbo_pix_channel_rbuff2.bmp" );
 
-        TurboFEC::encode( buff, surface );
-        uint8_t* buff_min = std::min_element(buff[0], buff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
-        uint8_t* buff_max = std::max_element(buff[0], buff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
-        SDL_Log( "buff min / max: %d/%d ", *buff_min, *buff_max );
+        //TurboFEC::encode( buff, surface );
+        //uint8_t* buff_min = std::min_element(buff[0], buff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
+        //uint8_t* buff_max = std::max_element(buff[0], buff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
+        //SDL_Log( "buff min / max: %d/%d ", *buff_min, *buff_max );
 
         //REQUIRE ( memcmp ( buff[0], lbuff[0], TurboFEC::conv_size_bits( buff_faces[0] ) ) == 0 );
         //REQUIRE ( memcmp ( buff[1], lbuff[1], TurboFEC::conv_size_bits( buff_faces[1] ) ) == 0 );
