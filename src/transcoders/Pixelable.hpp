@@ -248,16 +248,30 @@ public:
         return fm;
     }
 
-    static inline uint8_t float_to_uint8( double real ) {
+    // -1.0 to 1.0 range
+    static inline uint8_t double_to_uint8( double real ) {
         if ( real >= 1 )  return 0xFF;
         if ( real <= -1 ) return 0;
         double shift = (real + 1) / 2;
         return shift * 0x100;
     }
 
-    static inline double uint8_to_float( uint8_t quant ) {
+    // -1.0 to 1.0 range
+    static inline double uint8_to_double( uint8_t quant ) {
         double dequant = (double) quant / 0xFF;
         return (dequant * 2) - 1;
+    }
+
+    // 0.0 to 1.1 range
+    static inline uint8_t float_to_uint8( float real ) {
+        if ( real >= 1 )  return 0xFF;
+        if ( real <= 0 ) return 0;
+        return real * 0x100;
+    }
+
+    // 0.0 to 1.0 range
+    static inline float uint8_to_float( uint8_t quant ) {
+        return (float) quant / 0xFF;
     }
 
     static uint8_t* AsLumaChannelMatrix ( SDL_Surface* ref ) {
@@ -267,7 +281,7 @@ public:
         size_t pos = 0;
         for( int y = 0; y < ref->h; ++y )
             for( int x = 0; x < ref->w; ++x ) {
-                cm[pos] = float_to_uint8( fm[pos] );
+                cm[pos] = float_to_uint8(fm[pos]);
                 pos++;
             }
 
@@ -279,7 +293,7 @@ public:
         size_t pos = 0;
         for( int y = 0; y < ref->h; ++y )
             for( int x = 0; x < ref->w; ++x ) {
-                put32( ref, x, y, direct_from_luma( uint8_to_float( cm[pos] )) );
+                put32( ref, x, y, direct_from_luma(uint8_to_float(cm[pos])) );
                 pos++;
             }
 

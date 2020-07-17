@@ -159,6 +159,7 @@ void TurboFEC::decode( SDL_Surface *dst, uint8_t **buff ) {
     delete [] out_bits;
 }
 
+//n bits to uint8_t array b[0] = 0xFF as, dst[0] = 1, dst[1] = 1, dst[2] = 1 and so on, up to n
 void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
     int m = sizeof(uint8_t) * 8;
     uint8_t r = b[0];
@@ -174,6 +175,7 @@ void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
 
 }
 
+//
 void TurboFEC::frombits( uint8_t *dst, uint8_t *b, int n ) {
     int m = sizeof(uint8_t) * 8;
     uint8_t r = 0;
