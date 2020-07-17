@@ -224,40 +224,44 @@ public:
         DrawLine( dst, x3, y3, x0, y0, color );
     }
 
+    static size_t pixels( SDL_Surface* ref ) { return ref->w * ref->h; }
+
     static Uint8* AllocateChannelMatrix ( SDL_Surface* ref ) {
-        size_t buflen = ref->w * ref->h;
+        size_t buflen = pixels( ref );
         return (uint8_t *) malloc(sizeof(uint8_t) * buflen);
     }
 
-    static float* AllocateFloatMatrix ( SDL_Surface* ref ) {
-        size_t buflen = ref->w * ref->h;
-        return new float[buflen];
+    static double* AllocateFloatMatrix ( SDL_Surface* ref ) {
+        size_t buflen = pixels ( ref );
+        return new double[buflen];
     }
 
-    static float* AsLumaFloatMatrix ( SDL_Surface* ref ) {
+    static double* AsLumaFloatMatrix ( SDL_Surface* ref ) {
         auto fm = AllocateFloatMatrix( ref );
         size_t pos = 0;
         for( int y = 0; y < ref->h; ++y )
             for( int x = 0; x < ref->w; ++x ) {
-                fm[pos] = (float) direct_to_luma( get32( ref, x, y ) );
+                fm[pos] = direct_to_luma( get32( ref, x, y ) );
                 pos++;
             }
 
         return fm;
     }
 
-    static inline uint8_t float_to_uint8( float &real ) {
-        auto shift = (real + 1) / 2;
-        return (uint8_t) round(shift * 0xFF);
+    static inline uint8_t float_to_uint8( double real ) {
+        if ( real >= 1 )  return 0xFF;
+        if ( real <= -1 ) return 0;
+        double shift = (real + 1) / 2;
+        return shift * 0x100;
     }
 
-    static inline float uint8_to_float( uint8_t &quant ) {
-        float dequant = (float) quant / 0xFF;
+    static inline double uint8_to_float( uint8_t quant ) {
+        double dequant = (double) quant / 0xFF;
         return (dequant * 2) - 1;
     }
 
     static uint8_t* AsLumaChannelMatrix ( SDL_Surface* ref ) {
-        size_t buflen = ref->w * ref->h;
+        size_t buflen = pixels( ref );
         auto cm = new Uint8[buflen];
         auto fm = AsLumaFloatMatrix( ref );
         size_t pos = 0;
@@ -272,7 +276,6 @@ public:
     }
 
     static void ApplyLumaChannelMatrix ( SDL_Surface* ref, Uint8* cm ) {
-        size_t buflen = ref->w * ref->h;
         size_t pos = 0;
         for( int y = 0; y < ref->h; ++y )
             for( int x = 0; x < ref->w; ++x ) {

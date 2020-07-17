@@ -21,19 +21,21 @@ public:
     static void encode( uint8_t** buff, SDL_Surface* src );
     static void decode( SDL_Surface* src, uint8_t** buff );
     static inline int term_size() { return 4; };
+    static inline size_t bits ( size_t bytes ) { return bytes * 8 * sizeof(uint8_t); }
     static inline size_t bytes( size_t bits ) { return bits / 8 * sizeof(uint8_t); }
 
+    //nearest surface size from input frame size
     static inline int conv_size( SDL_Rect* ref ) {
-        auto scale = sizeof(uint8_t) * 8;
+
+        auto scale = bits(1);
         auto bits = ref->w * ref->h * scale;
         bits += term_size() * bits / LEN;
         auto bit_remainder = bits % scale;
         bits += ( scale - bit_remainder );
-
         assert( bits % scale == 0 && "Incompatible frame size bit expansion" );
+
         auto bytes = bits / scale;
         auto remainder = bytes % ref->w;
-
         int ret_size = (ref->w - remainder) + bytes;
         if ( ret_size % ref->w != 0 ) {
             SDL_Log("Non partitionable in screen lines! %d % %d != 0", ret_size, ref->w);
@@ -42,19 +44,35 @@ public:
         return ret_size;
     }
 
+    //size bytes
     static inline int conv_size( SDL_Surface* ref ) {
         SDL_Rect rect;
         SDL_GetClipRect( ref, &rect );
         return conv_size(&rect);
     }
 
+    //size frame
+    static inline SDL_Rect conv_rect( SDL_Surface* ref ) {
+        SDL_Rect rect;
+        SDL_GetClipRect( ref, &rect );
+        size_t nearest = conv_size(&rect);
+        return {
+            .x=0,
+            .y=0,
+            .w=ref->w,
+            .h= static_cast<int>(nearest / ref->w)
+        };
+    }
+
+    //size bytes
     static inline int conv_size( size_t size, size_t width=Config::SCREEN_WIDTH ) {
         auto height = size / width;
         SDL_Rect rect { .x = 0, .y= 0, .w = static_cast<int>(width), .h = static_cast<int>(height) };
         return conv_size( &rect );
     }
 
-    static inline int conv_size_bits( SDL_Surface * ref ) { return conv_size( ref ) * sizeof(uint8_t) * 8; }
+
+    static inline int conv_size_bits( SDL_Surface * ref ) { return bits ( conv_size( ref ) ); }
     static void tobits( uint8_t *dst, const uint8_t *b, int n );
     static void frombits( uint8_t *dst, uint8_t *b, int n );
 
@@ -87,10 +105,13 @@ uint8_t **TurboFEC::Allocate(int buflen) {
             new uint8_t[buflen],
             new uint8_t[buflen]
     };
-
+    memset( b[0], 0, sizeof( uint8_t ) * buflen );
+    memset( b[1], 0, sizeof( uint8_t ) * buflen );
+    memset( b[2], 0, sizeof( uint8_t ) * buflen );
     return b;
 }
 
+//src surface -> lumachannelmatrix -> tobits -> turbo encoder -> buff[] (??)
 void TurboFEC::encode(uint8_t **buff, SDL_Surface *src) {
 
     auto in = Pixelable::AsLumaChannelMatrix( src );
@@ -109,8 +130,10 @@ void TurboFEC::encode(uint8_t **buff, SDL_Surface *src) {
                 buff[2] + bit_offset );
     }
     delete [] in_bits;
+    delete [] in;
 }
 
+//buff[] -> turbo decode -> frombits -> applylumachannelmatrix -> dst surface
 void TurboFEC::decode( SDL_Surface *dst, uint8_t **buff ) {
     auto out_bits = new uint8_t[ conv_size_bits( dst ) ];
     static const int bit_chunks = conv_size_bits( dst ) / LEN;
