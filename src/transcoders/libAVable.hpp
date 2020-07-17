@@ -921,26 +921,32 @@ void LibAVable::unpack_minizigzag( SDL_Surface *dst, SDL_Surface *src, int step 
 //it stacks various transforms
 void LibAVable::pack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
-    //pack_interlace ( dst, src );
-    //pack_miniraster ( frame, src, step );
-    //unpack_minizigzag ( dst, frame, step );
-    Magickable::verticalize( frame, src );
-    pack_miniraster ( dst, frame, step );
-    //unpack_diagonal_mirror( frame, dst, step );
-    //pack_minizigzag ( dst, frame, step );
+    pack_miniraster ( frame, src, step );
+    deverticalize( dst, frame );
+    unpack_minizigzag ( frame, dst, step );
+    verticalize( dst, frame );
+    pack_spiral ( frame, dst, step );
+    deverticalize( dst, frame );
+    unpack_diagonal( frame, dst, step );
+    verticalize( dst, frame );
+    pack_minizigzag ( frame, dst, step );
+    deverticalize( dst, frame );
     SDL_FreeSurface( frame );
 }
 
 //inverse of te all transforms
 void LibAVable::unpack_all(SDL_Surface *dst, SDL_Surface *src, int step) {
     auto frame = Surfaceable::AllocateSurface( src );
-    //pack_miniraster( frame, src, step );
-    //unpack_minizigzag ( dst, frame, step );
-    //unpack_minizigzag ( dst, src, step );
-    //pack_diagonal_mirror ( frame, dst, step );
-    unpack_miniraster ( frame, src, step );
-    Magickable::deverticalize( dst, frame );
-    //pack_deinterlace( dst, frame );
+    verticalize( frame, src );
+    unpack_minizigzag ( dst, frame, step );
+    deverticalize( frame, dst );
+    pack_diagonal ( dst, frame, step );
+    verticalize( frame, dst );
+    pack_despiral ( dst, frame, step );
+    deverticalize( frame, dst );
+    pack_minizigzag ( dst, frame, step );
+    verticalize( frame, dst );
+    unpack_miniraster( dst, frame, step );
     SDL_FreeSurface( frame );
 }
 

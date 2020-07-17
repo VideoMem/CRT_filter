@@ -17,6 +17,8 @@
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/TurboTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TurboTests.hpp" afterDir="false" />
@@ -118,6 +120,12 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="LibAV tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[LibAV]" TEST_METHOD="LibAV tests" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="SDL2 Magick App + Loader " type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[App][SDL2]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -125,12 +133,6 @@
       </method>
     </configuration>
     <configuration name="SDL2 Magick++ API" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[SDL2][Magick++][App]" TEST_METHOD="SDL2 Magick++ API" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="TurboFEC error test (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC error test" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -188,20 +190,20 @@
       <item itemvalue="Catch.TurboFEC error test" />
       <item itemvalue="Catch.TurboFEC tests (1)" />
       <item itemvalue="Catch.TurboFEC quantization" />
-      <item itemvalue="Catch.TurboFEC error test (1)" />
       <item itemvalue="CMake Application.CRT_FILTERS" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Decoder" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
       <item itemvalue="Catch.TurboFEC tobits, frombits" />
+      <item itemvalue="Catch.LibAV tests" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Catch.TurboFEC tests (1)" />
+        <item itemvalue="Catch.LibAV tests" />
         <item itemvalue="Catch.TurboFEC tobits, frombits" />
         <item itemvalue="Catch.TurboFEC error test" />
         <item itemvalue="Catch.TurboFEC quantization" />
-        <item itemvalue="Catch.TurboFEC error test (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -292,7 +294,7 @@
       <workItem from="1593615689001" duration="17115000" />
       <workItem from="1593786592299" duration="20794000" />
       <workItem from="1594016571709" duration="139771000" />
-      <workItem from="1594961977285" duration="4616000" />
+      <workItem from="1594961977285" duration="14786000" />
     </task>
     <servers />
   </component>

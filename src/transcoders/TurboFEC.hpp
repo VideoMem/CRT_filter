@@ -19,7 +19,7 @@ public:
     static uint8_t** Allocate( SDL_Surface* ref );
     static void free ( uint8_t** b );
     static void encode( uint8_t** buff, SDL_Surface* src );
-    static void decode( SDL_Surface* src, uint8_t** buff );
+    static void decode( SDL_Surface* dst, uint8_t** buff );
     static inline int term_size() { return 4; };
     static inline size_t bits ( size_t bytes ) { return bytes * 8 * sizeof(uint8_t); }
     static inline size_t bytes( size_t bits ) { return bits / 8 * sizeof(uint8_t); }

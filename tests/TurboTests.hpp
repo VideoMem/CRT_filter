@@ -95,14 +95,21 @@ static size_t frame_len( SDL_Surface* output_surface ) {
 }
 
 // len as bytes, cp as bits
-static void dump ( uint8_t* cp, SDL_Surface* output_surface, std::string name ) {
+static void dump ( uint8_t* cp, SDL_Surface* output_surface ) {
     Loader::blank( output_surface );
     auto bytes = frame_len( output_surface );
     auto out = new uint8_t[ bytes ];
     frombits( out, cp, TurboFEC::bits( bytes ) );
     Pixelable::ApplyLumaChannelMatrix( output_surface, out );
-    SDL_SaveBMP( output_surface,  name.c_str() );
     delete[] out;
+}
+
+
+
+// len as bytes, cp as bits
+static void dump ( uint8_t* cp, SDL_Surface* output_surface, std::string name ) {
+    dump ( cp, output_surface );
+    SDL_SaveBMP( output_surface,  name.c_str() );
 }
 
 // len as bytes, cp as bits
@@ -422,6 +429,85 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         SDL_FreeSurface( copy );
         SDL_FreeSurface( recover );
         delete lte_enc;
+    }
+
+
+    SECTION("Encode, then block interleave") {
+        auto surface = SDL_ConvertSurfaceFormat(SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                                SDL_PIXELFORMAT_RGBA32, 0);
+        auto lte_enc = new TurboFEC();
+        auto buff = TurboFEC::Allocate(surface);
+        TurboFEC::encode(buff, surface);
+
+        SDL_Surface *turbo_out[3] = {
+            Surfaceable::AllocateSurface( surface ),
+            Surfaceable::AllocateSurface( surface ),
+            Surfaceable::AllocateSurface( surface )
+        };
+        SDL_Surface *interleaver_out[3] = {
+                Surfaceable::AllocateSurface( surface ),
+                Surfaceable::AllocateSurface( surface ),
+                Surfaceable::AllocateSurface( surface )
+        };
+
+        SDL_Surface *turbo_in[3] = {
+                Surfaceable::AllocateSurface( surface ),
+                Surfaceable::AllocateSurface( surface ),
+                Surfaceable::AllocateSurface( surface )
+        };
+
+
+        dump( buff[0], turbo_out[0] );
+        dump( buff[1], turbo_out[1] );
+        dump( buff[2], turbo_out[2] );
+
+        LibAVable::pack_all_recursive( interleaver_out[0],turbo_out[0], 40 );
+        LibAVable::pack_all_recursive( interleaver_out[1],turbo_out[1], 40 );
+        LibAVable::pack_all_recursive( interleaver_out[2],turbo_out[2], 40 );
+
+        SDL_SaveBMP(interleaver_out[0], "turbo_block_interleave_ch0.bmp");
+        SDL_SaveBMP(interleaver_out[1], "turbo_block_interleave_ch1.bmp");
+        SDL_SaveBMP(interleaver_out[2], "turbo_block_interleave_ch2.bmp");
+
+        SDL_Surface* buff_faces[3] = {
+                SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_block_interleave_ach0.bmp"),
+                                          SDL_PIXELFORMAT_RGBA32 , 0 ),
+                SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_block_interleave_ch1.bmp"),
+                                          SDL_PIXELFORMAT_RGBA32 , 0 ),
+                SDL_ConvertSurfaceFormat( SDL_LoadBMP("turbo_block_interleave_ch2.bmp"),
+                                          SDL_PIXELFORMAT_RGBA32 , 0 )
+        };
+
+        LibAVable::unpack_all_recursive( turbo_in[0],buff_faces[0], 40 );
+        LibAVable::unpack_all_recursive( turbo_in[1],buff_faces[1], 40 );
+        LibAVable::unpack_all_recursive( turbo_in[2],buff_faces[2], 40 );
+
+        undump(buff[0], turbo_in[0] );
+        undump(buff[1], turbo_in[1] );
+        undump(buff[2], turbo_in[2] );
+
+        auto recover = Surfaceable::AllocateSurface( surface );
+        TurboFEC::decode( recover, buff );
+        SDL_SaveBMP(recover, "turbo_block_decoded.bmp");
+
+        TurboFEC::free( buff );
+        delete [] buff;
+        delete lte_enc;
+        SDL_FreeSurface( surface );
+        SDL_FreeSurface( recover );
+        SDL_FreeSurface(buff_faces[0]);
+        SDL_FreeSurface(buff_faces[1]);
+        SDL_FreeSurface(buff_faces[2]);
+        SDL_FreeSurface(turbo_out[0]);
+        SDL_FreeSurface(turbo_out[1]);
+        SDL_FreeSurface(turbo_out[2]);
+        SDL_FreeSurface(interleaver_out[0]);
+        SDL_FreeSurface(interleaver_out[1]);
+        SDL_FreeSurface(interleaver_out[2]);
+        SDL_FreeSurface(turbo_in[0]);
+        SDL_FreeSurface(turbo_in[1]);
+        SDL_FreeSurface(turbo_in[2]);
+
     }
 
 }
