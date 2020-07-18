@@ -5,6 +5,7 @@
 #ifndef SDL_CRT_FILTER_LIBAVTESTS_HPP
 #define SDL_CRT_FILTER_LIBAVTESTS_HPP
 #include <transcoders/libAVable.hpp>
+#include <BaseApp.hpp>
 
 #define INBUF_SIZE 4096
 
@@ -478,6 +479,61 @@ TEST_CASE("LibAV tests","[LibAV]") {
         delete his;
     }
 
+}
+
+static int dummy_module_search( std::string name, void (*funct)(SDL_Surface*, SDL_Surface*, int), SDL_Surface* image ) {
+    LazyLoader loader;
+    BaseApp app(loader);
+    app.Standby();
+    auto frame = Surfaceable::AllocateSurface( image );
+    auto copy = Surfaceable::AllocateSurface( image );
+    auto step = 40;
+    Magickable::blitScaled( copy, image );
+    unsigned long module=1;
+    float min_ratio = 10;
+    char fname[100];
+    while ( !Loader::CompareSurface( image, frame ) ) {
+        funct( frame, copy, step );
+        Magickable::blitScaled( copy, frame );
+        auto ratio = LibAVable::compressibility( frame );
+
+        if ( ratio <= min_ratio ) {
+            SDL_Log("Found good compression at iteration %lu: Last ratio: %02f, new: %02f", module, min_ratio, ratio );
+            min_ratio = ratio;
+            app.publish(frame);
+            std::sprintf( fname , "libav_test-%s-%lu", name.c_str(), module);
+            SDL_SaveBMP(frame, fname);
+        } else if( module % 100 == 0 ) {
+            SDL_Log( "%s, iteration %d", name.c_str(), module );
+            app.publish(frame);
+        }
+
+        module++;
+    }
+
+    SDL_FreeSurface(frame);
+    SDL_FreeSurface(copy);
+    return module;
+}
+
+TEST_CASE("LibAV, uneducated way of observe a function's repetition module","[LibAV]") {
+
+    auto image = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                           SDL_PIXELFORMAT_RGBA32 , 0 );
+
+    SDL_Log("Observing miniraster() repetition module");
+    auto module = dummy_module_search( "miniraster", &LibAVable::pack_miniraster, image);
+    SDL_Log("Found function module!: %d", module );
+    SDL_Log("Observing minizigzag() repetition module");
+    module = dummy_module_search( "minizigzag", &LibAVable::pack_minizigzag, image);
+    SDL_Log("Found function module!: %d", module );
+
+    SDL_Log("Observing pack_all_recursive repetition module");
+    module = dummy_module_search( "pack_all_recursive", &LibAVable::pack_all_recursive, image);
+    SDL_Log("Found function module!: %d", module );
+
+
+    SDL_FreeSurface(image);
 }
 
 #endif //SDL_CRT_FILTER_LIBAVTESTS_HPP

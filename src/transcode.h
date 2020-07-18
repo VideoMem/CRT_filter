@@ -153,6 +153,8 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
     SDL_FreeSurface( recovered_surface );
     SDL_FreeSurface( frame );
     SDL_FreeSurface( full_spiral );
+    SDL_FreeSurface( aux_surface );
+
     //delete state;
     LibAVable::hs_free(hc);
     LibAVable::hs_free(hs);

@@ -156,6 +156,7 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
     SDL_FreeSurface(full);
     SDL_FreeSurface(frame_spiral);
     SDL_FreeSurface(frame);
+    SDL_FreeSurface(aux_surface);
     SDL_Log("Frame receive thread done!");
     SDL_Log("Resending video frames");
     resend_stream("h264", filename, zPipe, app);

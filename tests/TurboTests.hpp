@@ -545,8 +545,6 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
 
     }
 
-
-
     SECTION("Encode, then requantize, then block interleave") {
         auto surface = SDL_ConvertSurfaceFormat(SDL_LoadBMP("resources/images/testCardRGB.bmp"),
                                                 SDL_PIXELFORMAT_RGBA32, 0);
@@ -637,15 +635,7 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         SDL_FreeSurface(turbo_in[2]);
 
     }
-
-
-
-
-
-
-
-
-
+    
 }
 
 #endif //SDL_CRT_FILTER_TURBOTESTS_HPP
