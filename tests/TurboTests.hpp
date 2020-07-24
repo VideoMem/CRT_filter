@@ -35,7 +35,6 @@ struct lte_test_vector {
 };
 
 static void fill_random(uint8_t *b, int n) {
-
     int i, r, m, c;
 
     c = 0;
@@ -163,13 +162,13 @@ static int error_test( const struct lte_test_vector *test,
 
     auto bu = TurboFEC::Allocate( input_surface ); // <-- each uint8_t represents a bit not a byte!!
     auto bs = TurboFEC::Allocate( input_surface ); // there is four bit terminator for each channel
-    bs0 = (int8_t*) bs[0];
-    bs1 = (int8_t*) bs[1];
-    bs2 = (int8_t*) bs[2];
+    bs0 = (int8_t*) bs.turbo[0];
+    bs1 = (int8_t*) bs.turbo[1];
+    bs2 = (int8_t*) bs.turbo[2];
 
     for (i = 0; i < num_pkts; i++) {
         //fill_random(in, test->in_len);
-        l = lte_turbo_encode(test->code, in_bits, bu[0], bu[1], bu[2]);
+        l = lte_turbo_encode(test->code, in_bits, bu.turbo[0], bu.turbo[1], bu.turbo[2]);
         if (l != test->out_len) {
             printf("ERROR !\n");
             fprintf(stderr, "[!] Failed encoding length check (%i)\n",
@@ -177,42 +176,42 @@ static int error_test( const struct lte_test_vector *test,
             return -1;
         }
 
-        iber += uint8_to_err(bs0, bu[0], test->in_len + 4, snr);
-        iber += uint8_to_err(bs1, bu[1], test->in_len + 4, snr);
-        iber += uint8_to_err(bs2, bu[2], test->in_len + 4, snr);
+        iber += uint8_to_err(bs0, bu.turbo[0], test->in_len + 4, snr);
+        iber += uint8_to_err(bs1, bu.turbo[1], test->in_len + 4, snr);
+        iber += uint8_to_err(bs2, bu.turbo[2], test->in_len + 4, snr);
 
-        lte_turbo_decode_unpack(tdec, test->in_len, iter, bu[0], bs0, bs1, bs2);
+        lte_turbo_decode_unpack(tdec, test->in_len, iter, bu.turbo[0], bs0, bs1, bs2);
 
         for (n = 0; n < test->in_len; n++) {
-            if (in_bits[n] != bu[0][n])
+            if (in_bits[n] != bu.turbo[0][n])
                 ober++;
         }
 
-        if (memcmp(in_bits, bu[0], test->in_len))
+        if (memcmp(in_bits, bu.turbo[0], test->in_len))
             fer++;
 
     }
 
 
-    dump( bu[0], output_surface, "turbo_error_test_out.bmp" );
+    dump( bu.turbo[0], output_surface, "turbo_error_test_out.bmp" );
 
-    dump( bs[0], output_surface, "turbo_error_test_bs0.bmp" );
-    dump( bs[1], output_surface, "turbo_error_test_bs1.bmp" );
-    dump( bs[2], output_surface, "turbo_error_test_bs2.bmp" );
+    dump( bs.turbo[0], output_surface, "turbo_error_test_bs0.bmp" );
+    dump( bs.turbo[1], output_surface, "turbo_error_test_bs1.bmp" );
+    dump( bs.turbo[2], output_surface, "turbo_error_test_bs2.bmp" );
 
-    dump( bu[0], output_surface, "turbo_error_test_bu0.bmp" );
-    dump( bu[1], output_surface, "turbo_error_test_bu1.bmp" );
-    dump( bu[2], output_surface, "turbo_error_test_bu2.bmp" );
+    dump( bu.turbo[0], output_surface, "turbo_error_test_bu0.bmp" );
+    dump( bu.turbo[1], output_surface, "turbo_error_test_bu1.bmp" );
+    dump( bu.turbo[2], output_surface, "turbo_error_test_bu2.bmp" );
 
     print_error_results(test, iber, ober, fer, num_pkts);
 
     delete [] in_bits;
     delete [] in;
 
-    TurboFEC::free( bu );
-    TurboFEC::free( bs );
-    delete[] bu;
-    delete[] bs;
+    TurboFEC::free( bu.turbo );
+    TurboFEC::free( bs.turbo );
+    delete[] bu.turbo;
+    delete[] bs.turbo;
 
     SDL_FreeSurface( input_surface );
     SDL_FreeSurface( output_surface );
@@ -297,25 +296,25 @@ TEST_CASE("TurboFEC bitdownquant, bitupquant","[TurboFEC]") {
 
     auto buff = TurboFEC::Allocate( testcard );
     auto buff_r = TurboFEC::Allocate( testcard );
-    TurboFEC::encode( buff, testcard );
-    auto new_size = TurboFEC::bitdownquant( uint6, buff, bitlen, input_size );
-    TurboFEC::bitupquant( buff_r, uint6, bitlen, new_size );
+    TurboFEC::encode( buff.turbo, testcard );
+    auto new_size = TurboFEC::bitdownquant( uint6, buff.turbo, bitlen, input_size );
+    TurboFEC::bitupquant( buff_r.turbo, uint6, bitlen, new_size );
     dump_partition( uint6[0] );
-    dump_partition( buff[0] );
-    dump_partition( buff_r[0] );
+    dump_partition( buff.turbo[0] );
+    dump_partition( buff_r.turbo[0] );
     auto repack_bitlen = Surfaceable::AllocateSurface( testcard );
     dump( uint6[0], repack_bitlen, "turbo_bdwq_bitlen.bmp" );
-    REQUIRE( memcmp( buff[0], buff_r[0], TurboFEC::bits(input_size) ) == 0);
-    REQUIRE( memcmp( buff[1], buff_r[1], TurboFEC::bits(input_size) ) == 0);
-    REQUIRE( memcmp( buff[2], buff_r[2], TurboFEC::bits(input_size) ) == 0);
+    REQUIRE( memcmp( buff.turbo[0], buff_r.turbo[0], buff.size ) == 0);
+    REQUIRE( memcmp( buff.turbo[1], buff_r.turbo[1], buff.size ) == 0);
+    REQUIRE( memcmp( buff.turbo[2], buff_r.turbo[2], buff.size ) == 0);
 
     SDL_Log( "bitupquant/dwquant read_size: %d, new_quant_size: %lu", input_size / 8, new_size/8 );
 
-    TurboFEC::free(buff);
-    TurboFEC::free(buff_r);
+    TurboFEC::free(buff.turbo);
+    TurboFEC::free(buff_r.turbo);
     TurboFEC::free(uint6);
-    delete [] buff;
-    delete [] buff_r;
+    delete [] buff.turbo;
+    delete [] buff_r.turbo;
     delete [] uint6;
     SDL_FreeSurface( testcard );
     SDL_FreeSurface( repack_bitlen );
@@ -379,24 +378,24 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
                                                 SDL_PIXELFORMAT_RGBA32, 0);
         auto lte_enc = new TurboFEC();
         auto buff = TurboFEC::Allocate(surface);
-        TurboFEC::encode(buff, surface);
-        dump_partition(buff[0]);
-        dump_partition(buff[1]);
-        dump_partition(buff[2]);
+        TurboFEC::encode(buff.turbo, surface);
+        dump_partition(buff.turbo[0]);
+        dump_partition(buff.turbo[1]);
+        dump_partition(buff.turbo[2]);
         auto dst_rect = TurboFEC::conv_rect(surface);
         auto dst_copy = Surfaceable::AllocateSurface(dst_rect.w, dst_rect.h);
         auto copy = Surfaceable::AllocateSurface(surface);
 
-        dump(buff[0], dst_copy, "turbo_pix_channel_buff0.bmp");
-        dump(buff[1], dst_copy, "turbo_pix_channel_buff1.bmp");
-        dump(buff[2], dst_copy, "turbo_pix_channel_buff2.bmp");
+        dump(buff.turbo[0], dst_copy, "turbo_pix_channel_buff0.bmp");
+        dump(buff.turbo[1], dst_copy, "turbo_pix_channel_buff1.bmp");
+        dump(buff.turbo[2], dst_copy, "turbo_pix_channel_buff2.bmp");
 
         SDL_FreeSurface(dst_copy);
-        TurboFEC::decode(copy, buff);
+        TurboFEC::decode(copy, buff.turbo);
         SDL_SaveBMP(copy, "turbo_pix_channel_decoded.bmp");
 
-        TurboFEC::free(buff);
-        delete [] buff;
+        TurboFEC::free(buff.turbo);
+        delete [] buff.turbo;
         SDL_FreeSurface(copy);
         SDL_FreeSurface(surface);
         delete lte_enc;
@@ -421,13 +420,13 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
                                           SDL_PIXELFORMAT_RGBA32 , 0 )
         };
 
-        undump( lbuff[0], buff_faces[0] );
-        undump( lbuff[1], buff_faces[1] );
-        undump( lbuff[2], buff_faces[2] );
+        undump( lbuff.turbo[0], buff_faces[0] );
+        undump( lbuff.turbo[1], buff_faces[1] );
+        undump( lbuff.turbo[2], buff_faces[2] );
 
-        dump_partition(lbuff[0]);
-        dump_partition(lbuff[1]);
-        dump_partition(lbuff[2]);
+        dump_partition(lbuff.turbo[0]);
+        dump_partition(lbuff.turbo[1]);
+        dump_partition(lbuff.turbo[2]);
 
         //uint8_t* rbuff_min = std::min_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
         //uint8_t* rbuff_max = std::max_element(lbuff[0], lbuff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
@@ -435,9 +434,9 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
 
         auto recover_rect = TurboFEC::conv_rect( surface );
         auto recover = Surfaceable::AllocateSurface( recover_rect.w, recover_rect.h );
-        dump( lbuff[0], recover, "turbo_pix_channel_rbuff0.bmp" );
-        dump( lbuff[1], recover, "turbo_pix_channel_rbuff1.bmp" );
-        dump( lbuff[2], recover, "turbo_pix_channel_rbuff2.bmp" );
+        dump( lbuff.turbo[0], recover, "turbo_pix_channel_rbuff0.bmp" );
+        dump( lbuff.turbo[1], recover, "turbo_pix_channel_rbuff1.bmp" );
+        dump( lbuff.turbo[2], recover, "turbo_pix_channel_rbuff2.bmp" );
 
         //TurboFEC::encode( buff, surface );
         //uint8_t* buff_min = std::min_element(buff[0], buff[0] + TurboFEC::conv_size_bits( buff_faces[0] ) );
@@ -448,14 +447,14 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         //REQUIRE ( memcmp ( buff[1], lbuff[1], TurboFEC::conv_size_bits( buff_faces[1] ) ) == 0 );
         //REQUIRE ( memcmp ( buff[2], lbuff[2], TurboFEC::conv_size_bits( buff_faces[2] ) ) == 0 );
 
-        TurboFEC::decode( copy, lbuff );
+        TurboFEC::decode( copy, lbuff.turbo );
         SDL_SaveBMP( copy, "turbo_pix_channel_decoded_from_images.bmp");
 
-        TurboFEC::free( buff );
-        delete [] buff;
+        TurboFEC::free( buff.turbo );
+        delete [] buff.turbo;
 
         //TurboFEC::free( bit_buff );
-        TurboFEC::free( lbuff );
+        TurboFEC::free( lbuff.turbo );
         //delete [] bit_buff;
         SDL_FreeSurface( buff_faces[0] );
         SDL_FreeSurface( buff_faces[1] );
@@ -472,7 +471,7 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
                                                 SDL_PIXELFORMAT_RGBA32, 0);
         auto lte_enc = new TurboFEC();
         auto buff = TurboFEC::Allocate(surface);
-        TurboFEC::encode(buff, surface);
+        TurboFEC::encode(buff.turbo, surface);
 
         SDL_Surface *turbo_out[3] = {
             Surfaceable::AllocateSurface( surface ),
@@ -492,9 +491,9 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         };
 
 
-        dump( buff[0], turbo_out[0] );
-        dump( buff[1], turbo_out[1] );
-        dump( buff[2], turbo_out[2] );
+        dump( buff.turbo[0], turbo_out[0] );
+        dump( buff.turbo[1], turbo_out[1] );
+        dump( buff.turbo[2], turbo_out[2] );
 
         LibAVable::pack_all_recursive( interleaver_out[0],turbo_out[0], 40 );
         LibAVable::pack_all_recursive( interleaver_out[1],turbo_out[1], 40 );
@@ -517,16 +516,16 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         LibAVable::unpack_all_recursive( turbo_in[1],buff_faces[1], 40 );
         LibAVable::unpack_all_recursive( turbo_in[2],buff_faces[2], 40 );
 
-        undump(buff[0], turbo_in[0] );
-        undump(buff[1], turbo_in[1] );
-        undump(buff[2], turbo_in[2] );
+        undump(buff.turbo[0], turbo_in[0] );
+        undump(buff.turbo[1], turbo_in[1] );
+        undump(buff.turbo[2], turbo_in[2] );
 
         auto recover = Surfaceable::AllocateSurface( surface );
-        TurboFEC::decode( recover, buff );
+        TurboFEC::decode( recover, buff.turbo );
         SDL_SaveBMP(recover, "turbo_block_decoded.bmp");
 
-        TurboFEC::free( buff );
-        delete [] buff;
+        TurboFEC::free( buff.turbo );
+        delete [] buff.turbo;
         delete lte_enc;
         SDL_FreeSurface( surface );
         SDL_FreeSurface( recover );
@@ -556,7 +555,7 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         auto uint6_r = TurboFEC::Allocate(ints_size);
         auto buff = TurboFEC::Allocate(surface);
 
-        TurboFEC::encode(buff, surface);
+        TurboFEC::encode(buff.turbo, surface);
 
         SDL_Surface *turbo_out[3] = {
                 Surfaceable::AllocateSurface( surface ),
@@ -576,7 +575,7 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
                 Surfaceable::AllocateSurface( surface )
         };
 
-        auto new_size = TurboFEC::bitdownquant( uint6, buff, bitlen, input_size );
+        auto new_size = TurboFEC::bitdownquant( uint6, buff.turbo, bitlen, input_size );
 
         dump( uint6[0], turbo_out[0] );
         dump( uint6[1], turbo_out[1] );
@@ -609,15 +608,15 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
         undump(uint6_r[1], turbo_in[1] );
         undump(uint6_r[2], turbo_in[2] );
 
-        TurboFEC::bitupquant( buff, uint6_r, bitlen, TurboFEC::conv_size( surface ) );
+        TurboFEC::bitupquant( buff.turbo, uint6_r, bitlen, TurboFEC::conv_size( surface ) );
 
         auto recover = Surfaceable::AllocateSurface( surface );
-        TurboFEC::decode( recover, buff );
+        TurboFEC::decode( recover, buff.turbo );
         SDL_SaveBMP(recover, "turbo_block_requant_decoded.bmp");
 
         //TurboFEC::free( uint6 );
-        TurboFEC::free( buff );
-        delete [] buff;
+        TurboFEC::free( buff.turbo );
+        delete [] buff.turbo;
         delete [] uint6;
         SDL_FreeSurface( surface );
         SDL_FreeSurface( recover );
@@ -636,6 +635,23 @@ TEST_CASE("TurboFEC tests","[TurboFEC]") {
 
     }
     
+}
+
+
+TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
+
+    SECTION("Test MTU") {
+        auto surface = SDL_ConvertSurfaceFormat(SDL_LoadBMP("resources/images/testCardRGB.bmp"),
+                                                SDL_PIXELFORMAT_RGBA32, 0);
+
+        auto size = TurboFEC::bits( Pixelable::pixels( surface ) );
+        auto mtu = TurboFEC::mtu( size );
+        SDL_Log( "MTU size %lu bits, padding %lu bits :: size %zu bytes, padding %zu bytes", mtu, size - mtu, TurboFEC::bytes(mtu), TurboFEC::bytes( size - mtu ) );
+        auto b = TurboFEC::AllocateC( mtu );
+
+        SDL_FreeSurface( surface );
+    }
+
 }
 
 #endif //SDL_CRT_FILTER_TURBOTESTS_HPP

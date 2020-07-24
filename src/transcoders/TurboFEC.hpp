@@ -10,13 +10,20 @@ extern "C" {
 }
 
 /* Maximum LTE code block size of 6144 */
-#define LEN		TURBO_MAX_K
-#define DEFAULT_ITER		4
+#define LEN		        TURBO_MAX_K
+#define DEFAULT_ITER    4
+
+struct TurboFEC_bitbuff_t {
+    uint8_t ** turbo;
+    size_t size;
+};
+
 
 class TurboFEC {
 public:
+    static TurboFEC_bitbuff_t& AllocateC( size_t buflen );
     static uint8_t** Allocate( int buflen );
-    static uint8_t** Allocate( SDL_Surface* ref );
+    static TurboFEC_bitbuff_t & Allocate( SDL_Surface* ref );
     static void free ( uint8_t** b );
     static void encode( uint8_t** buff, SDL_Surface* src );
     static void decode( SDL_Surface* dst, uint8_t** buff );
@@ -25,60 +32,30 @@ public:
     static inline size_t bytes( size_t bits ) { return bits / 8 * sizeof(uint8_t); }
     //changes from uint8_t bit representation to n bit length rearrange
     static size_t bitdownquant(uint8_t **dst, uint8_t **src, int bitlen, size_t read_size );
-    static size_t int_count(int bitlen, size_t read_size ) { return read_size / bitlen; };
     static void bitupquant(uint8_t **dst, uint8_t **src, int bitlen, size_t int_count);
+    static size_t int_count(int bitlen, size_t read_size ) { return read_size / bitlen; };
 
     //nearest surface size in bytes from input rect size
-    static inline int conv_size( SDL_Rect* ref ) {
-
-        auto scale = bits(1);
-        auto bits = ref->w * ref->h * scale;
-        bits += term_size() * bits / LEN;
-        auto bit_remainder = bits % scale;
-        bits += ( scale - bit_remainder );
-        assert( bits % scale == 0 && "Incompatible frame size bit expansion" );
-
-        auto bytes = bits / scale;
-        auto remainder = bytes % ref->w;
-        int ret_size = (ref->w - remainder) + bytes;
-        if ( ret_size % ref->w != 0 ) {
-            SDL_Log("Non partitionable in screen lines! %d % %d != 0", ret_size, ref->w);
-            assert(false);
-        }
-        return ret_size;
-    }
-
+    static inline int conv_size( SDL_Rect* ref );
     //size bytes
-    static inline int conv_size( SDL_Surface* ref ) {
-        SDL_Rect rect;
-        SDL_GetClipRect( ref, &rect );
-        return conv_size(&rect);
-    }
-
+    static inline int conv_size( SDL_Surface* ref );
     //size frame
-    static inline SDL_Rect conv_rect( SDL_Surface* ref ) {
-        SDL_Rect rect;
-        SDL_GetClipRect( ref, &rect );
-        size_t nearest = conv_size(&rect);
-        return {
-            .x=0,
-            .y=0,
-            .w=ref->w,
-            .h= static_cast<int>(nearest / ref->w)
-        };
-    }
-
+    static inline SDL_Rect conv_rect( SDL_Surface* ref );
     //size bytes
-    static inline int conv_size( size_t size, size_t width=Config::SCREEN_WIDTH ) {
-        auto height = size / width;
-        SDL_Rect rect { .x = 0, .y= 0, .w = static_cast<int>(width), .h = static_cast<int>(height) };
-        return conv_size( &rect );
-    }
-
+    static inline int conv_size( size_t size, size_t width=Config::NKERNEL_WIDTH );
 
     static inline int conv_size_bits( SDL_Surface * ref ) { return bits ( conv_size( ref ) ); }
     static void tobits( uint8_t *dst, const uint8_t *b, int n );
     static void frombits( uint8_t *dst, uint8_t *b, int n );
+
+    //maximum transfer unit in bits for a given size in ref bits
+    static size_t mtu( size_t ref ) {
+        int packets = (int)ref / LEN;
+        int padding = packets * 3 * term_size();
+        size_t size = (LEN * packets) - padding;
+        assert( size % 8 == 0 && "8 bits multiplier check failed" );
+        return size;
+    }
 
 public:
     static const struct lte_turbo_code lte_turbo() {
@@ -95,8 +72,8 @@ public:
 };
 
 
-uint8_t** TurboFEC::Allocate(SDL_Surface *ref) {
-    return Allocate ( conv_size_bits(ref) );
+TurboFEC_bitbuff_t & TurboFEC::Allocate(SDL_Surface *ref ) {
+    return AllocateC( conv_size_bits(ref) );
 }
 
 void TurboFEC::free( uint8_t** b ) {
@@ -115,6 +92,14 @@ uint8_t **TurboFEC::Allocate(int buflen) {
     memset( b[1], 0, sizeof( uint8_t ) * buflen );
     memset( b[2], 0, sizeof( uint8_t ) * buflen );
     return b;
+}
+
+TurboFEC_bitbuff_t& TurboFEC::AllocateC( size_t buflen ) {
+    auto bitbuff = new TurboFEC_bitbuff_t {
+        Allocate( buflen ),
+        buflen
+    };
+    return *bitbuff;
 }
 
 //src surface -> lumachannelmatrix -> tobits -> turbo encoder -> buff[] (??)
@@ -165,7 +150,9 @@ void TurboFEC::decode( SDL_Surface *dst, uint8_t **buff ) {
     delete [] out_bits;
 }
 
-//n bits to uint8_t array b[0] = 0xFF as, dst[0] = 1, dst[1] = 1, dst[2] = 1 and so on, up to n
+// Convert n bits to uint8_t array
+// b[0] = 0xFF as, dst[0] = 1, dst[1] = 1, dst[2] = 1, etc ..
+// up to n (usually 8)
 void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
     int m = sizeof(uint8_t) * 8;
     uint8_t r = b[0];
@@ -181,7 +168,7 @@ void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
 
 }
 
-//
+//same as above but in reverse
 void TurboFEC::frombits( uint8_t *dst, uint8_t *b, int n ) {
     int m = sizeof(uint8_t) * 8;
     uint8_t r = 0;
@@ -198,6 +185,9 @@ void TurboFEC::frombits( uint8_t *dst, uint8_t *b, int n ) {
 
 }
 
+// From src array to dst array (read_size) elements.
+// Quantize each to unsigned bitlen integer, then store it on
+// dst as uint8_t
 size_t TurboFEC::bitdownquant(uint8_t **dst, uint8_t **src, int bitlen, size_t read_size) {
     size_t int_slots = int_count(bitlen, bits(read_size));
     auto shift = bits(1) - bitlen;
@@ -214,6 +204,7 @@ size_t TurboFEC::bitdownquant(uint8_t **dst, uint8_t **src, int bitlen, size_t r
     return int_slots;
 }
 
+//same as above, but in reverse
 void TurboFEC::bitupquant(uint8_t **dst, uint8_t **src, int bitlen, size_t int_count) {
     size_t write_size = int_count * bitlen;
     auto shift = bits(1) - bitlen;
@@ -231,6 +222,50 @@ void TurboFEC::bitupquant(uint8_t **dst, uint8_t **src, int bitlen, size_t int_c
 
 }
 
+//It rounds up a byte size to the nearest byte size surface as big as supplied in ref
+int TurboFEC::conv_size(SDL_Rect *ref) {
+
+    auto scale = bits(1);
+    auto bits = ref->w * ref->h * scale;
+    bits += term_size() * bits / LEN;
+    auto bit_remainder = bits % scale;
+    bits += ( scale - bit_remainder );
+    assert( bits % scale == 0 && "Incompatible frame size bit expansion" );
+
+    auto bytes = bits / scale;
+    auto remainder = bytes % ref->w;
+    int ret_size = (ref->w - remainder) + bytes;
+    if ( ret_size % ref->w != 0 ) {
+        SDL_Log("Non partitionable in screen lines! %d % %d != 0", ret_size, ref->w);
+        assert(false);
+    }
+    return ret_size;
+
+}
+
+int TurboFEC::conv_size(SDL_Surface *ref) {
+    SDL_Rect rect;
+    SDL_GetClipRect( ref, &rect );
+    return conv_size( &rect );
+}
+
+SDL_Rect TurboFEC::conv_rect(SDL_Surface *ref) {
+    SDL_Rect rect;
+    SDL_GetClipRect( ref, &rect );
+    size_t nearest = conv_size( &rect );
+    return {
+            .x=0,
+            .y=0,
+            .w=ref->w,
+            .h= static_cast<int>(nearest / ref->w)
+    };
+}
+
+int TurboFEC::conv_size(size_t size, size_t width) {
+    auto height = size / width;
+    SDL_Rect rect { .x = 0, .y= 0, .w = static_cast<int>(width), .h = static_cast<int>(height) };
+    return conv_size( &rect );
+}
 
 
 #endif //SDL_CRT_FILTER_TURBOFEC_HPP

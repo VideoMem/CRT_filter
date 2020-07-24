@@ -481,7 +481,21 @@ TEST_CASE("LibAV tests","[LibAV]") {
 
 }
 
-static int dummy_module_search( std::string name, void (*funct)(SDL_Surface*, SDL_Surface*, int), SDL_Surface* image ) {
+struct observation_t {
+    unsigned long module;
+    float comp_factor;
+    std::string sha256;
+};
+
+static bool obs_exists ( std::list<observation_t> &observations, std::string& sha ) {
+    auto match = std::find_if(observations.cbegin(), observations.cend(), [&sha] (const observation_t& s) {
+        return s.sha256 == sha;
+    });
+    return match->sha256 == sha;
+}
+
+
+static void dummy_module_search(std::list<observation_t> &observations, std::string name, void (*funct)(SDL_Surface*, SDL_Surface*, int), SDL_Surface* image ) {
     LazyLoader loader;
     BaseApp app(loader);
     app.Standby();
@@ -490,47 +504,162 @@ static int dummy_module_search( std::string name, void (*funct)(SDL_Surface*, SD
     auto step = 40;
     Magickable::blitScaled( copy, image );
     unsigned long module=1;
-    float min_ratio = 10;
+    float min_ratio = 1, max_ratio=0;
     char fname[100];
-    while ( !Loader::CompareSurface( image, frame ) ) {
+    bool abort = false;
+    while ( !Loader::CompareSurface( image, frame ) && !abort ) {
         funct( frame, copy, step );
         Magickable::blitScaled( copy, frame );
         auto ratio = LibAVable::compressibility( frame );
 
+        if ( max_ratio < ratio ) max_ratio = ratio;
         if ( ratio <= min_ratio ) {
-            SDL_Log("Found good compression at iteration %lu: Last ratio: %02f, new: %02f", module, min_ratio, ratio );
+            SDL_Log("Found good compression at iteration %lu: Last ratio: %02f -> new: %02f", module, min_ratio, ratio );
             min_ratio = ratio;
             app.publish(frame);
             std::sprintf( fname , "libav_test-%s-%lu", name.c_str(), module);
             SDL_SaveBMP(frame, fname);
         } else if( module % 100 == 0 ) {
-            SDL_Log( "%s, iteration %d", name.c_str(), module );
+            SDL_Log( "%s, iteration %d, current_ratio: %02f (%02f min ~ %02f max)", name.c_str(), module, ratio, min_ratio, max_ratio );
             app.publish(frame);
         }
-
+        auto sha256 = Loader::sha256Log((uint8_t*) frame->pixels, Pixelable::pixels( frame ) );
+        observation_t reg = {
+            module,
+            ratio,
+            sha256
+        };
+        if (! obs_exists( observations , sha256 ) ) {
+            observations.push_back(reg);
+        } else {
+            SDL_Log( "Repeated observation at %d", module );
+            abort = true;
+        }
         module++;
     }
 
     SDL_FreeSurface(frame);
     SDL_FreeSurface(copy);
-    return module;
 }
 
-TEST_CASE("LibAV, uneducated way of observe a function's repetition module","[LibAV]") {
+
+static void compander_search(std::list<observation_t> &observations, std::string name, void (*comp)(SDL_Surface*, SDL_Surface*, int), void (*expand)(SDL_Surface*, SDL_Surface*, int), SDL_Surface* image ) {
+    LazyLoader loader;
+    BaseApp app(loader);
+    app.Standby();
+    auto frame = Surfaceable::AllocateSurface( image );
+    auto copy = Surfaceable::AllocateSurface( image );
+    auto step = 16;
+    Magickable::blitScaled( copy, image );
+    unsigned long module=1;
+    float min_ratio = 100, max_ratio=0;
+    char fname[100];
+    bool abort = false;
+    while ( !Loader::CompareSurface( image, frame ) && !abort ) {
+        comp( frame, copy, step );
+        expand( copy, frame, step );
+        Magickable::flip_vertical( frame, copy );
+        Magickable::blitScaled( copy, frame );
+        auto ratio = Pixelable::psnr( image, frame );
+
+        if ( ratio < min_ratio ) min_ratio = ratio;
+        if ( ratio > max_ratio ) {
+            SDL_Log("Found good pnsr at iteration %lu: Last ratio: %02f -> new: %02f", module, min_ratio, ratio );
+            max_ratio = ratio;
+            app.publish(frame);
+            std::sprintf( fname , "libav_test-%s-%lu", name.c_str(), module);
+            SDL_SaveBMP(frame, fname);
+        } else if( module % 100 == 0 ) {
+            SDL_Log( "%s, iteration %d, current_ratio: %02f (%02f min ~ %02f max)", name.c_str(), module, ratio, min_ratio, max_ratio );
+            app.publish(frame);
+        }
+        auto sha256 = Loader::sha256Log((uint8_t*) frame->pixels, Pixelable::pixels( frame ) );
+        observation_t reg = {
+                module,
+                ratio,
+                sha256
+        };
+        if (! obs_exists( observations , sha256 ) ) {
+            observations.push_back(reg);
+        } else {
+            SDL_Log( "Repeated observation at %d", module );
+            abort = true;
+        }
+        module++;
+    }
+
+    SDL_FreeSurface(frame);
+    SDL_FreeSurface(copy);
+}
+
+
+
+
+typedef observation_t obs_minmax_t[2];
+
+static void minmax_obs ( obs_minmax_t& dst, std::list<observation_t>& observations) {
+
+    float min = 1;
+    float max = 0;
+    for (auto & observation : observations) {
+        if (observation.comp_factor < min) {
+            min = observation.comp_factor;
+            dst[0].comp_factor = observation.comp_factor;
+            dst[0].module = observation.module;
+            dst[0].sha256 = observation.sha256;
+        }
+        if (observation.comp_factor > max) {
+            max = observation.comp_factor;
+            dst[1].comp_factor = observation.comp_factor;
+            dst[1].module = observation.module;
+            dst[1].sha256 = observation.sha256;
+        }
+    }
+}
+
+static void display_observation(std::string name, std::list<observation_t> &observations ) {
+    SDL_Log("%s Found function module: %lu", name.c_str(), observations.end()->module );
+    obs_minmax_t eval;
+    minmax_obs(eval, observations);
+    SDL_Log("%s MAX ratio: %02f", name.c_str(), eval[0].comp_factor );
+    SDL_Log("%s MAX iteration: %lu", name.c_str(), eval[0].module );
+    SDL_Log("%s MAX sha256: %s", name.c_str(), eval[0].sha256.c_str() );
+    SDL_Log("%s MIN ratio: %02f", name.c_str(), eval[1].comp_factor );
+    SDL_Log("%s MIN iteration: %lu", name.c_str(), eval[1].module );
+    SDL_Log("%s MIN sha256: %s", name.c_str(), eval[1].sha256.c_str() );
+}
+
+
+static void observe(std::string name, void (*funct)(SDL_Surface*, SDL_Surface*, int), SDL_Surface* image) {
+    std::list<observation_t> observations;
+
+    SDL_Log("Observing %s() repetition module", name.c_str());
+    dummy_module_search( observations, name, funct, image);
+    display_observation( name, observations );
+    observations.clear();
+
+}
+
+static void observe(std::string name, void (*comp)(SDL_Surface*, SDL_Surface*, int), void (*expand)(SDL_Surface*, SDL_Surface*, int),  SDL_Surface* image) {
+    std::list<observation_t> observations;
+
+    SDL_Log("Observing %s() repetition module", name.c_str());
+    compander_search( observations, name, comp, expand, image);
+    display_observation( name, observations );
+    observations.clear();
+
+}
+
+
+TEST_CASE("LibAV, Observe a function's repetition module", "[LibAV]") {
 
     auto image = SDL_ConvertSurfaceFormat( SDL_LoadBMP("resources/images/testCardRGB.bmp"),
                                            SDL_PIXELFORMAT_RGBA32 , 0 );
 
-    SDL_Log("Observing miniraster() repetition module");
-    auto module = dummy_module_search( "miniraster", &LibAVable::pack_miniraster, image);
-    SDL_Log("Found function module!: %d", module );
-    SDL_Log("Observing minizigzag() repetition module");
-    module = dummy_module_search( "minizigzag", &LibAVable::pack_minizigzag, image);
-    SDL_Log("Found function module!: %d", module );
 
-    SDL_Log("Observing pack_all_recursive repetition module");
-    module = dummy_module_search( "pack_all_recursive", &LibAVable::pack_all_recursive, image);
-    SDL_Log("Found function module!: %d", module );
+    observe( "miniraster & minizigzag", &LibAVable::pack_miniraster, &LibAVable::pack_minizigzag, image);
+    observe( "spiral & miniraster", &LibAVable::pack_spiral, &LibAVable::pack_miniraster, image);
+    observe( "pack_spiral & diagonal", &LibAVable::pack_spiral, &LibAVable::pack_diagonal, image);
 
 
     SDL_FreeSurface(image);

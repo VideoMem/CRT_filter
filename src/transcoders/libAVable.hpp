@@ -972,6 +972,7 @@ void LibAVable::pack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int step)
     }
     Loader::SurfacePixelsCopy( frame, dst );
     SDL_FreeSurface( frame );
+    SDL_FreeSurface( copy );
 }
 
 //inverse of the above
@@ -1250,11 +1251,12 @@ void LibAVable::macroblock_test(SDL_Surface* dst, int start, int step ) {
 float LibAVable::compressibility( SDL_Surface* src ) {
     auto cm = Pixelable::AsLumaChannelMatrix( src );
     auto pixels = Pixelable::pixels( src );
-    if ( pixels > 0x100 * 1024 ) pixels = 0x100 * 1024;
+    if ( pixels > 1024 ) pixels = 1024;
     std::vector<uint8_t> out_data;
     compress_memory( cm, pixels, out_data );
     assert( out_data.size() > 0 && "empty compressor result ");
     auto ratio = (float) out_data.size() / pixels;
+    delete [] cm;
     return ratio;
 }
 

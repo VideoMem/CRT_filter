@@ -24,6 +24,7 @@ public:
     static void blitScaledMagick(SDL_Surface *dst, SDL_Surface *src);
     static void verticalize( SDL_Surface *dst, SDL_Surface *src );
     static void deverticalize( SDL_Surface *dst, SDL_Surface *src );
+    static void flip_vertical( SDL_Surface *dst, SDL_Surface *src );
 
 protected:
     static void magick2surface( Magick::Image& image, SDL_Surface* surface );
@@ -31,6 +32,13 @@ protected:
     static void surface2image( SDL_Surface* surface, Magick::Image& img );
 
 };
+
+void Magickable::flip_vertical(SDL_Surface *dst, SDL_Surface *src) {
+    for( int line = 0; line < src->h; line ++ ) {
+        auto dstline = src->h - line - 1;
+        Loader::blitLine( src, dst, line, dstline );
+    }
+}
 
 void Magickable::magick2surface(Magick::Image &image, SDL_Surface *surface) {
     Geometry newSize = Geometry( surface->w, surface->h );
