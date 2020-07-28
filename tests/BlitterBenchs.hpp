@@ -96,6 +96,7 @@ TEST_CASE( "SDL2 ConvertSurface Bench", "[SDL2][BenchMark]") {
         for(auto& x : dsts) {
             SDL_FreeSurface( x );
         }
+        SDL_FreeSurface( src );
     }
 
 }

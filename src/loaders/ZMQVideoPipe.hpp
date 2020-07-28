@@ -1,7 +1,7 @@
 //
 // Created by sebastian on 8/5/20.
 //
-
+#pragma once
 #ifndef SDL_CRT_FILTER_ZMQVIDEOPIPE_H
 #define SDL_CRT_FILTER_ZMQVIDEOPIPE_H
 #include <zmq.hpp>

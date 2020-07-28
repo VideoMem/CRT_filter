@@ -17,13 +17,16 @@
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Magickable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/LibAvTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/TurboTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TurboTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -103,7 +106,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.LibAV, Observe a function's repetition module">
+  <component name="RunManager" selected="Catch.All Tests">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -122,13 +125,7 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LibAV tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[LibAV]" TEST_METHOD="LibAV tests" TEST_MODE="SUITE_TEST">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-        <option name="BeforeTestRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="LibAV, Observe a function's repetition module" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[LibAV]" TEST_METHOD="LibAV, Observe a function's repetition module" TEST_MODE="SUITE_TEST">
+    <configuration name="Pixel data converter tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="Pixel data converter tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -146,19 +143,25 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TurboFEC bitdownquant, bitupquant" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC bitdownquant, bitupquant" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC all tests" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TurboFEC tests (1)" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC tests" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC bitdownquant, bitupquant" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC bitdownquant, bitupquant" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TurboFEC tobits, frombits" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC tobits, frombits" TEST_MODE="SUITE_TEST">
+    <configuration name="TurboFEC quantization" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC quantization" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TurboFEC tests, frame stream" type="CMakeCatchTestRunConfigurationType" factoryName="Catch Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SDL_CRT_Filter" TARGET_NAME="SDL2_CRT_Tests" RUN_TARGET_PROJECT_NAME="SDL_CRT_Filter" RUN_TARGET_NAME="SDL2_CRT_Tests" TEST_CLASS="[TurboFEC]" TEST_METHOD="TurboFEC tests, frame stream" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -189,11 +192,11 @@
       <item itemvalue="Catch.All But ZMQ" />
       <item itemvalue="Catch.SDL2 Magick App + Loader " />
       <item itemvalue="Catch.SDL2 Magick++ API" />
-      <item itemvalue="Catch.TurboFEC tests (1)" />
-      <item itemvalue="Catch.TurboFEC tobits, frombits" />
-      <item itemvalue="Catch.LibAV tests" />
+      <item itemvalue="Catch.TurboFEC all tests" />
+      <item itemvalue="Catch.TurboFEC tests, frame stream" />
       <item itemvalue="Catch.TurboFEC bitdownquant, bitupquant" />
-      <item itemvalue="Catch.LibAV, Observe a function's repetition module" />
+      <item itemvalue="Catch.Pixel data converter tests" />
+      <item itemvalue="Catch.TurboFEC quantization" />
       <item itemvalue="CMake Application.CRT_FILTERS" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Decoder" />
@@ -201,11 +204,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Catch.LibAV, Observe a function's repetition module" />
-        <item itemvalue="Catch.TurboFEC tobits, frombits" />
-        <item itemvalue="Catch.TurboFEC tests (1)" />
-        <item itemvalue="Catch.LibAV tests" />
+        <item itemvalue="Catch.TurboFEC tests, frame stream" />
+        <item itemvalue="Catch.TurboFEC all tests" />
         <item itemvalue="Catch.TurboFEC bitdownquant, bitupquant" />
+        <item itemvalue="Catch.Pixel data converter tests" />
+        <item itemvalue="Catch.TurboFEC quantization" />
       </list>
     </recent_temporary>
   </component>
@@ -298,7 +301,8 @@
       <workItem from="1594016571709" duration="139771000" />
       <workItem from="1594961977285" duration="58927000" />
       <workItem from="1595260431820" duration="8289000" />
-      <workItem from="1595446622051" duration="9113000" />
+      <workItem from="1595446622051" duration="43898000" />
+      <workItem from="1595821121996" duration="72532000" />
     </task>
     <servers />
   </component>
@@ -378,7 +382,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
-          <line>1160</line>
+          <line>1161</line>
           <option name="timeStamp" value="119" />
         </line-breakpoint>
       </breakpoints>
@@ -388,12 +392,6 @@
       </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="CMakeCatchTestRunConfigurationType">
-        <watch expression="scale" />
-        <watch expression="bits" />
-        <watch expression="padding" />
-        <watch expression="ret_size" />
-      </configuration>
       <configuration name="CMakeRunConfiguration">
         <watch expression="dst" />
         <watch expression="src" />

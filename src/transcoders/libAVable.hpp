@@ -571,7 +571,7 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     else
         init_decode( state, codec_name );
 
-    state->pkt = av_packet_alloc();
+    state->pkt = av_packet_alloc(); //this one leaks
     state->c->bit_rate = bitrate;
     state->c->width = x;
     state->c->height = y;
@@ -992,6 +992,7 @@ void LibAVable::unpack_all_recursive(SDL_Surface *dst, SDL_Surface *src, int ste
 
     Loader::SurfacePixelsCopy( frame, dst );
     SDL_FreeSurface( frame );
+    SDL_FreeSurface( copy );
 }
 
 //It generates diagonal sort macroblock pixel order LUT
@@ -1219,7 +1220,7 @@ void LibAVable::hs_transpose(LibAVable_hypersurface_t *hs, LibAVable_hypersurfac
         }
     }
 
-    delete macro_id;
+    delete[] macro_id;
 }
 
 void LibAVable::macroblock_test(SDL_Surface* dst, int start, int step ) {
@@ -1245,6 +1246,7 @@ void LibAVable::macroblock_test(SDL_Surface* dst, int start, int step ) {
     Loader::SurfacePixelsCopy( black, dst );
     SDL_FreeSurface( black );
     SDL_FreeSurface( frame );
+    delete[] macroblocks;
     delete osd;
 }
 
