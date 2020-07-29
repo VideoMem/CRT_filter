@@ -14,6 +14,8 @@ extern "C" {
 #define DEFAULT_ITER    4
 #define DEFAULT_BITDEPTH 4
 
+typedef std::vector<Pixelable_ch_t> Turbofec_bitvect_t;
+
 struct TurboFEC_bitbuff_t {
     uint8_t ** turbo;
     size_t size;
@@ -74,7 +76,9 @@ public:
     static inline int conv_size( size_t size, size_t width=Config::NKERNEL_WIDTH );
 
     static inline int conv_size_bits( SDL_Surface * ref ) { return bits ( conv_size( ref ) ); }
+    static void tobits(Pixelable_ch_t &dst, Pixelable_ch_t &src );
     static void tobits( uint8_t *dst, const uint8_t *b, int n );
+    static void frombits(Pixelable_ch_t &dst, Pixelable_ch_t &src );
     static void frombits( uint8_t *dst, uint8_t *b, int n );
     static inline int output_bits_per_packet() { return 3 * ( LEN + term_size() ); };
     static inline int packets( int ref ) { return floor((double)ref / output_bits_per_packet() ); };
@@ -276,11 +280,21 @@ void TurboFEC::decode( SDL_Surface *dst, uint8_t **buff ) {
     delete [] out_bits;
 }
 
+
+void TurboFEC::tobits(Pixelable_ch_t &dst, Pixelable_ch_t &src ) {
+    Pixelable_ch_t temp(src.size() * bytes(1), 0);
+    auto srcp = &src[0];
+    auto dstp = &temp[0];
+    tobits(dstp, srcp, src.size());
+    dst.clear();
+//    std::copy(temp.begin(), temp.end(), dst);
+}
+
 // Convert n bits to uint8_t array
 // b[0] = 0xFF as, dst[0] = 1, dst[1] = 1, dst[2] = 1, etc ..
 // up to n (usually 8)
 void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
-    int m = sizeof(uint8_t) * 8;
+    int m = sizeof(uint8_t) * bits(1);
     uint8_t r = b[0];
 
     int j = 0;
@@ -294,9 +308,18 @@ void TurboFEC::tobits( uint8_t *dst, const uint8_t *b, int n ) {
 
 }
 
+void TurboFEC::frombits(Pixelable_ch_t &dst, Pixelable_ch_t &src ) {
+    Pixelable_ch_t temp(src.size() * bytes(1), 0);
+    auto srcp = &src[0];
+    auto dstp = &temp[0];
+    frombits(dstp, srcp, src.size());
+    dst.clear();
+//    std::copy(temp.begin(), temp.end(), dst);
+}
+
 //same as above but in reverse
 void TurboFEC::frombits( uint8_t *dst, uint8_t *b, int n ) {
-    int m = sizeof(uint8_t) * 8;
+    int m = sizeof(uint8_t) * bits(1);
     uint8_t r = 0;
 
     int j = 0;

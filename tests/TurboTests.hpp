@@ -357,7 +357,7 @@ TEST_CASE("TurboFEC error test","[TurboFEC]") {
 
 
 TEST_CASE("Pixel data converter tests","[TurboFEC]") {
-    SECTION("Pixelable channel surfaces") {
+    SECTION("Pixelable channelmatrix surfaces") {
         auto image = SDL_LoadBMP("resources/images/testCardRGB.bmp");
         auto surface = SDL_ConvertSurfaceFormat( image,
                                                  SDL_PIXELFORMAT_RGBA32 , 0 );
@@ -370,6 +370,20 @@ TEST_CASE("Pixel data converter tests","[TurboFEC]") {
         SDL_FreeSurface( copy );
         SDL_FreeSurface( image );
         delete [] cm;
+    }
+
+    SECTION("Pixelable channelvector surfaces") {
+        auto image = SDL_LoadBMP("resources/images/testCardRGB.bmp");
+        auto surface = SDL_ConvertSurfaceFormat( image,
+                                                 SDL_PIXELFORMAT_RGBA32 , 0 );
+
+        auto cv = Pixelable::AsLumaChannelVector( surface );
+        auto copy = Surfaceable::AllocateSurface( surface );
+        Pixelable::ApplyLumaChannelVector( copy, cv );
+        SDL_SaveBMP( copy, "turbo_pix_channel_vector_test.bmp");
+        SDL_FreeSurface( surface );
+        SDL_FreeSurface( copy );
+        SDL_FreeSurface( image );
     }
 
 }
@@ -738,9 +752,9 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
         SDL_Log("Input sha256: %s", sha256.c_str() );
 
         //it prepares a downconverted version
-        auto new_size = TurboFEC::downquant_size( DEFAULT_BITDEPTH, mtu.output_bits );
+        auto new_size = TurboFEC::downquant_size( DEFAULT_BITDEPTH, b.size );
         auto b6 = TurboFEC::AllocateC(new_size*2);
-        TurboFEC::bitdownquant( b6.turbo, b.turbo, DEFAULT_BITDEPTH, mtu.output_bits );
+        TurboFEC::bitdownquant( b6.turbo, b.turbo, DEFAULT_BITDEPTH, b.size );
         SDL_Log( "Downconverted size: %zu, unconverted %d bits, total per frame %zu", new_size, mtu.output_bits, size_bits );
 
         //it recovers the downconverted version

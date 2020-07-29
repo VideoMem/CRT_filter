@@ -17,16 +17,11 @@
   <component name="ChangeListManager">
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/Pixelable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/BlitterBenchs.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/LibAvTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/LibAvTests.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/TurboTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/TurboTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/cmake-build-debug/catch.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,7 +101,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Catch.All Tests">
+  <component name="RunManager" selected="Catch.Pixel data converter tests">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -204,10 +199,10 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Catch.Pixel data converter tests" />
         <item itemvalue="Catch.TurboFEC tests, frame stream" />
         <item itemvalue="Catch.TurboFEC all tests" />
         <item itemvalue="Catch.TurboFEC bitdownquant, bitupquant" />
-        <item itemvalue="Catch.Pixel data converter tests" />
         <item itemvalue="Catch.TurboFEC quantization" />
       </list>
     </recent_temporary>
@@ -302,7 +297,7 @@
       <workItem from="1594961977285" duration="58927000" />
       <workItem from="1595260431820" duration="8289000" />
       <workItem from="1595446622051" duration="43898000" />
-      <workItem from="1595821121996" duration="72532000" />
+      <workItem from="1595821121996" duration="80836000" />
     </task>
     <servers />
   </component>
@@ -362,7 +357,7 @@
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/transcoders/Pixelable.hpp</url>
-          <line>108</line>
+          <line>109</line>
           <option name="timeStamp" value="70" />
         </line-breakpoint>
         <line-breakpoint type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
@@ -384,6 +379,16 @@
           <url>file://$PROJECT_DIR$/src/transcoders/libAVable.hpp</url>
           <line>1161</line>
           <option name="timeStamp" value="119" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/tests/TurboTests.hpp</url>
+          <line>746</line>
+          <option name="timeStamp" value="127" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/transcoders/Pixelable.hpp</url>
+          <line>311</line>
+          <option name="timeStamp" value="136" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

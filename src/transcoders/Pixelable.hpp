@@ -6,6 +6,7 @@
 #define SDL_CRT_FILTER_PIXELABLE_HPP
 
 #include "Surfaceable.hpp"
+typedef std::vector<uint8_t> Pixelable_ch_t;
 
 class Pixelable: public Surfaceable {
 public:
@@ -289,6 +290,13 @@ public:
         return cm;
     }
 
+    static Pixelable_ch_t AsLumaChannelVector ( SDL_Surface* ref ) {
+        uint8_t* cm = AsLumaChannelMatrix( ref );
+        Pixelable_ch_t retval(cm, cm + pixels(ref) / sizeof cm[0]);
+        delete[] cm;
+        return retval;
+    }
+
     static void ApplyLumaChannelMatrix ( SDL_Surface* ref, Uint8* cm ) {
         size_t pos = 0;
         for( int y = 0; y < ref->h; ++y )
@@ -297,6 +305,12 @@ public:
                 pos++;
             }
 
+    }
+
+    static void ApplyLumaChannelVector ( SDL_Surface* ref, Pixelable_ch_t& cv ) {
+        uint8_t cm[cv.size()];
+        std::copy(cv.begin(), cv.end(), cm);
+        ApplyLumaChannelMatrix( ref, cm );
     }
 
 };
