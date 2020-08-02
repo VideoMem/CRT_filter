@@ -77,24 +77,27 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
     }
 
     SECTION( "ZMQ REQ/REP complex pipe" ) {
-        ZMQVideoPipe zPipe;
+    /*    ZMQVideoPipe zPipe;
         for(int i = 1e2; i > 0; --i)
-            zPipe.testPassThru();
+            zPipe.testPassThru(); */
     }
 
     SECTION( "ZMQ REQ/REP quantized pipe" ) {
-        ZMQVideoPipe zPipe;
+    /*    ZMQVideoPipe zPipe;
         for(int i = 1e2; i > 0; --i)
             zPipe.testPassThruQuant();
-    }
+     */
+     }
 
     SECTION( "ZMQ REQ Source" ) {
+    /*
         ZMQVideoPipe zPipe;
         SDL_Surface* sample = Loader::AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
         zPipe.testReceiveFrame();
         zPipe.GetSurface(sample);
         SDL_SaveBMP(sample, "encoded.bmp");
         SDL_FreeSurface(sample);
+    */
     }
 
     SECTION( "GNURadio surface to complex, complex to surface") {
@@ -180,9 +183,10 @@ TEST_CASE( "ZMQ API", "[ZMQ][SDL2][GNURadio]") {
     */
 
     SECTION( "ZMQ REQ/REP quantized frame pipe" ) {
-        ZMQVideoPipe zPipe;
+    /*    ZMQVideoPipe zPipe;
         for(int i = 10; i > 0; --i)
             zPipe.testFramePassThru();
+    */
     }
 
 }
@@ -196,7 +200,7 @@ void send_frame(ZMQVideoPipe* zPipe) {
 
 TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
     SECTION( "ZMQ Loader inproc data flow" ) {
-        Config cfg;
+        /*Config cfg;
         ZMQLoader zLoader;
         cfg.initResources(zLoader);
         BaseApp app(zLoader);
@@ -214,6 +218,7 @@ TEST_CASE( "ZMQ Loader", "[ZMQ][SDL2][App]") {
         quit_signal = true;
         SDL_FreeSurface(frame);
         radio_tx.join();
+    */
     }
 }
 
