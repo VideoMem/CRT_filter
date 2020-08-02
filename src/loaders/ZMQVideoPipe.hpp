@@ -1,7 +1,6 @@
 //
 // Created by sebastian on 8/5/20.
 //
-#pragma once
 #ifndef SDL_CRT_FILTER_ZMQVIDEOPIPE_H
 #define SDL_CRT_FILTER_ZMQVIDEOPIPE_H
 #include <zmq.hpp>
@@ -9,11 +8,18 @@
 #include <loaders/LazySDL2.hpp>
 #include <loaders/fmt_tools/WaveFile.hpp>
 #include <submodules/lpc/lpclient/lpc.hpp>
+#include <transcoders/TurboFEC.hpp>
 #define MAX_RETRIES 3
 
 //#define PIPE_DEBUG_FRAMES
 
 static const int ZMQ_FRAME_SIZE = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
+static const size_t ZMQ_MTU_WORD_BITS = DEFAULT_BITDEPTH;
+static const size_t ZMQ_MTU_INPUT_BITS = TurboFEC::mtu_downquant( TurboFEC::bits ( ZMQ_FRAME_SIZE ), ZMQ_MTU_WORD_BITS ).input_bits;
+static const size_t ZMQ_MTU_INPUT_BYTES = TurboFEC::bytes( ZMQ_MTU_INPUT_BITS );
+static const size_t ZMQ_MTU_LINEAR_OUT_BITS = TurboFEC::linear_required_size( ZMQ_MTU_INPUT_BITS, ZMQ_MTU_WORD_BITS );
+static const size_t ZMQ_MTU_LINEAR_OUT_BYTES = TurboFEC::bytes( ZMQ_MTU_LINEAR_OUT_BITS );
+
 static const int ZMQ_COMPLEX_SIZE = 2 * ZMQ_FRAME_SIZE;
 
 typedef float* internal_complex_t;
@@ -54,8 +60,8 @@ public:
     internal_complex_stack_t debug_frames;
 #endif
     bool frameTransfer = false;
-    int  byte_index = 0;
-    int  copiedBytes = 0;
+    size_t  byte_index = 0;
+    size_t  copiedBytes = 0;
     void receiveFrame();
     static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
     static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
@@ -262,13 +268,14 @@ void ZMQVideoPipe::transferEvent() {
 void ZMQVideoPipe::receiveFrame() {
     size_t rx_size = receive( internal );
 
-    int current_index = byte_index;
+    size_t current_index = byte_index;
     byte_index += rx_size;
 
-    if ( byte_index >= asByteIndex(ZMQ_COMPLEX_SIZE) ) {
+    size_t limit =  asByteIndex(ZMQ_COMPLEX_SIZE);
+    if ( byte_index >= limit ) {
 //        SDL_Log("Prepared to transfer frame at %d", byte_index);
-        int remainder = byte_index -  asByteIndex(ZMQ_COMPLEX_SIZE);
-        int toCopy_size = rx_size - remainder;
+        size_t remainder = byte_index -  limit;
+        size_t toCopy_size = rx_size - remainder;
 
         memcpy(
                 &internal_store[asFloatIndex(current_index)],
@@ -283,12 +290,12 @@ void ZMQVideoPipe::receiveFrame() {
                  remainder );
 //        SDL_Log("Copied %d, bytes to last buffer, %d to new one from a %d bytes total",
 //            toCopy_size, remainder, (int) rx_size );
-        assert((toCopy_size + remainder) == (int) rx_size);
+        assert((toCopy_size + remainder) == rx_size);
 
         copiedBytes += toCopy_size;
 //        SDL_Log("Copied bytes, ZMQ_COMPLEX_SIZE, %d, %d",
 //                copiedBytes, ZMQ_COMPLEX_SIZE );
-        assert(copiedBytes  == asByteIndex(ZMQ_COMPLEX_SIZE));
+        assert(copiedBytes  == limit );
 
         copiedBytes = remainder;
         byte_index = remainder;

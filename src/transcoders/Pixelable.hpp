@@ -308,10 +308,11 @@ public:
     }
 
     static void ApplyLumaChannelVector ( SDL_Surface* ref, Pixelable_ch_t& cv ) {
-        uint8_t cm[cv.size()];
+        auto cm = new uint8_t[cv.size()];
         assert(cv.size() == pixels(ref) && "Source size mismatch");
         std::copy(cv.begin(), cv.end(), cm);
         ApplyLumaChannelMatrix( ref, cm );
+        delete[] cm;
     }
 
 };

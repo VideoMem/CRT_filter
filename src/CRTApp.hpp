@@ -294,7 +294,6 @@ void CRTApp::bcs( SDL_Surface *surface, SDL_Surface *dest  ) {
 
 }
 
-
 double CRTApp::rippleBias(int sync) {
     int line = sync % Config::SCREEN_HEIGHT;
     double screenpos = (double) line / Config::SCREEN_HEIGHT;
@@ -303,18 +302,6 @@ double CRTApp::rippleBias(int sync) {
     double correct = 1 - (10e-4 * ripple);
     lastR = ret * correct;
     return ret ;
-}
-
-inline void CRTApp::blitLine(SDL_Surface *src, SDL_Surface *dst, int line, int dstline) {
-    SDL_Rect srcrect;
-    SDL_Rect dstrect;
-    SDL_GetClipRect(src, &srcrect);
-    SDL_GetClipRect(src, &dstrect);
-    srcrect.y = line;
-    dstrect.y = dstline;
-    srcrect.h = 1;
-    dstrect.h = 1;
-    SDL_BlitSurface(src, &srcrect, dst, &dstrect);
 }
 
 inline void CRTApp::blitLineScaled(SDL_Surface *src, SDL_Surface* dst, int line, double scale) {
@@ -351,31 +338,6 @@ void CRTApp::HRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
 
 }
 
-void CRTApp::VRipple( SDL_Surface *surface, SDL_Surface *dest, int warp ) {
-    if(addVRipple) {
-        Loader::blank(dest);
-        int noiseSlip = round(((rand() & 0xFF) / 0xF0) * 0.3 );
-        int sync = warp;
-        int newy = 0 , last_blitY = 0;
-        for(int y=0; y< Config::SCREEN_HEIGHT; ++y) {
-            double scale = (supplyV * rippleBias(sync)); ++sync;
-            int height = round((double) Config::SCREEN_HEIGHT * scale);
-            int center = round((double) (Config::SCREEN_HEIGHT - height) / 2);
-            last_blitY = newy;
-            newy = round(y * scale) + center + noiseSlip;
-            if (newy > 0 && newy < Config::SCREEN_HEIGHT) {
-                Loader::blitLine( surface, dest, y, newy );
-            }
-            if(newy > last_blitY && last_blitY != 0)
-                for(int i = last_blitY; i < newy; ++i)
-                    Loader::blitLine( surface, dest, y, i );
-            else
-                for(int i = newy; i < last_blitY; ++i)
-                    Loader::blitLine( surface, dest, y, i );
-        }
-    } else
-        Loader::SurfacePixelsCopy( surface, dest );
-}
 
 void CRTApp::fade(SDL_Surface* surface) {
 

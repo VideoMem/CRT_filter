@@ -2,7 +2,7 @@
 #define SDL_CRT_FILTER_BASEAPP_HPP
 #include <loaders/LazySDL2.hpp>
 #include <Config.hpp>
-
+#include <transcoders/Magickable.hpp>
 
 class BaseApp {
 public:

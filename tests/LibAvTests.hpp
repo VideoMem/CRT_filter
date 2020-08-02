@@ -1,7 +1,6 @@
 //
 // Created by sebastian on 25/5/20.
 //
-#pragma once
 #ifndef SDL_CRT_FILTER_LIBAVTESTS_HPP
 #define SDL_CRT_FILTER_LIBAVTESTS_HPP
 #include <transcoders/libAVable.hpp>

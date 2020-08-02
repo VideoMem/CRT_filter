@@ -4,18 +4,15 @@
 
 #ifndef SDL_CRT_FILTER_LOADER_HPP
 #define SDL_CRT_FILTER_LOADER_HPP
-#include <ResourceRoller.hpp>
+//#include <ResourceRoller.hpp>
 #include <SDL2/SDL.h>
 #include <fstream>
 #include <picosha2.h>
 #include <transcoders/Surfaceable.hpp>
 #include <transcoders/Waveable.hpp>
 #include <transcoders/Pixelable.hpp>
-#include <transcoders/Magickable.hpp>
 
 #define MAX_WHITE_LEVEL 200
-using namespace vips;
-using namespace Magick;
 
 class Loader: public ResourceRoller {
 public:
