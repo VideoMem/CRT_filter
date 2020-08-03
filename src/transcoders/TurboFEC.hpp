@@ -11,8 +11,8 @@ extern "C" {
 
 /* Maximum LTE code block size of 6144 */
 #define LEN		        TURBO_MAX_K
-#define DEFAULT_ITER    4
-#define DEFAULT_BITDEPTH 6
+#define DEFAULT_ITER    16
+#define DEFAULT_BITDEPTH 2
 
 typedef std::vector<Pixelable_ch_t> TurboFEC_bitvect_t;
 
@@ -149,7 +149,7 @@ public:
     }
 
     // Recursive function to return gcd of a and b
-    static int gcd(int a, int b)    {
+    static int gcd( int a, int b )    {
         // Everything divides 0
         if (a == 0)
             return b;
@@ -245,7 +245,7 @@ void TurboFEC::encode( uint8_t** buff, uint8_t* in_bits, size_t len_bits ) {
 }
 
 void TurboFEC::encode(TurboFEC_bitvect_t &dst, Pixelable_ch_t &in_bits ) {
-    SDL_Log("Encoding %zu input as %zu output bits ", in_bits.size(), required_size( in_bits.size() ));
+    //SDL_Log("Encoding %zu input as %zu output bits ", in_bits.size(), required_size( in_bits.size() ));
     auto packets = in_bits.size() / LEN;
     auto lte_t = lte_turbo();
     auto &buff = AllocateC( required_size(in_bits.size()) );

@@ -584,8 +584,8 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     * then gop_size is ignored and the output of encoder
     * will always be I frame irrespective to gop_size
     */
-    state->c->gop_size = 10;
-    state->c->max_b_frames = 10;
+    state->c->gop_size = 1;
+    state->c->max_b_frames = 1;
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if ( state->codec->id == AV_CODEC_ID_H264 ) {
@@ -674,7 +674,7 @@ size_t LibAVable::readfile( LibAVable::AVthings_t *state, FILE *infile ) {
         assert( false && "Error decoding video" );
     }
 
-    printf("decoded frame %3d\n", state->c->frame_number );
+    //printf("decoded frame %3d\n", state->c->frame_number );
     fflush(stdout);
     return ret;
 }

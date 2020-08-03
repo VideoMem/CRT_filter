@@ -657,7 +657,7 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
     }
 
 
-    SECTION("Test MTU encode") {
+    SECTION("Test MTU transcode") {
         auto image = SDL_LoadBMP("resources/images/testCardRGB.bmp");
         auto surface = SDL_ConvertSurfaceFormat( image,
                                                 SDL_PIXELFORMAT_RGBA32, 0);
@@ -666,20 +666,20 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
         auto size_bits = TurboFEC::bits(pixels);
         auto mtu = TurboFEC::mtu_downquant( size_bits, DEFAULT_BITDEPTH );
         SDL_Log("MTU size %d bits, output %d bits :: size %zu bytes, output %zu bytes", mtu.input_bits, mtu.output_bits,
-                TurboFEC::bytes(mtu.input_bits), TurboFEC::bytes(mtu.output_bits));
+                TurboFEC::bytes(mtu.input_bits), TurboFEC::bytes(mtu.output_bits) );
         SDL_Log("Padding size %d bits, %zu bytes", mtu.padding, TurboFEC::bytes(mtu.padding) );
 
         //it first encodes a channelvector surface to in_bits
         auto surface_cv = Pixelable::AsLumaChannelVector( surface );
         surface_cv.resize( TurboFEC::bytes( mtu.input_bits ) );
-        auto in_bits = TurboFEC::tobits(surface_cv );
+        auto in_bits = TurboFEC::tobits(surface_cv ); //1
 
         //it allocates 3 buffers to store the turbo encoder output
         auto &b = TurboFEC::AllocateC( TurboFEC::required_size( in_bits.size() ) );
 
         //it encodes in_bits to bv bitvect, and the unsafe version b
         TurboFEC_bitvect_t bv = TurboFEC::init_bitvect();
-        TurboFEC::encode( bv, in_bits );
+        TurboFEC::encode( bv, in_bits ); //2
         TurboFEC::encode( b.turbo, &in_bits[0], in_bits.size() );
         auto sha256 = Loader::sha256Log(&surface_cv[0], surface_cv.size() );
         SDL_Log("Input sha256: %s", sha256.c_str() );
@@ -692,12 +692,12 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
         REQUIRE( b.size == TurboFEC::required_size( in_bits.size() ) );
         auto new_size = TurboFEC::downquant_size( DEFAULT_BITDEPTH, b.size );
         TurboFEC_bitvect_t b6_v;
-        TurboFEC::bitdownquant( b6_v, bv, DEFAULT_BITDEPTH );
+        TurboFEC::bitdownquant( b6_v, bv, DEFAULT_BITDEPTH ); //3
         SDL_Log( "Downconverted size: %zu, unconverted %zu bits, total per frame %zu", new_size, bv.front().size(), size_bits );
 
         //it recovers the downconverted version
         auto cv = TurboFEC::init_bitvect();
-        TurboFEC::bitupquant( cv, b6_v, DEFAULT_BITDEPTH );
+        TurboFEC::bitupquant( cv, b6_v, DEFAULT_BITDEPTH ); //3'
 
         for( int i =0 ; i < 3; i++ )
             REQUIRE( TurboFEC::verbose_memcmp( &bv[i][0], &cv[i][0], bv[i].size() ) == 0 );
@@ -709,8 +709,8 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
         Pixelable_ch_t out_bits;
 
         //here the decoder action
-        TurboFEC::decode( out_bits, cv );
-        Pixelable_ch_t out_cv = TurboFEC::frombits( out_bits );
+        TurboFEC::decode( out_bits, cv ); //2'
+        Pixelable_ch_t out_cv = TurboFEC::frombits( out_bits ); //1'
         auto sha256o = Loader::sha256Log(&out_cv[0], out_cv.size() );
         SDL_Log("Output sha256: %s", sha256o.c_str());
 
@@ -719,7 +719,7 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
 
         //it saves the result of the decoder as an image
         out_cv.resize( Pixelable::pixels( recover ) );
-        Pixelable::ApplyLumaChannelVector( recover, out_cv );
+        Pixelable::ApplyLumaChannelVector( recover, out_cv ); //5'
         SDL_SaveBMP(recover, "turbofec_mtutest_decoded.bmp");
 
         for( int i = 0; i < 3; i++ ) {
@@ -732,7 +732,7 @@ TEST_CASE("TurboFEC tests, frame stream","[TurboFEC]") {
         REQUIRE( enc_cv.size() <= Pixelable::pixels( recover ) );
         SDL_Log("enc_cv.size() %zu, %zu", enc_cv.size(), enc_cv.size() * 8 );
         enc_cv.resize( Pixelable::pixels( recover ) );
-        Pixelable::ApplyLumaChannelVector( recover, enc_cv );
+        Pixelable::ApplyLumaChannelVector( recover, enc_cv ); //5
         SDL_SaveBMP(recover, "turbofec_mtutest_encoded.bmp");
 
         TurboFEC::free( b );

@@ -39,17 +39,17 @@ static void powerOff(CRTApp& crt) {
 
 void send_frame( bool* quit, ZMQVideoPipe* zPipe ) {
     SDL_Log("Frame send thread initialized");
-    duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
+    //duration<double> frameTime( Waveable::conversion_size( zPipe->reference() ) /  FRONT_SAMPLERATE );
     //SDL_Log("Frontend Samplerate: %lf, frame time %02lf ms", FRONT_SAMPLERATE, frameTime.count() );
     while(!*quit) {
         auto start = high_resolution_clock::now();
         zPipe->pushFrame();
         auto stop = high_resolution_clock::now();
         auto elapsed = duration_cast<milliseconds>(stop - start);
-        if(duration_cast<milliseconds>(frameTime) > elapsed) {
-            auto error = duration_cast<milliseconds>(frameTime - elapsed) * 0.8;
-            std::this_thread::sleep_for(error);
-        }
+        //if(duration_cast<milliseconds>(frameTime) > elapsed) {
+        //    auto error = duration_cast<milliseconds>(frameTime - elapsed) * 0.8;
+        //    std::this_thread::sleep_for(error);
+        //}
     }
     SDL_Log("Frame send thread done!");
 }
@@ -111,8 +111,8 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 
             LibAVable::hs_free( hc );
         }
-        LibAVable::pack_miniraster( aux_surface, frame, PACK_SIZE );
-        auto full_copy = LibAVable::hs_stack( hs, hc, aux_surface );
+        //LibAVable::pack_all ( aux_surface, frame, PACK_SIZE );
+        auto full_copy = LibAVable::hs_stack( hs, hc, frame );
         SDL_FreeSurface( full_copy );
         /*
         int ret = avcodec_receive_frame( state->c , encoded_frame );
@@ -132,7 +132,7 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
              auto error = (duration_cast<milliseconds>(frameTime) - elapsed) * 0.8;
              //SDL_Log("Elapsed %ld ms, waiting %02f ms: total %02f ms, frame %ld ms", elapsed.count(), error.count(),
              //         (elapsed + error).count(), duration_cast<milliseconds>(frameTime).count() );
-             std::this_thread::sleep_for(error);
+             //std::this_thread::sleep_for(error);
         }
     }
 

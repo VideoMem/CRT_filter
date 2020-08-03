@@ -13,12 +13,13 @@
 
 //#define PIPE_DEBUG_FRAMES
 
-static const int ZMQ_FRAME_SIZE = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
-static const size_t ZMQ_MTU_WORD_BITS = DEFAULT_BITDEPTH;
-static const size_t ZMQ_MTU_INPUT_BITS = TurboFEC::mtu_downquant( TurboFEC::bits ( ZMQ_FRAME_SIZE ), ZMQ_MTU_WORD_BITS ).input_bits;
-static const size_t ZMQ_MTU_INPUT_BYTES = TurboFEC::bytes( ZMQ_MTU_INPUT_BITS );
-static const size_t ZMQ_MTU_LINEAR_OUT_BITS = TurboFEC::linear_required_size( ZMQ_MTU_INPUT_BITS, ZMQ_MTU_WORD_BITS );
-static const size_t ZMQ_MTU_LINEAR_OUT_BYTES = TurboFEC::bytes( ZMQ_MTU_LINEAR_OUT_BITS );
+const int ZMQ_FRAME_SIZE = Config::NKERNEL_WIDTH * Config::NKERNEL_HEIGHT;
+const size_t ZMQ_MTU_WORD_BITS = DEFAULT_BITDEPTH;
+const size_t ZMQ_MTU_INPUT_BITS = TurboFEC::mtu_downquant( TurboFEC::bits ( ZMQ_FRAME_SIZE ), ZMQ_MTU_WORD_BITS ).input_bits;
+const size_t ZMQ_MTU_INPUT_BYTES = TurboFEC::bytes( ZMQ_MTU_INPUT_BITS );
+const size_t ZMQ_MTU_INPUT_COMPLEX_SIZE = 2 * ZMQ_MTU_INPUT_BYTES;
+const size_t ZMQ_MTU_LINEAR_OUT_BITS = TurboFEC::linear_required_size( ZMQ_MTU_INPUT_BITS, ZMQ_MTU_WORD_BITS );
+const size_t ZMQ_MTU_LINEAR_OUT_BYTES = TurboFEC::bytes( ZMQ_MTU_LINEAR_OUT_BITS );
 
 static const int ZMQ_COMPLEX_SIZE = 2 * ZMQ_FRAME_SIZE;
 
@@ -52,8 +53,10 @@ public:
     static inline uint8_t quantize_amplitude( float &a, float &b );
     static inline void unquantize_amplitude( uint8_t &c, float &a, float &b );
 
+    static void fecframe_to_float(SDL_Surface* surface, float arr[]);
     static void frame_to_float(SDL_Surface* surface, float arr[]);
     static void float_to_frame(float arr[], SDL_Surface* surface );
+    static void float_to_fecframe(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
     void transferEvent();
 #ifdef PIPE_DEBUG_FRAMES
@@ -63,8 +66,8 @@ public:
     size_t  byte_index = 0;
     size_t  copiedBytes = 0;
     void receiveFrame();
-    static inline int asFloatIndex(int idx)  { return idx /  sizeof(float); }
-    static inline int asByteIndex(int idx)  { return idx * sizeof(float); }
+    static inline int asFloatIndex(int idx) { return idx / (int)sizeof(float); }
+    static inline int asByteIndex(int idx)  { return idx * (int)sizeof(float); }
     static inline double angle( float a, float b );
     SDL_Surface* reference() { return captured_frame; }
 public:
@@ -103,7 +106,7 @@ ZMQVideoPipe::ZMQVideoPipe() {
             AllocateSurface( Config::NKERNEL_WIDTH, Config::NKERNEL_HEIGHT );
     internal = new float[ZMQ_COMPLEX_SIZE];
     internal_store = new float[ZMQ_COMPLEX_SIZE];
-
+    assert ( ZMQ_COMPLEX_SIZE > ZMQ_MTU_INPUT_COMPLEX_SIZE );
     if(captured_frame == nullptr || temporary_frame == nullptr )
         SDL_Log("Cannot allocate internal frames");
     else {
@@ -116,7 +119,6 @@ void ZMQVideoPipe::init() {
     //  Prepare our context and socket
     if(socket != nullptr) { delete(socket); socket = nullptr; }
     if(context != nullptr) { delete(context); context = nullptr; }
-
     context = new zmq::context_t(1);
     socket = new zmq::socket_t( *context, ZMQ_REQ );
     context_rep = new zmq::context_t(1);
@@ -155,7 +157,7 @@ size_t ZMQVideoPipe::receive( float* raw_stream ) {
             --retries;
             receive( internal );
         }
-        return -1;
+        return 0;
     }
 }
 
@@ -216,7 +218,7 @@ void ZMQVideoPipe::unquantize_am( uint8_t &quant, float &real, float &imaginary 
 uint8_t ZMQVideoPipe::quantize(float &real, float &imaginary) {
     double theta = angle(real, imaginary);
     double theta_normalized = theta / (2 * M_PI);
-    uint8_t quant  = round(theta_normalized * MAX_WHITE_LEVEL);
+    uint8_t quant = round(theta_normalized * MAX_WHITE_LEVEL );
     return quant;
 }
 
@@ -254,14 +256,14 @@ void ZMQVideoPipe::unquantize_amplitude(uint8_t &c, float &a, float &b) {
 }
 
 void ZMQVideoPipe::transferEvent() {
-    internal_complex_t stackable = new float[ZMQ_COMPLEX_SIZE];
-    memcpy(stackable, internal_store, ZMQ_COMPLEX_SIZE);
 #ifdef PIPE_DEBUG_FRAMES
+    auto stackable = new float[ ZMQ_COMPLEX_SIZE ];
+    memcpy(stackable, internal_store, asByteIndex( ZMQ_MTU_INPUT_COMPLEX_SIZE ));
     debug_frames.push_back(stackable);
 #endif
     //SDL_SaveBMP(temporary_frame, "current.bmp");
-    float_to_frame(internal_store, temporary_frame);
-    SDL_BlitSurface(temporary_frame, nullptr, captured_frame, nullptr);
+    float_to_fecframe( internal_store, temporary_frame );
+    SDL_BlitSurface( temporary_frame, nullptr, captured_frame, nullptr );
     frameTransfer = true;
 }
 
@@ -271,31 +273,23 @@ void ZMQVideoPipe::receiveFrame() {
     size_t current_index = byte_index;
     byte_index += rx_size;
 
-    size_t limit =  asByteIndex(ZMQ_COMPLEX_SIZE);
-    if ( byte_index >= limit ) {
-//        SDL_Log("Prepared to transfer frame at %d", byte_index);
+    size_t limit = asByteIndex( ZMQ_MTU_INPUT_COMPLEX_SIZE );
+    if ( byte_index >= limit ) { //if it fills a frame
+        //SDL_Log("Prepared to transfer frame at %d", byte_index);
         size_t remainder = byte_index -  limit;
         size_t toCopy_size = rx_size - remainder;
 
-        memcpy(
-                &internal_store[asFloatIndex(current_index)],
-                internal,
-                toCopy_size
-                );
-
+        memcpy( &internal_store[asFloatIndex(current_index)], internal, toCopy_size );
         transferEvent();
-
-        memcpy( internal_store,
-                &internal[asFloatIndex(toCopy_size)],
-                 remainder );
-//        SDL_Log("Copied %d, bytes to last buffer, %d to new one from a %d bytes total",
-//            toCopy_size, remainder, (int) rx_size );
-        assert((toCopy_size + remainder) == rx_size);
+        memcpy(&internal_store[0],&internal[asFloatIndex(toCopy_size)], remainder );
+        //SDL_Log("Copied %zu, bytes to last buffer, %zu to new one from a %zu bytes total",
+//            toCopy_size, remainder,  rx_size );
+        assert( (toCopy_size + remainder) == rx_size );
 
         copiedBytes += toCopy_size;
-//        SDL_Log("Copied bytes, ZMQ_COMPLEX_SIZE, %d, %d",
-//                copiedBytes, ZMQ_COMPLEX_SIZE );
-        assert(copiedBytes  == limit );
+        //SDL_Log("Copied bytes, ZMQ_MTU_INPUT_COMPLEX_SIZE, %zu, %zu",
+        //        copiedBytes, ZMQ_MTU_INPUT_COMPLEX_SIZE );
+        assert( copiedBytes  ==  limit );
 
         copiedBytes = remainder;
         byte_index = remainder;
@@ -317,8 +311,9 @@ void ZMQVideoPipe::send( float *src, int size ) {
 
 void ZMQVideoPipe::testSendFrame(SDL_Surface *surface) {
     auto* front_frame = new float[ ZMQ_COMPLEX_SIZE ];
-    frame_to_float( surface, front_frame );
-    send(front_frame, asByteIndex(ZMQ_COMPLEX_SIZE) );
+    memset( front_frame, 0, ZMQ_COMPLEX_SIZE );
+    fecframe_to_float( surface, front_frame );
+    send(front_frame, asByteIndex(ZMQ_MTU_INPUT_COMPLEX_SIZE) );
 
     delete [] front_frame;
 }
@@ -414,6 +409,49 @@ void ZMQVideoPipe::float_to_frame(float *arr, SDL_Surface *surface ) {
             put_pixel32(surface, x, y, pixel);
             pos+=2;
         }
+    }
+}
+
+void ZMQVideoPipe::float_to_fecframe(float *arr, SDL_Surface *surface ) {
+    Loader::blank( surface );
+    Pixelable_ch_t quant_cv;
+    for( size_t pos = 0; pos < ZMQ_MTU_INPUT_COMPLEX_SIZE ; pos+=2 ) { //0
+        uint8_t value = quantize_am(arr[pos], arr[pos + 1]);
+        quant_cv.push_back( value );
+    }
+    //SDL_Log("float to fecframe -> cv_size %zu", quant_cv.size() );
+    auto quant_bitv = TurboFEC::tobits(quant_cv ); //1
+    auto enc_bitv = TurboFEC::init_bitvect();
+    TurboFEC::encode(enc_bitv, quant_bitv ); //2
+    //SDL_Log("float to fecframe -> enc_bv front size %zu", enc_bitv.front().size() );
+    TurboFEC_bitvect_t enc_dw_bv;
+    TurboFEC::bitdownquant(enc_dw_bv, enc_bitv, ZMQ_MTU_WORD_BITS ); //3
+    auto out_cv = TurboFEC::AsChannelVector(enc_dw_bv ); //4
+    //SDL_Log( " out cv_size (pre) %zu, zmq_linear_bytes %zu", out_cv.size(), ZMQ_MTU_LINEAR_OUT_BYTES );
+    assert( out_cv.size() <= Pixelable::pixels( surface ) && "float to fecframe input overflow");
+    out_cv.resize( Pixelable::pixels( surface ) );
+    Pixelable::ApplyLumaChannelVector( surface, out_cv ); //5
+}
+
+
+void ZMQVideoPipe::fecframe_to_float(SDL_Surface *surface, float *arr) {
+    auto in_cv = Pixelable::AsLumaChannelVector( surface ); //5
+    //SDL_Log( " in cv_size (pre) %zu, zmq_linear_bytes %zu", in_cv.size(), ZMQ_MTU_LINEAR_OUT_BYTES );
+    in_cv.resize( ZMQ_MTU_LINEAR_OUT_BYTES );
+    auto enc_dw_bv = TurboFEC::FromChannelVector( in_cv ); //4
+    TurboFEC_bitvect_t enc_bv = TurboFEC::init_bitvect();
+    TurboFEC::bitupquant( enc_bv, enc_dw_bv, ZMQ_MTU_WORD_BITS ); //3
+    Pixelable_ch_t quant_bv;
+    //SDL_Log("fecframe to float -> enc_bv front size %zu", enc_bv.front().size() );
+    TurboFEC::decode( quant_bv, enc_bv ); //2
+    auto quant_cv = TurboFEC::frombits( quant_bv ); //1
+    //SDL_Log("fecframe to float -> cv_size %zu", quant_cv.size() );
+
+    size_t pos = 0;
+    for( auto value : quant_cv )  { //0
+        arr[pos] =0; arr[pos + 1] = 0;
+        unquantize_am(value, arr[pos], arr[pos + 1]);
+        pos+=2;
     }
 }
 
