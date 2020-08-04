@@ -12,7 +12,7 @@
 #include <transcoders/Waveable.hpp>
 #include <transcoders/Pixelable.hpp>
 
-#define MAX_WHITE_LEVEL 200
+#define MAX_WHITE_LEVEL 255
 
 class Loader: public ResourceRoller {
 public:

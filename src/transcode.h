@@ -111,8 +111,8 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
                     LibAVable::encode( recovered_surface, state->frame );
                     app->pushCode( recovered_surface );
                     if( !hct->surfaces.empty() ) {
-                        //LibAVable::unpack_all ( aux_surface, hct->surfaces.front() , PACK_SIZE );
-                        zPipe->testSendFrame( hct->surfaces.front() );
+                        LibAVable::pack_miniraster ( aux_surface, hct->surfaces.front() , PACK_SIZE );
+                        zPipe->testSendFrame( aux_surface );
                         hct->surfaces.erase(hct->surfaces.begin());
                     }
 

@@ -111,8 +111,8 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 
             LibAVable::hs_free( hc );
         }
-        //LibAVable::pack_all ( aux_surface, frame, PACK_SIZE );
-        auto full_copy = LibAVable::hs_stack( hs, hc, frame );
+        LibAVable::unpack_miniraster ( aux_surface, frame, PACK_SIZE );
+        auto full_copy = LibAVable::hs_stack( hs, hc, aux_surface );
         SDL_FreeSurface( full_copy );
         /*
         int ret = avcodec_receive_frame( state->c , encoded_frame );

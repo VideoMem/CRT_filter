@@ -58,6 +58,7 @@ public:
     static void float_to_frame(float arr[], SDL_Surface* surface );
     static void float_to_fecframe(float arr[], SDL_Surface* surface );
     void send( float* src, int size );
+    static void print_psnr(SDL_Surface* ref, SDL_Surface* cpy);
     void transferEvent();
 #ifdef PIPE_DEBUG_FRAMES
     internal_complex_stack_t debug_frames;
@@ -205,14 +206,19 @@ double ZMQVideoPipe::angle(float real, float imaginary) {
 uint8_t ZMQVideoPipe::quantize_am( float &real, float &imaginary ) {
     //auto shift = (real + 1) / 2;
     //return (uint8_t) round(shift * 0xFF);
+    imaginary = 0;
+    //uint8_t q = Pixelable::double_to_uint8(real) * MAX_WHITE_LEVEL / 0xFF;
+
+    //assert(q >=0 && q <=MAX_WHITE_LEVEL);
     return Pixelable::double_to_uint8(real);
 }
 
 void ZMQVideoPipe::unquantize_am( uint8_t &quant, float &real, float &imaginary ) {
     //float dequant = (float) quant / 0xFF;
     //real = (dequant * 2) - 1;
-    //imaginary = 0;
-    real = Pixelable::uint8_to_double(quant);
+    imaginary = 0;
+    real = (float) Pixelable::uint8_to_double(quant);
+    //real = (float)Pixelable::uint8_to_double(round( (double) quant * 0xFF / MAX_WHITE_LEVEL ) );
 }
 
 uint8_t ZMQVideoPipe::quantize(float &real, float &imaginary) {
@@ -309,12 +315,26 @@ void ZMQVideoPipe::send( float *src, int size ) {
 
 }
 
+void ZMQVideoPipe::print_psnr(SDL_Surface *ref, SDL_Surface *cpy) {
+    auto err = Surfaceable::AllocateSurface( ref );
+    auto psnr = Pixelable::psnr( ref, cpy );
+    if ( psnr < 100 ) SDL_Log("Raw psnr:, %02f dB", psnr );
+    Pixelable::psnr( ref, cpy, err );
+    //SDL_SaveBMP(ref, "zmqpipe_ref_psnr.bmp" );
+    //SDL_SaveBMP(cpy, "zmqpipe_cpy_psnr.bmp" );
+    SDL_SaveBMP(err, "zmqpipe_err_psnr.bmp" );
+    SDL_FreeSurface( err );
+}
+
 void ZMQVideoPipe::testSendFrame(SDL_Surface *surface) {
     auto* front_frame = new float[ ZMQ_COMPLEX_SIZE ];
+    auto copy = Surfaceable::AllocateSurface( surface );
     memset( front_frame, 0, ZMQ_COMPLEX_SIZE );
     fecframe_to_float( surface, front_frame );
+    float_to_fecframe( front_frame, copy );
+    print_psnr( surface, copy );
     send(front_frame, asByteIndex(ZMQ_MTU_INPUT_COMPLEX_SIZE) );
-
+    SDL_FreeSurface( copy );
     delete [] front_frame;
 }
 
@@ -448,9 +468,14 @@ void ZMQVideoPipe::fecframe_to_float(SDL_Surface *surface, float *arr) {
     //SDL_Log("fecframe to float -> cv_size %zu", quant_cv.size() );
 
     size_t pos = 0;
+
+    //auto max = std::max_element( quant_cv.begin(), quant_cv.end() );
+    //auto min = std::min_element( quant_cv.begin(), quant_cv.end() );
+
+    //SDL_Log( "quantized channelvector (uncorrected) max/min: %d, %d", *max, *min );
     for( auto value : quant_cv )  { //0
         arr[pos] =0; arr[pos + 1] = 0;
-        unquantize_am(value, arr[pos], arr[pos + 1]);
+        unquantize_am( value, arr[pos], arr[pos + 1]);
         pos+=2;
     }
 }

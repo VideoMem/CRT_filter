@@ -507,8 +507,8 @@ void CRTApp::getFrame(SDL_Surface *dst) {
 void CRTApp::updateScreen() {
     auto s0 = high_resolution_clock::now();
     Loader::SurfacePixelsCopy(gFrame, gBack);
-    //publish(gFrame);
-    //return;
+    publish(gFrame);
+    return;
     //getCode();
     //Uint8 power = 0, delay = 0;
     //if(addGhost) plane(&delay, &power);
