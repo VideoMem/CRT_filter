@@ -584,12 +584,12 @@ LibAVable::AVthings_t * LibAVable::init_state(std::string codec_name, int decode
     * then gop_size is ignored and the output of encoder
     * will always be I frame irrespective to gop_size
     */
-    state->c->gop_size = 10;
-    state->c->max_b_frames = 1;
+    state->c->gop_size = 100;
+    state->c->max_b_frames = 100;
     state->c->pix_fmt = AV_PIX_FMT_YUV420P;
 
     if ( state->codec->id == AV_CODEC_ID_H264 ) {
-        av_opt_set(state->c->priv_data, "preset", "medium", 0);
+        av_opt_set(state->c->priv_data, "preset", "slow", 0);
         av_opt_set(state->c->priv_data, "tune", "animation", 0);
         av_opt_set(state->c->priv_data, "crf", "0", 0);
         av_opt_set(state->c->priv_data, "crf_max", "0", 0);

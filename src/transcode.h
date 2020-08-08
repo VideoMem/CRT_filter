@@ -7,7 +7,7 @@
 
 #define FRONT_SAMPLERATE 9216000
 #define INBUF_SIZE 4096
-#define KERNING_SIZE 16
+#define KERNING_SIZE 8
 #define PACK_SIZE 4
 #define TRANSPOSE_TIMES 1
 #define DEPTH_MULTIPLIER 1
@@ -111,7 +111,7 @@ void resend_stream(string codec_name, string file_name, ZMQVideoPipe *zPipe, CRT
                     LibAVable::encode( recovered_surface, state->frame );
                     app->pushCode( recovered_surface );
                     if( !hct->surfaces.empty() ) {
-                        LibAVable::pack_miniraster ( aux_surface, hct->surfaces.front() , PACK_SIZE );
+                        LibAVable::unpack_minizigzag ( aux_surface, hct->surfaces.front() , PACK_SIZE );
                         zPipe->testSendFrame( aux_surface );
                         hct->surfaces.erase(hct->surfaces.begin());
                     }

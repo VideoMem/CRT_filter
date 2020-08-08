@@ -315,13 +315,13 @@ void ZMQVideoPipe::send( float *src, int size ) {
 
 }
 
-void ZMQVideoPipe::print_psnr(SDL_Surface *ref, SDL_Surface *cpy) {
+void ZMQVideoPipe::print_psnr( SDL_Surface *ref, SDL_Surface *cpy ) {
     auto err = Surfaceable::AllocateSurface( ref );
     auto psnr = Pixelable::psnr( ref, cpy );
-    if ( psnr < 100 ) SDL_Log("Raw psnr:, %02f dB", psnr );
+    if ( psnr < 100 ) SDL_Log("Raw psnr: %02f dB", psnr );
     Pixelable::psnr( ref, cpy, err );
-    //SDL_SaveBMP(ref, "zmqpipe_ref_psnr.bmp" );
-    //SDL_SaveBMP(cpy, "zmqpipe_cpy_psnr.bmp" );
+    SDL_SaveBMP(ref, "zmqpipe_ref_psnr.bmp" );
+    SDL_SaveBMP(cpy, "zmqpipe_cpy_psnr.bmp" );
     SDL_SaveBMP(err, "zmqpipe_err_psnr.bmp" );
     SDL_FreeSurface( err );
 }

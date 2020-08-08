@@ -18,15 +18,13 @@
     <list default="true" id="332f5a5f-4d9f-4911-a069-37d6728ec516" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CRTmain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CRTmain.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CRTApp.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/CRTApp.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/loaders/Loader.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/Loader.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/loaders/ZMQVideoPipe.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcode.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcode.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/TurboFEC.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/transcoders/libAVable.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/submodules/mql-lpclient-latest/lpc/lpclient/lpc.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/ZMQTests.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ZMQTests.hpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,7 +104,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="CMake Application.SDL2_CRT_Decoder">
+  <component name="RunManager" selected="CMake Application.SDL_CRT_Filter">
     <configuration default="true" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile">
       <makefile filename="$PROJECT_DIR$/Makefile" target="" workingDirectory="" arguments="">
         <envs />
@@ -196,11 +194,11 @@
       <item itemvalue="Catch.TurboFEC tests" />
       <item itemvalue="Catch.TurboFEC tests (1)" />
       <item itemvalue="Catch.TurboFEC bitdownquant, bitupquant (vectors version)" />
+      <item itemvalue="Catch.ZMQ API" />
       <item itemvalue="CMake Application.CRT_FILTERS" />
       <item itemvalue="CMake Application.SDL_CRT_Filter" />
       <item itemvalue="CMake Application.SDL2_CRT_Decoder" />
       <item itemvalue="CMake Application.CHAR_ROM_GEN" />
-      <item itemvalue="Catch.ZMQ API" />
     </list>
     <recent_temporary>
       <list>
@@ -306,7 +304,10 @@
       <workItem from="1596205549549" duration="11339000" />
       <workItem from="1596217675219" duration="31024000" />
       <workItem from="1596367507870" duration="30918000" />
-      <workItem from="1596465797754" duration="30462000" />
+      <workItem from="1596465797754" duration="39876000" />
+      <workItem from="1596650143419" duration="3000" />
+      <workItem from="1596735825719" duration="603000" />
+      <workItem from="1596751515374" duration="2000" />
     </task>
     <servers />
   </component>

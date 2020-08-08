@@ -12,7 +12,7 @@ extern "C" {
 /* Maximum LTE code block size of 6144 */
 #define LEN		        TURBO_MAX_K
 #define DEFAULT_ITER    4
-#define DEFAULT_BITDEPTH 2
+#define DEFAULT_BITDEPTH 3
 
 typedef std::vector<Pixelable_ch_t> TurboFEC_bitvect_t;
 

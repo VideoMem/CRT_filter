@@ -111,7 +111,7 @@ void recv_frame( bool* quit, ZMQLoader* zLoader, ZMQVideoPipe* zPipe, CRTApp* ap
 
             LibAVable::hs_free( hc );
         }
-        LibAVable::unpack_miniraster ( aux_surface, frame, PACK_SIZE );
+        LibAVable::pack_minizigzag ( aux_surface, frame, PACK_SIZE );
         auto full_copy = LibAVable::hs_stack( hs, hc, aux_surface );
         SDL_FreeSurface( full_copy );
         /*
